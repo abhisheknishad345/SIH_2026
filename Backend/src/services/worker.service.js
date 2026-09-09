@@ -6,7 +6,8 @@ const createWorkerProfile = async ({
     skills,
     experience,
     certifications,
-    location
+    location,
+    
 }) => {
 
     // Check if worker profile already exists
@@ -76,7 +77,8 @@ const getNearbyWorkers = async ({
     longitude,
     latitude,
     maxDistance,
-    skill
+    skill,
+    category
 }) => {
     const query = {
         isVerified: true,
@@ -95,6 +97,12 @@ const getNearbyWorkers = async ({
     if (skill) {
     query["skills.name"] = {
         $regex: new RegExp(`^${skill}$`, "i")
+    };
+}
+
+if (category) {
+    query.category = {
+        $regex: new RegExp(`^${category}$`, "i")
     };
 }
 

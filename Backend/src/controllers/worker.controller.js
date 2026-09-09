@@ -59,12 +59,14 @@ const getNearbyWorkers = async (req, res) => {
         const latitude = Number(req.query.latitude);
         const maxDistance = Number(req.query.maxDistance);
         const skill = req.query.skill;
+        const category = req.query.category;
 
         const result = await workerService.getNearbyWorkers({
             longitude,
             latitude,
             maxDistance,
-            skill
+            skill,
+            category
         });
 
         res.status(200).json(result);
