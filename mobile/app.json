@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "Coop Gig Services",
+    "slug": "coop-gig-services",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": ["**/*"],
+    "ios": { "supportsTablet": true },
+    "android": { "package": "org.coop.gigservices" }
+  }
+}
