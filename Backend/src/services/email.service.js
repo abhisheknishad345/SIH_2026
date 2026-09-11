@@ -1,4 +1,7 @@
+
 const nodemailer = require("nodemailer");
+const fs = require("fs");
+const path = require("path");
 
 const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -8,25 +11,60 @@ const transporter = nodemailer.createTransport({
     }
 });
 
+
+// Load Email Verification Template
+const emailVerificationTemplate = fs.readFileSync(
+    path.join(
+        __dirname,
+        "../templates/email-verification.html"
+    ),
+    "utf8"
+);
+
+const passwordResetTemplate = fs.readFileSync(
+    path.join(
+        __dirname,
+        "../templates/password-reset.html"
+    ),
+    "utf8"
+);
+
+
+// Email Verification OTP
 const sendOTPEmail = async (email, otp) => {
+
+    const html = emailVerificationTemplate.replace(
+        "{{OTP}}",
+        otp
+    );
+
     await transporter.sendMail({
         from: `"Cooperative Services" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: "Email Verification OTP",
-        html: `
-            <h2>Email Verification</h2>
-
-            <p>Your OTP for email verification is:</p>
-
-            <h1>${otp}</h1>
-
-            <p>This OTP will expire in 10 minutes.</p>
-
-            <p>If you did not create this account, please ignore this email.</p>
-        `
+        html: html
     });
 };
 
+
+// Password Reset OTP
+const passwordResetOTPEmail = async (email, otp) => {
+
+    const html = passwordResetTemplate.replace(
+        "{{OTP}}",
+        otp
+    );
+
+    await transporter.sendMail({
+        from: `"Cooperative Services" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: "Password Reset OTP",
+        html: html
+    });
+};
+
+
 module.exports = {
-    sendOTPEmail
+    sendOTPEmail,
+    passwordResetOTPEmail
 };
