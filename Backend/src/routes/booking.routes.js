@@ -1,8 +1,7 @@
 const express = require("express");
 
-const {
-    createBooking, getWorkerBookings, updateBookingStatus, getCustomerBookings
-} = require("../controllers/booking.controller");
+const {createBooking, getWorkerBookings, updateBookingStatus,
+    getCustomerBookings, cancelBooking, completeBooking } = require("../controllers/booking.controller");
 
 const authMiddleware = require("../middlewares/auth.middleware");
 const roleMiddleware = require("../middlewares/role.middleware");
@@ -23,11 +22,25 @@ router.get(
     getWorkerBookings
 );
 
-router.patch(
+router.put(
     "/:bookingId/status",
     authMiddleware,
     roleMiddleware(["worker"]),
     updateBookingStatus
+);
+
+router.put(
+    "/:bookingId/cancel",
+    authMiddleware,
+    roleMiddleware(["customer"]),
+    cancelBooking
+);
+
+router.put(
+    "/:bookingId/complete",
+    authMiddleware,
+    roleMiddleware(["worker"]),
+    completeBooking
 );
 
 router.get(
@@ -36,6 +49,7 @@ router.get(
     roleMiddleware(["customer"]),
     getCustomerBookings
 );
+
 
 
 

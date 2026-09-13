@@ -6,8 +6,18 @@ const serviceSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
-            unique: true,
             maxlength: 100
+        },
+        cooperativeId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Cooperative",
+            required: true
+        },
+
+        createdBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true
         },
 
         description: {
@@ -22,6 +32,17 @@ const serviceSchema = new mongoose.Schema(
             trim: true,
             maxlength: 100
         },
+        price: {
+            type: Number,
+            required: true,
+            min: 0
+        },
+
+        priceType: {
+            type: String,
+            enum: ["per_hour", "per_visit", "per_day", "fixed"],
+            required: true
+        },
 
         isActive: {
             type: Boolean,
@@ -31,6 +52,11 @@ const serviceSchema = new mongoose.Schema(
     {
         timestamps: true
     }
+);
+
+serviceSchema.index(
+    { cooperativeId: 1, name: 1 },
+    { unique: true }
 );
 
 const Service = mongoose.model("Service", serviceSchema);

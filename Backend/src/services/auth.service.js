@@ -4,6 +4,7 @@ const EmailVerification = require("../models/EmailVerify");
 const PasswordReset = require("../models/PasswordReset");
 const { sendOTPEmail, passwordResetOTPEmail } = require("./email.service");
 const generateToken = require("../utils/jwt");
+const { validatePassword } = require("../validator/auth.validator");
 
 const signup = async ({ fullName, email, password, role }) => {
 
@@ -18,6 +19,7 @@ const signup = async ({ fullName, email, password, role }) => {
     }
 
     // 5. Hash password
+    validatePassword(password);
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // 6. Create user
@@ -30,6 +32,7 @@ const signup = async ({ fullName, email, password, role }) => {
 
     // 7. Generate 6-digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    console.log("DEV EMAIL OTP:", otp);
 
     // 8. Hash OTP
     const otpHash = await bcrypt.hash(otp, 10);
@@ -376,6 +379,7 @@ const resetPassword = async ({
     }
 
     // Hash new password
+    validatePassword(newPassword)
     const hashedPassword = await bcrypt.hash(
         newPassword,
         10

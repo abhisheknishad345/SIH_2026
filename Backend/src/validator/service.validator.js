@@ -2,7 +2,9 @@
 const validateService = ({
     name,
     description,
-    category
+    category,
+    price,
+    priceType
 }) => {
     if (
         typeof name !== "string" ||
@@ -41,6 +43,27 @@ const validateService = ({
     ) {
         throw new Error(
             "Category must be between 2-100 characters"
+        );
+    }
+
+    if (
+        typeof price !== "number" ||
+        !Number.isFinite(price) ||
+        price < 0
+    ) {
+        throw new Error("Price must be a valid non-negative number");
+    }
+
+    const allowedPriceTypes = [
+        "per_hour",
+        "per_visit",
+        "per_day",
+        "fixed"
+    ];
+
+    if (!allowedPriceTypes.includes(priceType)) {
+        throw new Error(
+            "Invalid price type. Allowed values: per_hour, per_visit, per_day, fixed"
         );
     }
 };

@@ -4,6 +4,7 @@ const validateBooking = ({
     workerId,
     serviceId,
     scheduledAt,
+    duration,
     address,
     location,
     skillName,
@@ -64,6 +65,14 @@ const validateBooking = ({
     }
 
     if (
+        typeof duration !== "number" ||
+        !Number.isInteger(duration) ||
+        duration <= 0
+    ) {
+        throw new Error("Duration must be a positive number in minutes");
+    }
+
+    if (
         typeof address !== "string" ||
         !address.trim()
     ) {
@@ -112,7 +121,7 @@ const validateBooking = ({
 };
 
 const validateBookingStatus = ({ status }) => {
-    if (!["accepted", "rejected"].includes(status)) {
+    if (!["accepted", "rejected", "completed"].includes(status)) {
         throw new Error(
             "Status must be either accepted or rejected"
         );

@@ -9,6 +9,12 @@ const workerSchema = new mongoose.Schema(
             unique: true
         },
 
+        cooperativeId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Cooperative",
+            required: true
+        },
+
         category: {
             type: String,
             required: true,
@@ -22,7 +28,9 @@ const workerSchema = new mongoose.Schema(
                 "Gardener",
                 "Driver",
                 "Caregiver",
-                "Technician"
+                "Technician",
+                "Domestic Helper",
+                "Caregivers"
             ]
         },
 
@@ -81,6 +89,12 @@ const workerSchema = new mongoose.Schema(
         isVerified: {
             type: Boolean,
             default: false
+        },
+
+        verificationStatus: {
+            type: String,
+            enum: ["pending", "approved", "rejected"],
+            default: "pending"
         },
 
         isAvailable: {

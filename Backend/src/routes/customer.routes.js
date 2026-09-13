@@ -25,7 +25,7 @@ router.get(
     getCustomerProfile
 );
 
-router.patch(
+router.put(
     "/profile",
     authMiddleware,
     roleMiddleware(["customer"]),

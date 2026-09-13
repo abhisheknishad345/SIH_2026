@@ -10,6 +10,7 @@ const createBooking = async ({
     skillName,
     quantity,
     scheduledAt,
+    duration,
     address,
     location
 }) => {
@@ -43,6 +44,15 @@ const createBooking = async ({
         throw new Error("Service not found");
     }
 
+    if (
+        worker.cooperativeId.toString() !==
+        service.cooperativeId.toString()
+    ) {
+        throw new Error(
+            "Worker does not belong to the service cooperative"
+        );
+    }
+
     // 5. Find selected skill
     const skill = worker.skills.find(
         (item) =>
@@ -59,26 +69,55 @@ const createBooking = async ({
     // 6. Calculate price on backend
     let price;
 
-    switch (skill.priceType) {
+    switch (service.priceType) {
 
         case "per_hour":
-            price = skill.price * quantity;
+            price = service.price * quantity;
             break;
 
         case "per_day":
-            price = skill.price * quantity;
+            price = service.price * quantity;
             break;
 
         case "per_visit":
-            price = skill.price;
+            price = service.price * quantity;
             break;
 
         case "fixed":
-            price = skill.price;
+            price = service.price;
             break;
 
         default:
-            throw new Error("Invalid skill price type");
+            throw new Error("Invalid service price type");
+    }
+
+    const newBookingStart = new Date(scheduledAt);
+    const newBookingEnd = new Date(
+        newBookingStart.getTime() + duration * 60 * 1000
+    );
+
+    const existingBookings = await Booking.find({
+        workerId,
+        status: {
+            $in: ["pending", "accepted"]
+        }
+    });
+
+    const hasConflict = existingBookings.some((booking) => {
+        const existingStart = new Date(booking.scheduledAt);
+
+        const existingEnd = new Date(
+            existingStart.getTime() + booking.duration * 60 * 1000
+        );
+
+        return (
+            newBookingStart < existingEnd &&
+            newBookingEnd > existingStart
+        );
+    });
+
+    if (hasConflict) {
+        throw new Error("Worker is already booked during this time");
     }
 
     // 7. Create booking
@@ -89,6 +128,7 @@ const createBooking = async ({
         skillName: skill.name,
         quantity,
         scheduledAt,
+        duration,
         address,
         location,
         price
@@ -131,10 +171,28 @@ const updateBookingStatus = async ({
         );
     }
 
-    // Sirf pending booking ko accept/reject kar sakte hain
-    if (booking.status !== "pending") {
+    // Pending → accepted/rejected
+    if (booking.status === "pending") {
+        if (status !== "accepted" && status !== "rejected") {
+            throw new Error(
+                "Pending booking can only be accepted or rejected"
+            );
+        }
+    }
+
+    // Accepted → completed
+    else if (booking.status === "accepted") {
+        if (status !== "completed") {
+            throw new Error(
+                "Accepted booking can only be completed"
+            );
+        }
+    }
+
+    // Baaki statuses se koi update allowed nahi
+    else {
         throw new Error(
-            "Only pending bookings can be accepted or rejected"
+            `Booking cannot be updated from ${booking.status} status`
         );
     }
 
@@ -161,6 +219,85 @@ const getCustomerBookings = async (customerId) => {
     };
 };
 
+const cancelBooking = async ({
+    bookingId,
+    customerId
+}) => {
+    const booking = await Booking.findById(bookingId);
+
+    if (!booking) {
+        throw new Error("Booking not found");
+    }
+
+    // Check: kya booking isi customer ki hai?
+    if (
+        booking.customerId.toString() !==
+        customerId.toString()
+    ) {
+        throw new Error(
+            "You are not allowed to cancel this booking"
+        );
+    }
+
+    // Sirf pending booking cancel hogi
+    if (booking.status !== "pending") {
+        throw new Error(
+            "Only pending bookings can be cancelled"
+        );
+    }
+
+    booking.status = "cancelled";
+
+    await booking.save();
+
+    return {
+        message: "Booking cancelled successfully",
+        booking
+    };
+};
+
+const completeBooking = async ({
+    bookingId,
+    workerId
+}) => {
+    const booking = await Booking.findById(bookingId);
+
+    // console.log("Booking workerId:", booking.workerId.toString());
+    // console.log("Logged-in workerId:", workerId.toString());
+
+    if (!booking) {
+        throw new Error("Booking not found");
+    }
+
+    // Check: kya booking isi worker ki hai?
+    if (
+        booking.workerId.toString() !==
+        workerId.toString()
+    ) {
+        throw new Error(
+            "You are not allowed to complete this booking"
+        );
+    }
+
+    // Sirf accepted booking complete ho sakti hai
+    if (booking.status !== "accepted") {
+        throw new Error(
+            "Only accepted bookings can be completed"
+        );
+    }
+
+    booking.status = "completed";
+
+    await booking.save();
+
+    return {
+        message: "Booking completed successfully",
+        booking
+    };
+};
+
+
 module.exports = {
-    createBooking, getWorkerBookings, updateBookingStatus, getCustomerBookings
+    createBooking, getWorkerBookings, updateBookingStatus, getCustomerBookings, cancelBooking
+    , completeBooking
 };

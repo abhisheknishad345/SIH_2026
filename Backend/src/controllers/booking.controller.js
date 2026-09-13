@@ -15,10 +15,12 @@ const createBooking = async (req, res) => {
                 workerId: req.body.workerId,
                 serviceId: req.body.serviceId,
                 scheduledAt: req.body.scheduledAt,
+                duration: req.body.duration,
                 address: req.body.address,
                 location: req.body.location,
                 skillName: req.body.skillName,
                 quantity: req.body.quantity,
+                
             });
 
         res.status(201).json(result);
@@ -89,6 +91,55 @@ const getCustomerBookings = async (req, res) => {
     }
 };
 
+const cancelBooking = async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+            return res.status(400).json({
+                message: "Invalid booking ID"
+            });
+        }
+
+        const result =
+            await bookingService.cancelBooking({
+                bookingId,
+                customerId: req.user._id
+            });
+
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(400).json({
+            message: error.message
+        });
+    }
+};
+
+const completeBooking = async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+            return res.status(400).json({
+                message: "Invalid booking ID"
+            });
+        }
+
+        const result =
+            await bookingService.completeBooking({
+                bookingId,
+                workerId: req.user._id
+            });
+
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(400).json({
+            message: error.message
+        });
+    }
+};
+
 module.exports = {
-    createBooking, getWorkerBookings, updateBookingStatus, getCustomerBookings
+    createBooking, getWorkerBookings, updateBookingStatus,
+    getCustomerBookings, cancelBooking, completeBooking
 };

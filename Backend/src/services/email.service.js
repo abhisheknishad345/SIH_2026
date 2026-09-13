@@ -63,8 +63,32 @@ const passwordResetOTPEmail = async (email, otp) => {
     });
 };
 
+const cooperativeAdminCreatedTemplate = fs.readFileSync(
+    path.join(
+        __dirname,
+        "../templates/cooperative-admin-created.html"
+    ),
+    "utf8"
+);
+
+const cooperativeAdminCreatedEmail = async (email, fullName) => {
+
+    let html = cooperativeAdminCreatedTemplate;
+
+    html = html.replaceAll("{{FULL_NAME}}", fullName);
+    html = html.replaceAll("{{EMAIL}}", email);
+
+    await transporter.sendMail({
+        from: `"Cooperative Services" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: "Your Cooperative Admin Account Has Been Created",
+        html
+    });
+};
+
 
 module.exports = {
     sendOTPEmail,
-    passwordResetOTPEmail
+    passwordResetOTPEmail,
+    cooperativeAdminCreatedEmail
 };

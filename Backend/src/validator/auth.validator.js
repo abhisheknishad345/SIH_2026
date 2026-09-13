@@ -13,19 +13,6 @@ const validateSignupData = ({ fullName, email, password, role }) => {
         throw new Error("Email is invalid");
     }
 
-    if (!validator.isStrongPassword(password, {
-        minLength: 8,
-        maxLength: 128,
-        minLowercase: 1,
-        minUppercase: 1,
-        minNumbers: 1,
-        minSymbols: 1
-    })) {
-        throw new Error(
-            "Password must be at least 8 characters and contain uppercase, lowercase, number and special character"
-        );
-    }
-
     if (!["customer", "worker"].includes(role)) {
         throw new Error("Invalid role");
     }
@@ -42,7 +29,30 @@ const validateLoginData = ({ email, password }) => {
     }
 };
 
+const validatePassword = (password) => {
+
+    if (typeof password !== "string") {
+        throw new Error("Password must be a string");
+    }
+
+    if (
+        !validator.isStrongPassword(password, {
+            minLength: 8,
+            maxLength: 128,
+            minLowercase: 1,
+            minUppercase: 1,
+            minNumbers: 1,
+            minSymbols: 1
+        })
+    ) {
+        throw new Error(
+            "Password must be at least 8 characters and contain uppercase, lowercase, number and special character"
+        );
+    }
+};
+
 module.exports = {
     validateSignupData,
-    validateLoginData
+    validateLoginData,
+    validatePassword
 };

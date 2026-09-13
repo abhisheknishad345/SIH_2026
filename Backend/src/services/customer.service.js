@@ -26,7 +26,8 @@ const createCustomerProfile = async ({
 };
 
 const getCustomerProfile = async (userId) => {
-    const customer = await Customer.findOne({ userId });
+    const customer = await Customer.findOne({ userId })
+        .populate("userId", "fullName email role");
 
     if (!customer) {
         throw new Error("Customer profile not found");
