@@ -133,7 +133,7 @@ const WorkerProfile = () => {
 
 
 
-                <div className=" flex justify-between mb-5 border-2 p-3 rounded-2xl bg-amber-200">
+                <div className=" flex justify-between mb-5 border-2 p-3 rounded-2xl ">
                 {/* Back Button */}
 
                 <button

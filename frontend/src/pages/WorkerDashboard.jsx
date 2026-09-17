@@ -150,8 +150,7 @@ function WorkerDashboard() {
 
           <button
             onClick={handleLogout}
-            className="text-sm font-semibold text-gray-600
-                       hover:text-indigo-600"
+            className="text-sm font-semibold text-black border-2 border-black rounded-2xl p-2 cursor-pointer"
           >
             Logout
           </button>
@@ -183,7 +182,7 @@ function WorkerDashboard() {
 
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-xl font-bold text-gray-800">
-              My Bookings
+              Total Bookings
             </h3>
 
             <span className="text-sm text-gray-500">

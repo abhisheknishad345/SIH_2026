@@ -145,8 +145,8 @@ function WorkerProfilePending() {
             <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-sm sm:p-8">
             <button
                 onClick={handleLogout}
-                className="text-sm font-bold
-                       hover:text-indigo-600 border-2 rounded-xl px-4 py-2 cursor-pointer"
+                className="text-md font-bold
+                       text-black border-2 rounded-xl px-4 py-2 cursor-pointer"
             >
                 Logout
             </button>

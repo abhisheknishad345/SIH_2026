@@ -13,7 +13,7 @@ function LandingPage() {
                         to="/"
                         className="text-2xl font-extrabold tracking-wide text-indigo-400 sm:text-3xl"
                     >
-                        SEWA
+                        TechConnect
                     </Link>
 
                     {/* Desktop Links */}
@@ -490,7 +490,7 @@ function LandingPage() {
 
                     <div>
                         <p className="text-2xl font-bold text-indigo-400">
-                            SEWA
+                            TechConnect
                         </p>
 
                         <p className="mt-2 text-sm text-gray-500">
@@ -537,7 +537,7 @@ function LandingPage() {
 
 
                     <div className="text-left text-sm text-gray-600 md:text-right">
-                        <p>© 2026 SEWA</p>
+                        <p>© 2026 TechConnect</p>
                         <p className="mt-1">
                             All rights reserved.
                         </p>
