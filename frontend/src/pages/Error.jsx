@@ -36,7 +36,7 @@ const HandleError = () => {
               text-[#06101d]
               font-semibold
               hover:bg-sky-400
-              transition
+              transition cursor-pointer
             "
           >
             Go Home
@@ -52,7 +52,7 @@ const HandleError = () => {
               font-semibold
               hover:border-blue-400
               hover:text-blue-400
-              transition
+              transition cursor-pointer
             "
           >
             Go Back

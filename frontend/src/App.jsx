@@ -11,45 +11,19 @@ import WorkerProfile from "./pages/WorkerProfile";
 import WorkerCreateProfile from "./pages/WorkerCreateProfile";
 import WorkerProfilePending from "./pages/WorkerProfilePending";
 import PendingWorkers from "./pages/PendingWorkers";
-import CustomerEditProfile from "./pages/CustomerEditprofile";
 import CustomerCreateProfile from "./pages/CustomerCreateProfile";
+import CustomerEditProfile from "./pages/CustomerEditProfile";
 import WorkerEditProfile from "./pages/WorkerEditProfile";
 import CustomerProfile from "./pages/CustomerProfile";
 import AdminDashboard from "./pages/AdminDashboard"
-import LoginPage from "./pages/FakeLogin";
 import HandleError from "./pages/Error";
 import LandingPage from "./pages/LandingPage";
 import api from "./services/api";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import CustomerProfileGuard from "./pages/CustomerProfileGuard";
+import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 
-
-function SuperAdminDashboard() {
-  const navigate = useNavigate()
-
-  const handleLogout = async () => {
-    try {
-      await api.post("/auth/logout");
-      navigate("/");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
-  return (
-    <>
-      <h1 className="p-10 text-3xl text-center">Super Admin Dashboard
-      </h1>
-      <button onClick={handleLogout} className="border-2 p-2 rounded-xl m-3"
-      >Logout</button>
-      <h2 className="p-5 text-xl ">You can monnitor entire platform</h2>
-      <span className="p-5">1. Cooperative</span>
-      <span className="p-5">2. Cooperative Admin</span>
-      <span className="p-5">3. Workers</span>
-      <span className="p-5">4. Customer</span>
-    </>
-  )
-}
 
 function App() {
   return (
@@ -62,10 +36,23 @@ function App() {
         <Route path="*" element={<HandleError />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/customer" element={<CustomerDashboard />} />
+        <Route
+          path="/customer"
+          element={
+            <CustomerProfileGuard>
+              <CustomerDashboard />
+            </CustomerProfileGuard>
+          }
+        />
+
         <Route
           path="/customer/edit-profile"
-          element={<CustomerEditProfile />}
+          element={
+            <CustomerProfileGuard>
+
+          <CustomerEditProfile />
+            </CustomerProfileGuard>
+        }
 
         />
 
@@ -76,7 +63,16 @@ function App() {
         <Route path="/worker" element={<WorkerDashboard />} />
         <Route path="/cooperative-admin" element={<AdminDashboard />} />
         <Route path="/admin" element={<SuperAdminDashboard />} />
-        <Route path="/booking" element={<Booking />} />
+
+        <Route
+          path="/booking"
+          element={
+            <CustomerProfileGuard>
+              <Booking />
+            </CustomerProfileGuard>
+          }
+        />
+
         <Route path="/worker/profile" element={<WorkerProfile />} />
         <Route path="/worker/create-profile" element={<WorkerCreateProfile />} />
         <Route
@@ -100,12 +96,21 @@ function App() {
 
         <Route
           path="/customer/bookings"
-          element={<MyBookings />}
+          element={
+            <CustomerProfileGuard>
+              <MyBookings />
+            </CustomerProfileGuard>
+          }
         />
         <Route
           path="/services/:serviceId/workers"
-          element={<ServiceWorkers />}
+          element={
+            <CustomerProfileGuard>
+              <ServiceWorkers />
+            </CustomerProfileGuard>
+          }
         />
+
         <Route
           path="/forgot-password"
           element={<ForgotPassword />}

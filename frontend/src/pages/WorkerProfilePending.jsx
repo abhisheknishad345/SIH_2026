@@ -121,7 +121,7 @@ function WorkerProfilePending() {
                         onClick={() =>
                             navigate("/worker/edit-profile")
                         }
-                        className="mt-6 w-full rounded-xl bg-indigo-600 px-5 py-3.5 text-sm font-semibold text-white hover:bg-indigo-700"
+                        className="mt-6 w-full rounded-xl bg-indigo-600 px-5 py-3.5 text-sm font-semibold text-white hover:bg-indigo-700 cursor-pointer"
                     >
                         Edit Profile
                     </button>
@@ -164,7 +164,7 @@ function WorkerProfilePending() {
                         Profile Under Review
                     </h1>
 
-                    <p className="mt-3 text-sm leading-6 text-gray-600">
+                    <p className="mt-3 text-md leading-6 text-gray-600">
                         Your worker profile has been successfully
                         submitted and is waiting for approval from
                         your cooperative admin.
@@ -174,7 +174,7 @@ function WorkerProfilePending() {
                 {/* Status */}
                 <div className="mt-8 rounded-xl border border-indigo-100 bg-indigo-50 p-4">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-black">
                             ✓
                         </div>
 
@@ -233,7 +233,7 @@ function WorkerProfilePending() {
 
                 {/* Bottom note */}
                 <div className="mt-6 text-center">
-                    <p className="text-sm leading-5 text-gray-500">
+                    <p className="text-md leading-5 text-red-400">
                         You can safely leave this page. Once your
                         profile is approved, you will be able to
                         access your worker dashboard.

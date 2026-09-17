@@ -87,13 +87,13 @@ function MyBookings() {
 
           <button
             onClick={() => navigate("/customer")}
-            className="text-gray-600 hover:text-indigo-600"
+            className="text-gray-600 hover:text-indigo-600 cursor-pointer"
           >
-            ← Back
+            ⬅ Back
           </button>
 
           <h1 className="text-xl font-bold text-indigo-700">
-            SEWA
+           TechConnect
           </h1>
 
           <div className="w-10" />
@@ -247,7 +247,7 @@ function MyBookings() {
                     onClick={() => cancelBooking(booking._id)}
                     className="mt-5 px-4 py-2 border border-red-500
                                text-red-600 rounded-lg text-sm
-                               font-semibold hover:bg-red-50"
+                               font-semibold hover:bg-red-50 cursor-pointer"
                   >
                     Cancel Booking
                   </button>

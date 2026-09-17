@@ -179,41 +179,8 @@ function LandingPage() {
                                 <div className="h-3 w-3 rounded-full bg-green-400 shadow-lg shadow-green-400/40" />
                             </div>
 
-                            {/* Worker Illustration */}
-                            <div className="mx-auto flex h-64 items-center justify-center">
-
-                                <div className="relative">
-
-                                    {/* Glow */}
-                                    <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-500/20 blur-3xl" />
-
-                                    {/* Head */}
-                                    <div className="relative mx-auto h-24 w-24 rounded-full bg-linear-to-br from-orange-300 to-orange-500 shadow-xl">
-                                        <div className="absolute left-5 top-9 h-2 w-2 rounded-full bg-gray-800" />
-                                        <div className="absolute right-5 top-9 h-2 w-2 rounded-full bg-gray-800" />
-
-                                        <div className="absolute bottom-5 left-1/2 h-2 w-8 -translate-x-1/2 rounded-full bg-gray-800" />
-                                    </div>
-
-                                    {/* Helmet */}
-                                    <div className="absolute -top-3 left-1/2 h-9 w-28 -translate-x-1/2 rounded-t-full bg-yellow-400 shadow-lg">
-                                        <div className="absolute -bottom-1 left-1/2 h-2 w-32 -translate-x-1/2 rounded-full bg-yellow-500" />
-                                    </div>
-
-                                    {/* Body */}
-                                    <div className="mx-auto mt-2 h-40 w-44 rounded-t-[3rem] bg-linear-to-br from-indigo-700 to-indigo-900 shadow-2xl">
-                                        <div className="flex h-full items-center justify-center">
-                                            <span className="text-3xl font-black text-white/80">
-                                                Hello
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    {/* Arms */}
-                                    <div className="absolute -bottom-1 -left-9 h-28 w-12 rotate-[-25deg] rounded-full bg-linear-to-b from-indigo-800 to-indigo-950" />
-
-                                    <div className="absolute -bottom-1 -right-9 h-28 w-12 rotate-[-25deg] rounded-full bg-linear-to-b from-indigo-800 to-indigo-950" />
-                                </div>
+                            <div>
+                                <img src="https://plus.unsplash.com/premium_photo-1739786996022-5ed5b56834e2?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjl8fHByb2ZpbGUlMjBwaWN8ZW58MHx8MHx8fDA%3D" alt="" className="mb-3 rounded-2xl" />
                             </div>
 
                             {/* Feature list */}
@@ -266,7 +233,7 @@ function LandingPage() {
                     <div className="mx-auto max-w-3xl text-center">
 
                         <p className="text-sm font-bold tracking-[0.2em] text-indigo-400">
-                            WHY SEWA
+                            WHY TechConnect
                         </p>
 
                         <h2 className="mt-4 text-3xl font-bold sm:text-4xl">
@@ -339,7 +306,7 @@ function LandingPage() {
 
                         <p className="mt-4 text-gray-400">
                             Whether you need a service, want to offer your
-                            skills, or manage a cooperative, SEWA brings
+                            skills, or manage a cooperative, TechConnect brings
                             everyone together.
                         </p>
 
@@ -454,7 +421,7 @@ function LandingPage() {
                                 </h2>
 
                                 <p className="mt-3 max-w-xl text-gray-400">
-                                    Join SEWA and become part of a stronger,
+                                    Join TechConnect and become part of a stronger,
                                     more connected community.
                                 </p>
                             </div>

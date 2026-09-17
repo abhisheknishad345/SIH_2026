@@ -50,7 +50,7 @@ function CustomerProfile() {
         <div className="mx-auto flex min-h-[80vh] max-w-lg items-center justify-center">
           <div className="w-full rounded-2xl border border-red-200 bg-white p-7 text-center shadow-sm">
 
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-2xl">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-200 text-2xl text-black">
               !
             </div>
 
@@ -64,7 +64,7 @@ function CustomerProfile() {
 
             <button
               onClick={() => navigate("/customer")}
-              className="mt-6 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+              className="mt-6 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 cursor-pointer"
             >
               Back to Dashboard
             </button>
@@ -93,9 +93,9 @@ function CustomerProfile() {
         <button
           type="button"
           onClick={() => navigate("/customer")}
-          className="mb-5 text-sm font-semibold text-gray-600 transition hover:text-indigo-600"
+          className="mb-5 text-sm font-semibold text-gray-600 transition hover:text-indigo-600 cursor-pointer"
         >
-          ← Back to Dashboard
+          ⬅ Back to Dashboard
         </button>
 
         {/* Profile Header */}
@@ -131,7 +131,7 @@ function CustomerProfile() {
               onClick={() =>
                 navigate("/customer/edit-profile")
               }
-              className="w-full rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 sm:w-auto"
+              className="w-full rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 sm:w-auto cursor-pointer"
             >
               Edit Profile
             </button>
@@ -306,8 +306,8 @@ function CustomerProfile() {
         </div>
 
         {/* Footer */}
-        <p className="py-6 text-center text-xs text-gray-400">
-          SEWA • Cooperative Services Platform
+        <p className="py-6 text-center text-xs text-gray-600">
+          TechCoonect • Cooperative Services Platform
         </p>
 
       </div>

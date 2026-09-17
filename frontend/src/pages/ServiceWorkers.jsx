@@ -44,13 +44,13 @@ function ServiceWorkers() {
 
           <button
             onClick={() => navigate("/customer")}
-            className="text-gray-600 hover:text-indigo-600"
+            className="text-gray-600 hover:text-indigo-600 cursor-pointer"
           >
-            ← Back
+            ⬅ Back
           </button>
 
           <h1 className="text-xl font-bold text-indigo-700">
-            SEWA
+            TechConnect
           </h1>
 
           <div className="w-10" />
@@ -182,7 +182,7 @@ function ServiceWorkers() {
                   }
                   className="w-full mt-5 py-3 bg-indigo-600
                              text-white font-semibold rounded-xl
-                             hover:bg-indigo-700 transition"
+                             hover:bg-indigo-700 transition cursor-pointer"
                 >
                   Book Now
                 </button>

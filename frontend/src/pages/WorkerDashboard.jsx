@@ -143,14 +143,14 @@ function WorkerDashboard() {
 
           <button
             onClick={() => navigate("/worker/profile")}
-            className="w-1/4 bg-indigo-600 text-white py-2 rounded-xl font-semibold cursor-pointer"
+            className="w-1/6 bg-indigo-600 text-white py-2 rounded-xl font-semibold cursor-pointer"
           >
             My Profile
           </button>
 
           <button
             onClick={handleLogout}
-            className="w-1/5 text-md font-semibold text-black border-2 border-black rounded-2xl p-2 cursor-pointer"
+            className="w-1/6 text-md font-semibold text-black border-2 border-black rounded-2xl p-2 cursor-pointer hover:text-red-500"
           >
             Logout
           </button>

@@ -49,7 +49,7 @@ function VerifyEmail() {
 
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-indigo-700">
-            SEWA
+            TechConnect
           </h1>
 
           <p className="text-gray-500 mt-2">
@@ -82,7 +82,7 @@ function VerifyEmail() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               className="w-full px-4 py-3 border border-gray-300 rounded-xl
-                         focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                         focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
               required
             />
           </div>
@@ -103,7 +103,7 @@ function VerifyEmail() {
               placeholder="Enter 6-digit OTP"
               className="w-full px-4 py-3 border border-gray-300 rounded-xl
                          text-center text-xl tracking-[0.4em]
-                         focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                         focus:outline-none focus:ring-2 focus:ring-indigo-500 text-black"
               required
             />
           </div>

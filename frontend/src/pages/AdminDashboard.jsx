@@ -48,7 +48,7 @@ function AdminDashboard() {
                         onClick={() =>
                             navigate("/cooperative-admin/workers/pending")
                         }
-                        className="rounded-2xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                        className="rounded-2xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md cursor-pointer"
                     >
                         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-50 text-2xl">
                             👷
@@ -63,7 +63,7 @@ function AdminDashboard() {
                         </p>
 
                         <div className="mt-5 text-sm font-semibold text-indigo-600">
-                            Review Workers →
+                            Review Workers 
                         </div>
                     </button>
 

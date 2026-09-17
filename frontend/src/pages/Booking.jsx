@@ -168,13 +168,13 @@ function Booking() {
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
-            className="text-gray-600 hover:text-indigo-600"
+            className="text-gray-600 hover:text-indigo-600 cursor-pointer"
           >
-            ← Back
+            ⬅ Back
           </button>
 
           <h1 className="text-xl font-bold text-indigo-700">
-            SEWA
+            TechConnect
           </h1>
 
           <div className="w-10" />
@@ -254,7 +254,7 @@ function Booking() {
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl
                          bg-white focus:outline-none focus:ring-2
-                         focus:ring-indigo-500"
+                         focus:ring-indigo-500 text-black"
               required
             >
               {worker?.skills?.map((skill) => (
@@ -279,7 +279,7 @@ function Booking() {
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl
                          focus:outline-none focus:ring-2
-                         focus:ring-indigo-500"
+                         focus:ring-indigo-500 text-black"
               required
             />
           </div>
@@ -292,12 +292,14 @@ function Booking() {
 
             <input
               type="datetime-local"
+              // type="date"
               name="scheduledAt"
               value={formData.scheduledAt}
+              // value={Date()}
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl
                          focus:outline-none focus:ring-2
-                         focus:ring-indigo-500"
+                         focus:ring-indigo-500 text-black"
               required
             />
           </div>
@@ -314,7 +316,7 @@ function Booking() {
               onChange={handleChange}
               className="w-full px-4 py-3 border border-gray-300 rounded-xl
              bg-white focus:outline-none focus:ring-2
-             focus:ring-indigo-500"
+             focus:ring-indigo-500 text-black"
               required
             >
               <option value="1">1 hour</option>
@@ -340,7 +342,7 @@ function Booking() {
               rows="3"
               className="w-full px-4 py-3 border border-gray-300 rounded-xl
                          focus:outline-none focus:ring-2
-                         focus:ring-indigo-500 resize-none"
+                         focus:ring-indigo-500 resize-none text-black"
               required
             />
           </div>
@@ -352,7 +354,7 @@ function Booking() {
               onClick={getLocation}
               className="w-full py-3 border-2 border-indigo-600
                          text-indigo-600 font-semibold rounded-xl
-                         hover:bg-indigo-50 transition"
+                         hover:bg-indigo-50 transition cursor-pointer"
             >
               {location
                 ? "✓ Location Added"
@@ -366,7 +368,7 @@ function Booking() {
             disabled={bookingLoading}
             className="w-full py-3 bg-indigo-600 text-white
                        font-semibold rounded-xl hover:bg-indigo-700
-                       transition disabled:opacity-60"
+                       transition disabled:opacity-60 cursor-pointer"
           >
             {bookingLoading
               ? "Creating Booking..."

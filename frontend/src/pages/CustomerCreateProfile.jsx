@@ -124,6 +124,15 @@ function CustomerCreateProfile() {
     }
   };
 
+   const handleLogout = async () => {
+        try {
+            await api.post("/auth/logout");
+            navigate("/");
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
+    };
+
   return (
     <div className="min-h-screen bg-gray-100 px-4 py-5 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-3xl">
@@ -142,7 +151,7 @@ function CustomerCreateProfile() {
               </h1>
 
               <p className="mt-1 text-sm text-gray-500">
-                Complete your profile to start using SEWA services.
+                Complete your profile to start using TechConnect services.
               </p>
             </div>
 
@@ -194,7 +203,7 @@ function CustomerCreateProfile() {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="Enter your phone number"
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
                 required
               />
             </div>
@@ -211,7 +220,7 @@ function CustomerCreateProfile() {
                 onChange={handleChange}
                 rows="4"
                 placeholder="Enter your current address"
-                className="w-full resize-none rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="w-full resize-none rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
                 required
               />
 
@@ -237,7 +246,7 @@ function CustomerCreateProfile() {
                 type="button"
                 onClick={getCurrentLocation}
                 disabled={locationLoading}
-                className="w-full rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                className="w-full rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto cursor-pointer"
               >
                 {locationLoading
                   ? "Getting Location..."
@@ -293,7 +302,7 @@ function CustomerCreateProfile() {
                   </h4>
 
                   <p className="mt-1 text-xs leading-5 text-indigo-700">
-                    SEWA uses your location to help you discover
+                    TechConnect uses your location to help you discover
                     verified workers and services available nearby.
                   </p>
                 </div>
@@ -307,7 +316,7 @@ function CustomerCreateProfile() {
               <button
                 type="button"
                 onClick={() => navigate("/customer")}
-                className="w-full rounded-xl border border-gray-300 px-5 py-3 font-semibold text-gray-700 transition hover:bg-gray-50 sm:w-auto"
+                className="w-full rounded-xl border border-gray-300 px-5 py-3 font-semibold text-gray-700 transition hover:bg-gray-50 sm:w-auto cursor-pointer"
               >
                 Cancel
               </button>
@@ -315,7 +324,7 @@ function CustomerCreateProfile() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                className="w-full rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto cursor-pointer"
               >
                 {loading
                   ? "Creating Profile..."
@@ -327,8 +336,16 @@ function CustomerCreateProfile() {
           </form>
         </div>
 
-        <p className="py-5 text-center text-xs text-gray-400">
-          SEWA • Cooperative Services Platform
+        <div className="text-black mt-3 flex justify-between border border-purple-600 rounded-2xl p-3">
+          !Do not want to create Profile
+          <button
+          onClick={handleLogout}
+          className="border bg-indigo-600 p-2 rounded-xl cursor-pointer text-white font-semibold"
+          >Logout</button>
+        </div>
+
+        <p className="py-5 text-center text-xs text-gray-600">
+          TechConnect • Cooperative Services Platform
         </p>
 
       </div>

@@ -129,7 +129,7 @@ const WorkerProfile = () => {
         <div className="min-h-screen  bg-emerald-600 px-4 py-5 sm:px-6 lg:px-8">
 
             {/* Main Container */}
-            <div className="max-w-5xl mx-auto">
+            <div className="max-w-6xl mx-auto">
 
 
 
@@ -146,7 +146,7 @@ const WorkerProfile = () => {
 
                 <button
                     onClick={() => navigate("/worker/edit-profile")}
-                    className="rounded-2xl border-2  p-2  font-semibold cursor-pointer text-black"
+                    className="rounded-2xl border-2 p-2 font-semibold cursor-pointer text-black"
                     >
                     Edit Profile
                 </button>

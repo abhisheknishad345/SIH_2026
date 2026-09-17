@@ -311,9 +311,9 @@ function WorkerEditProfile() {
         <button
           type="button"
           onClick={() => navigate("/worker/profile")}
-          className="mb-5 text-sm font-semibold text-gray-600 transition hover:text-indigo-600"
+          className="mb-5 text-sm font-semibold text-gray-600 transition hover:text-indigo-600 cursor-pointer"
         >
-          ← Back to Profile
+          ⬅ Back to Profile
         </button>
 
         {/* Header */}
@@ -692,8 +692,8 @@ function WorkerEditProfile() {
           </form>
         </div>
 
-        <p className="py-5 text-center text-xs text-gray-400">
-          SEWA • Cooperative Services Platform
+        <p className="py-5 text-center text-xs text-gray-600">
+          TechConnect • Cooperative Services Platform
         </p>
 
       </div>

@@ -198,9 +198,9 @@ function CustomerEditProfile() {
         <button
           type="button"
           onClick={() => navigate("/customer")}
-          className="mb-5 text-sm font-semibold text-gray-600 transition hover:text-indigo-600"
+          className="mb-5 text-sm font-semibold cursor-pointer text-gray-600 transition hover:text-indigo-600"
         >
-          ← Back to Dashboard
+          ⬅ Back to Dashboard
         </button>
 
         {/* Header */}
@@ -268,7 +268,7 @@ function CustomerEditProfile() {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="Enter your phone number"
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
                 required
               />
             </div>
@@ -285,7 +285,7 @@ function CustomerEditProfile() {
                 onChange={handleChange}
                 rows="4"
                 placeholder="Enter your current address"
-                className="w-full resize-none rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                className="w-full resize-none rounded-xl border border-gray-300 px-4 py-3 text-black outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                 required
               />
             </div>
@@ -307,7 +307,7 @@ function CustomerEditProfile() {
                 type="button"
                 onClick={getCurrentLocation}
                 disabled={locationLoading}
-                className="w-full rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                className="w-full rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto cursor-pointer"
               >
                 {locationLoading
                   ? "Getting Location..."
@@ -377,7 +377,7 @@ function CustomerEditProfile() {
               <button
                 type="button"
                 onClick={() => navigate("/customer")}
-                className="w-full rounded-xl border border-gray-300 px-5 py-3 font-semibold text-gray-700 transition hover:bg-gray-50 sm:w-auto"
+                className="w-full rounded-xl border border-gray-300 px-5 py-3 font-semibold text-gray-700 transition hover:bg-gray-50 sm:w-auto cursor-pointer"
               >
                 Cancel
               </button>
@@ -385,7 +385,7 @@ function CustomerEditProfile() {
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                className="w-full rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto cursor-pointer"
               >
                 {saving
                   ? "Saving Changes..."
@@ -397,8 +397,8 @@ function CustomerEditProfile() {
           </form>
         </div>
 
-        <p className="py-5 text-center text-xs text-gray-400">
-          SEWA • Cooperative Services Platform
+        <p className="py-5 text-center text-xs text-gray-600">
+          TechConnect • Cooperative Services Platform
         </p>
 
       </div>
