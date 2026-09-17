@@ -101,7 +101,7 @@ function LandingPage() {
                         </h1>
 
                         <p className="mt-6 max-w-2xl text-base leading-7 text-gray-400 sm:text-lg">
-                            SEWA is a cooperative services platform that
+                            TechConnect is a cooperative services platform that
                             connects skilled workers with people who need
                             reliable services — creating opportunities and
                             strengthening local communities.

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
+import {ArrowLeft, MoveLeft} from 'lucide-react'
 
 function ForgotPassword() {
     const navigate = useNavigate();
@@ -56,16 +57,16 @@ function ForgotPassword() {
                             to="/"
                             className="text-3xl font-extrabold tracking-wide text-indigo-600"
                         >
-                            SEWA
+                           TechConnect
                         </Link>
 
-                        <p className="mt-2 text-sm text-gray-500">
+                        <p className="mt-2 text-md text-gray-500">
                             Cooperative Services Platform
                         </p>
                     </div>
 
                     {/* Card */}
-                    <div className="rounded-2xl bg-white p-6 shadow-sm sm:p-8">
+                    <div className="rounded-2xl bg-white p-6 shadow-sm sm:p-8 border border-blue-500">
 
                         {/* Icon */}
                         <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50 text-2xl">
@@ -77,7 +78,7 @@ function ForgotPassword() {
                                 Forgot Password?
                             </h1>
 
-                            <p className="mt-2 text-sm leading-6 text-gray-500">
+                            <p className="mt-2 text-md leading-6 text-gray-500">
                                 Enter your registered email address and
                                 we'll send you a verification OTP.
                             </p>
@@ -95,7 +96,7 @@ function ForgotPassword() {
                             className="mt-6"
                         >
                             {/* Email */}
-                            <label className="mb-2 block text-sm font-medium text-gray-700">
+                            <label className="mb-2 block text-md font-medium text-gray-700">
                                 Email Address
                             </label>
 
@@ -109,14 +110,14 @@ function ForgotPassword() {
                                 placeholder="you@example.com"
                                 autoComplete="email"
                                 required
-                                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
+                                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-md outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
                             />
 
                             {/* Button */}
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="mt-5 w-full rounded-xl bg-indigo-600 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+                                className="mt-5 w-full rounded-xl bg-indigo-600 px-5 py-3.5 text-md font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
                             >
                                 {loading
                                     ? "Sending OTP..."
@@ -128,9 +129,9 @@ function ForgotPassword() {
                         <div className="mt-6 text-center">
                             <Link
                                 to="/"
-                                className="text-sm font-semibold text-indigo-600 hover:text-indigo-800"
-                            >
-                                ← Back to Login
+                                className="text-md font-semibold text-indigo-600 hover:text-indigo-800"
+                                >
+                            ⬅ Back to Login
                             </Link>
                         </div>
                     </div>

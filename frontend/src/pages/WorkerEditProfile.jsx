@@ -372,7 +372,7 @@ function WorkerEditProfile() {
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
                   required
                 >
                   <option value="">
@@ -404,7 +404,7 @@ function WorkerEditProfile() {
                   value={formData.experience}
                   onChange={handleChange}
                   placeholder="e.g. 3"
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
                   required
                 />
               </div>
@@ -429,7 +429,7 @@ function WorkerEditProfile() {
                 <button
                   type="button"
                   onClick={addSkill}
-                  className="shrink-0 rounded-lg bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-100"
+                  className="shrink-0 rounded-lg bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-100 cursor-pointer"
                 >
                   + Add Skill
                 </button>
@@ -455,7 +455,7 @@ function WorkerEditProfile() {
                           onClick={() =>
                             removeSkill(index)
                           }
-                          className="text-sm font-medium text-red-500 hover:text-red-600"
+                          className="text-sm font-medium text-red-500 hover:text-red-600 cursor-pointer"
                         >
                           Remove
                         </button>
@@ -481,7 +481,7 @@ function WorkerEditProfile() {
                             )
                           }
                           placeholder="e.g. Pipe Repair"
-                          className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                          className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
                           required
                         />
                       </div>
@@ -504,7 +504,7 @@ function WorkerEditProfile() {
                             )
                           }
                           placeholder="e.g. 500"
-                          className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                          className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
                           required
                         />
                       </div>
@@ -524,7 +524,7 @@ function WorkerEditProfile() {
                               e.target.value
                             )
                           }
-                          className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                          className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
                         >
                           {priceTypes.map((type) => (
                             <option
@@ -579,7 +579,7 @@ function WorkerEditProfile() {
                   value={formData.certifications}
                   onChange={handleChange}
                   placeholder="e.g. ITI, Skill India, Electrician Certificate"
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  className="w-full rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
                 />
 
                 <p className="mt-2 text-xs text-gray-400">
@@ -604,7 +604,7 @@ function WorkerEditProfile() {
                 type="button"
                 onClick={getCurrentLocation}
                 disabled={locationLoading}
-                className="mt-5 w-full rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                className="mt-5 w-full rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto cursor-pointer"
               >
                 {locationLoading
                   ? "Getting Location..."
@@ -672,7 +672,7 @@ function WorkerEditProfile() {
               <button
                 type="button"
                 onClick={() => navigate("/worker/profile")}
-                className="w-full rounded-xl border border-gray-300 px-5 py-3 font-semibold text-gray-700 transition hover:bg-gray-50 sm:w-auto"
+                className="w-full rounded-xl border border-gray-300 px-5 py-3 font-semibold text-gray-700 transition hover:bg-gray-50 sm:w-auto cursor-pointer"
               >
                 Cancel
               </button>
@@ -680,7 +680,7 @@ function WorkerEditProfile() {
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                className="w-full rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto cursor-pointer"
               >
                 {saving
                   ? "Saving Changes..."

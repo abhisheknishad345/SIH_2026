@@ -138,19 +138,19 @@ function WorkerDashboard() {
         <div className="max-w-5xl mx-auto flex items-center justify-between">
 
           <h1 className="text-2xl font-bold text-indigo-700">
-            SEWA
+            TechConnect
           </h1>
 
           <button
             onClick={() => navigate("/worker/profile")}
-            className="w-1/3 bg-indigo-600 text-white py-2 rounded-xl font-semibold"
+            className="w-1/4 bg-indigo-600 text-white py-2 rounded-xl font-semibold cursor-pointer"
           >
             My Profile
           </button>
 
           <button
             onClick={handleLogout}
-            className="text-sm font-semibold text-black border-2 border-black rounded-2xl p-2 cursor-pointer"
+            className="w-1/5 text-md font-semibold text-black border-2 border-black rounded-2xl p-2 cursor-pointer"
           >
             Logout
           </button>

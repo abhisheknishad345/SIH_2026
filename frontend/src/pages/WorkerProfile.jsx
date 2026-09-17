@@ -126,34 +126,34 @@ const WorkerProfile = () => {
     };
 
     return (
-        <div className="min-h-screen bg-green-800 px-4 py-5 sm:px-6 lg:px-8">
+        <div className="min-h-screen  bg-emerald-600 px-4 py-5 sm:px-6 lg:px-8">
 
             {/* Main Container */}
             <div className="max-w-5xl mx-auto">
 
 
 
-                <div className=" flex justify-between mb-5 border-2 p-3 rounded-2xl ">
+                <div className=" flex justify-between mb-5 p-3 rounded-2xl bg-gray-300">
                 {/* Back Button */}
 
                 <button
                     onClick={() => navigate("/worker")}
-                    className="flex items-center gap-2   font-semibold transition border-2 p-2 rounded-2xl cursor-pointer"
+                    className="flex items-center gap-2 font-semibold transition border-2 p-2 rounded-2xl cursor-pointer text-black"
                     >
-                    <span className="text-xl">←</span>
+                    <span className="text-xl">⬅</span>
                     Back to Dashboard
                 </button>
 
                 <button
                     onClick={() => navigate("/worker/edit-profile")}
-                    className="rounded-2xl border-2  p-2  font-semibold cursor-pointer"
+                    className="rounded-2xl border-2  p-2  font-semibold cursor-pointer text-black"
                     >
                     Edit Profile
                 </button>
 
                 <button
                 onClick={handleLogout}
-                className="p-3 rounded-2xl border-2 font-semibold  cursor-pointer"
+                className="p-3 rounded-2xl border-2 font-semibold  cursor-pointer text-black"
                 >
                     Logout
                 </button>

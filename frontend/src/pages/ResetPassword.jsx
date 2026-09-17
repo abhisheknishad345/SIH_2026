@@ -98,14 +98,14 @@ function ResetPassword() {
                             Password Reset Successfully
                         </h1>
 
-                        <p className="mt-3 text-sm leading-6 text-gray-500">
+                        <p className="mt-3 text-md leading-6 text-gray-500">
                             Your password has been changed successfully.
                             You can now login using your new password.
                         </p>
 
                         <button
                             onClick={() => navigate("/")}
-                            className="mt-7 w-full rounded-xl bg-indigo-600 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                            className="mt-7 w-full rounded-xl bg-indigo-600 px-5 py-3.5 text-md font-semibold text-white transition hover:bg-indigo-700"
                         >
                             Go to Login
                         </button>
@@ -128,16 +128,16 @@ function ResetPassword() {
                             to="/"
                             className="text-3xl font-extrabold tracking-wide text-indigo-600"
                         >
-                            SEWA
+                            TechConnect
                         </Link>
 
-                        <p className="mt-2 text-sm text-gray-500">
+                        <p className="mt-2 text-md text-gray-500">
                             Cooperative Services Platform
                         </p>
                     </div>
 
                     {/* Card */}
-                    <div className="rounded-2xl bg-white p-6 shadow-sm sm:p-8">
+                    <div className="rounded-2xl bg-white p-6 shadow-sm sm:p-8 border border-blue-500">
 
                         {/* Icon */}
                         <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50 text-2xl">
@@ -149,7 +149,7 @@ function ResetPassword() {
                                 Reset Password
                             </h1>
 
-                            <p className="mt-2 text-sm leading-6 text-gray-500">
+                            <p className="mt-2 text-md leading-6 text-gray-500">
                                 Enter the OTP sent to your email and
                                 create a new password.
                             </p>
@@ -157,7 +157,7 @@ function ResetPassword() {
 
                         {/* Error */}
                         {error && (
-                            <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                            <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-md text-red-600">
                                 {error}
                             </div>
                         )}
@@ -169,7 +169,7 @@ function ResetPassword() {
 
                             {/* Email */}
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-700">
+                                <label className="mb-2 block text-md font-medium text-gray-700">
                                     Email Address
                                 </label>
 
@@ -183,13 +183,13 @@ function ResetPassword() {
                                     placeholder="you@example.com"
                                     autoComplete="email"
                                     required
-                                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
+                                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-md outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
                                 />
                             </div>
 
                             {/* OTP */}
                             <div>
-                                <label className="mb-2  block text-sm font-medium text-gray-700">
+                                <label className="mb-2  block text-md font-medium text-gray-700">
                                     OTP
                                 </label>
 
@@ -215,7 +215,7 @@ function ResetPassword() {
 
                             {/* New Password */}
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-700">
+                                <label className="mb-2 block text-md font-medium text-gray-700">
                                     New Password
                                 </label>
 
@@ -231,13 +231,13 @@ function ResetPassword() {
                                     placeholder="Enter new password"
                                     autoComplete="new-password"
                                     required
-                                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
+                                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-md outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
                                 />
                             </div>
 
                             {/* Confirm Password */}
                             <div>
-                                <label className="mb-2 block text-sm font-medium text-gray-700">
+                                <label className="mb-2 block text-md font-medium text-gray-700">
                                     Confirm Password
                                 </label>
 
@@ -253,7 +253,7 @@ function ResetPassword() {
                                     placeholder="Confirm new password"
                                     autoComplete="new-password"
                                     required
-                                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
+                                    className="w-full rounded-xl border border-gray-300 px-4 py-3 text-md outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 text-black"
                                 />
                             </div>
 
@@ -261,7 +261,7 @@ function ResetPassword() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full rounded-xl bg-indigo-600 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
+                                className="w-full rounded-xl bg-indigo-600 px-5 py-3.5 text-md font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
                             >
                                 {loading
                                     ? "Resetting Password..."
@@ -273,9 +273,9 @@ function ResetPassword() {
                         <div className="mt-6 text-center">
                             <Link
                                 to="/"
-                                className="text-sm font-semibold text-indigo-600 hover:text-indigo-800"
+                                className="text-md font-semibold text-indigo-600 hover:text-indigo-800"
                             >
-                                ← Back to Login
+                                ⬅ Back to Login
                             </Link>
                         </div>
 

@@ -51,9 +51,9 @@ function Login() {
       } else if (user.role === "worker") {
         try {
           const response = await api.get("/workers/profile");
-          
+
           const worker = response.data.worker;
-          
+
           if (
             worker.verificationStatus === "approved" &&
             worker.isVerified === true
@@ -67,9 +67,9 @@ function Login() {
             });
           } else if (worker.verificationStatus == "pending") {
             navigate("/worker/profile-pending")
- 
-          } 
-           else {
+
+          }
+          else {
             navigate("/worker/edit-profile", {
               replace: true,
             });
@@ -107,7 +107,7 @@ function Login() {
 
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-indigo-700">
-            SEWA
+            TechConnect
           </h1>
 
           <p className="text-gray-300 mt-2">
@@ -158,13 +158,13 @@ function Login() {
           </div>
 
           <div className="mt-2 text-right">
-    <Link
-        to="/forgot-password"
-        className="text-sm font-semibold text-indigo-600 hover:text-indigo-800"
-    >
-        Forgot Password?
-    </Link>
-</div>
+            <Link
+              to="/forgot-password"
+              className="text-sm font-semibold text-blue-400 hover:text-blue-700"
+            >
+              Forgot Password?
+            </Link>
+          </div>
 
           <button
             type="submit"
