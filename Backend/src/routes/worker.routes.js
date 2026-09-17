@@ -32,7 +32,7 @@ router.put(
     updateWorkerAvailability
 );
 
-router.put(
+router.patch(
     "/editprofile",
     authMiddleware,
     roleMiddleware(["worker"]),
