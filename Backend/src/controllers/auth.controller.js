@@ -1,11 +1,12 @@
 
 const authService = require("../services/auth.service");
-const {validateSignupData, validateLoginData} = require("../validator/auth.validator");
+const {validateSignupData, validateLoginData, validatePassword} = require("../validator/auth.validator");
 
 
 const signup = async (req, res) => {
     try {
         validateSignupData(req.body);
+        validatePassword(req.body)
         const result = await authService.signup(req.body);
 
         res.status(201).json(result);

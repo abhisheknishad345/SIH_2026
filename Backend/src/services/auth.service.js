@@ -173,10 +173,10 @@ const resendOTP = async (email) => {
     if (
         existingVerification &&
         existingVerification.createdAt &&
-        Date.now() - existingVerification.createdAt.getTime() < 60 * 1000
+        Date.now() - existingVerification.createdAt.getTime() < 120 * 1000
     ) {
         throw new Error(
-            "Please wait 60 seconds before requesting a new OTP"
+            "Please wait 120 seconds before requesting a new OTP"
         );
     }
 
@@ -276,14 +276,14 @@ const forgotPassword = async (email) => {
         userId: user._id
     });
 
-    // 60-second cooldown
+    // 120-second cooldown
     if (
         existingReset &&
         existingReset.updatedAt &&
-        Date.now() - existingReset.updatedAt.getTime() < 60 * 1000
+        Date.now() - existingReset.updatedAt.getTime() < 120 * 1000
     ) {
         throw new Error(
-            "Please wait 60 seconds before requesting a new OTP"
+            "Please wait 120 seconds before requesting a new OTP"
         );
     }
 

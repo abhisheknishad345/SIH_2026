@@ -143,7 +143,7 @@ function MyBookings() {
               onClick={() => navigate("/customer")}
               className="mt-5 px-5 py-3 bg-indigo-600
                          text-white font-semibold rounded-xl
-                         hover:bg-indigo-700"
+                         hover:bg-indigo-700 cursor-pointer"
             >
               Browse Services
             </button>

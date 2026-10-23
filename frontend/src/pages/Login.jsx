@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 function Login() {
+
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -13,11 +14,71 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const ROLE_ROUTES = {
+    customer: "/customer",
+    cooperative_admin: "/cooperative-admin",
+    super_admin: "/admin",
+  };
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  // Customer profile check
+  const handleCustomerLogin = async () => {
+    try {
+      await api.get("/customers/profile");
+
+      navigate("/customer", { replace: true });
+    } catch (err) {
+      if (err.response?.status === 404) {
+        navigate("/customer/create-profile", { replace: true });
+        return;
+      }
+
+      throw err;
+    }
+  };
+
+  // Worker profile + verification check
+  const handleWorkerLogin = async () => {
+    try {
+      const response = await api.get("/workers/profile");
+
+      const worker = response.data.worker;
+
+      if (
+        worker.verificationStatus === "approved" &&
+        worker.isVerified === true
+      ) {
+        navigate("/worker", { replace: true });
+        return;
+      }
+
+      if (worker.verificationStatus === "pending") {
+        navigate("/worker/profile-pending", { replace: true });
+        return;
+      }
+
+      if (worker.verificationStatus === "rejected") {
+        navigate("/worker/edit-profile", { replace: true });
+        return;
+      }
+
+      // Fallback
+      navigate("/worker/profile-pending", { replace: true });
+
+    } catch (err) {
+      if (err.response?.status === 404) {
+        navigate("/worker/create-profile", { replace: true });
+        return;
+      }
+
+      throw err;
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -29,66 +90,31 @@ function Login() {
     try {
       const response = await api.post("/auth/login", formData);
 
-      console.log("Login response:", response.data);
-
       const user = response.data.user;
 
+      // Customer
       if (user.role === "customer") {
-        try {
-          await api.get("/customers/profile");
-          navigate("/customer");
-        } catch (profileError) {
-          if (profileError.response?.status === 404) {
-            navigate("/customer/create-profile");
-          } else {
-            navigate("/customer");
-          }
-        }
-      } else if (user.role === "cooperative_admin") {
-        navigate("/cooperative-admin");
-      } else if (user.role === "super_admin") {
-        navigate("/admin");
-      } else if (user.role === "worker") {
-        try {
-          const response = await api.get("/workers/profile");
-
-          const worker = response.data.worker;
-
-          if (
-            worker.verificationStatus === "approved" &&
-            worker.isVerified === true
-          ) {
-            navigate("/worker", { replace: true });
-          } else if (
-            worker.verificationStatus === "rejected"
-          ) {
-            navigate("/worker/profile-pending", {
-              replace: true,
-            });
-          } else if (worker.verificationStatus == "pending") {
-            navigate("/worker/profile-pending")
-
-          }
-          else {
-            navigate("/worker/edit-profile", {
-              replace: true,
-            });
-          }
-
-        } catch (profileError) {
-
-          if (profileError.response?.status === 404) {
-            navigate("/worker/create-profile", {
-              replace: true,
-            });
-          } else {
-            setError(
-              profileError.response?.data?.message ||
-              "Unable to load worker profile."
-            );
-          }
-        }
+        await handleCustomerLogin();
+        return;
       }
+
+      // Worker
+      if (user.role === "worker") {
+        await handleWorkerLogin();
+        return;
+      }
+
+      // Admin / Super Admin
+      const route = ROLE_ROUTES[user.role];
+
+      if (route) {
+        navigate(route, { replace: true });
+        return;
+      }
+
+      // Unknown role
+      setError("Invalid user role.");
+
     } catch (err) {
       console.error(err);
 

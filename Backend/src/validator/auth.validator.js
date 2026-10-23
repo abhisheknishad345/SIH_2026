@@ -1,6 +1,6 @@
 const validator = require("validator");
 
-const validateSignupData = ({ fullName, email, password, role }) => {
+const validateSignupData = ({ fullName, email, role }) => {
     if (!fullName) {
         throw new Error("Full name is required");
     }

@@ -1,5 +1,4 @@
 const express = require("express");
-const { sendOTPEmail } = require("../services/email.service");
 const { signup, verifyEmail, login, resendOTP, logout, forgotPassword, resetPassword } = require("../controllers/auth.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
 const roleMiddleware = require("../middlewares/role.middleware");
@@ -43,25 +42,5 @@ router.get(
         });
     }
 );
-
-
-router.get("/test-email", async (req, res) => {
-    try {
-        await sendOTPEmail(
-            "akn242005@gmail.com",
-            "123456"
-        );
-
-        res.status(200).json({
-            message: "Test email sent successfully"
-        });
-    } catch (error) {
-        console.error(error);
-
-        res.status(500).json({
-            message: "Failed to send email"
-        });
-    }
-});
 
 module.exports = router;
