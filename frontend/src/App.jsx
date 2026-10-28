@@ -14,15 +14,18 @@ import PendingWorkers from "./pages/PendingWorkers";
 import CustomerCreateProfile from "./pages/CustomerCreateProfile";
 import CustomerEditProfile from "./pages/CustomerEditProfile";
 import WorkerEditProfile from "./pages/WorkerEditProfile";
+import WorkerProfileEdit from "./pages/WorkerProfileEdit";
 import CustomerProfile from "./pages/CustomerProfile";
 import AdminDashboard from "./pages/AdminDashboard"
 import HandleError from "./pages/Error";
 import LandingPage from "./pages/LandingPage";
-import api from "./services/api";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import CustomerProfileGuard from "./pages/CustomerProfileGuard";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
+import WorkerBookings from "./pages/WorkerBookings";
+import RejectedWorker from "./pages/RejectedWorker";
+import RejectWorker from "./pages/RejectWorker";
 
 
 function App() {
@@ -60,7 +63,8 @@ function App() {
           path="/customer/create-profile"
           element={<CustomerCreateProfile />}
         />
-        <Route path="/worker" element={<WorkerDashboard />} />
+        <Route path="/worker/dashboard" element={<WorkerDashboard />} />
+        <Route path="/worker/bookings" element={<WorkerBookings />}/>
         <Route path="/cooperative-admin" element={<AdminDashboard />} />
         <Route path="/admin" element={<SuperAdminDashboard />} />
 
@@ -75,10 +79,8 @@ function App() {
 
         <Route path="/worker/profile" element={<WorkerProfile />} />
         <Route path="/worker/create-profile" element={<WorkerCreateProfile />} />
-        <Route
-          path="/worker/profile-pending"
-          element={<WorkerProfilePending />}
-        />
+        <Route path="/worker/rejected" element={<RejectWorker />}/>
+        <Route path="/worker/profile-pending" element={<WorkerProfilePending />}/>
 
         <Route
           path="/customer/profile"
@@ -91,7 +93,7 @@ function App() {
         />
         <Route
           path="/worker/edit-profile"
-          element={<WorkerEditProfile />}
+          element={<WorkerProfileEdit />}
         />
 
         <Route

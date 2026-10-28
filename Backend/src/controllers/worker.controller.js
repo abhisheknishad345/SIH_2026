@@ -3,8 +3,6 @@ const {
     validateWorkerProfile, validateWorkerProfileUpdate
 } = require("../validator/worker.validator");
 
-const Worker = require("../models/Worker");
-
 const createWorkerProfile = async (req, res) => {
     try {
         validateWorkerProfile(req.body);
@@ -15,7 +13,8 @@ const createWorkerProfile = async (req, res) => {
             skills: req.body.skills,
             experience: req.body.experience,
             certifications: req.body.certifications,
-            location: req.body.location
+            location: req.body.location,
+            workingHours: req.body.workingHours
         });
 
         res.status(201).json(result);
@@ -47,6 +46,20 @@ const updateWorkerProfile = async (req, res) => {
             req.user._id,
             req.body
         );
+
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(400).json({
+            message: error.message
+        });
+    }
+};
+
+const resubmitWorkerProfile = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        const result = await workerService.resubmitWorkerProfile(userId);
 
         res.status(200).json(result);
     } catch (error) {
@@ -178,11 +191,51 @@ const updateWorkerAvailability = async (req, res) => {
     }
 };
 
+const updateWorkerSchedule = async (req, res) => {
+    try {
+        const { workingHours } = req.body;
+
+        const result = await workerService.updateWorkerSchedule(
+            req.user._id,
+            workingHours
+        );
+
+        return res.status(200).json({
+            success: true,
+            ...result
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+const getWorkerSchedule = async (req, res) => {
+    try {
+        const result = await workerService.getWorkerSchedule(
+            req.user._id
+        );
+
+        return res.status(200).json({
+            success: true,
+            ...result
+        });
+    } catch (error) {
+        return res.status(404).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
 
 
 
 module.exports = {
     createWorkerProfile, getWorkerProfile, updateWorkerProfile,
     getNearbyWorkers, getPendingWorkers, verifyWorker, rejectWorker,
-    updateWorkerAvailability
+    updateWorkerAvailability, updateWorkerSchedule, getWorkerSchedule,
+    resubmitWorkerProfile
 };

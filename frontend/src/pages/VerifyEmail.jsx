@@ -43,6 +43,36 @@ function VerifyEmail() {
     }
   };
 
+  const resendOtp = async (e) => {
+    e.preventDefault();
+
+    setError("");
+    setSuccess("");
+    setLoading(true);
+
+    try {
+      const response = await api.post("/auth/resend-otp", {
+        email: email.trim(),
+      });
+
+      console.log(response.data);
+
+      setSuccess("OTP sent successfully! You can now verify.");
+
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        "Unable to resend the OTP."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-7 sm:p-9">
@@ -118,7 +148,16 @@ function VerifyEmail() {
             {loading ? "Verifying..." : "Verify Email"}
           </button>
 
+          
+
         </form>
+
+        <button
+          className="text-black"
+          onClick={resendOtp}
+          >
+            Resend OTP
+          </button>
 
       </div>
     </div>

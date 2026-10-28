@@ -6,7 +6,7 @@ const {validateSignupData, validateLoginData, validatePassword} = require("../va
 const signup = async (req, res) => {
     try {
         validateSignupData(req.body);
-        validatePassword(req.body)
+        validatePassword(req.body.password)
         const result = await authService.signup(req.body);
 
         res.status(201).json(result);

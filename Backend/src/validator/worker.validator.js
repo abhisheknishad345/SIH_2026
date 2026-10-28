@@ -33,8 +33,11 @@ const validateWorkerProfile = ({
     skills,
     experience,
     certifications,
-    location
+    location,
+    workingHours
 }) => {
+
+    console.log(workingHours);
 
     const allowedCategories = [
         "Plumber",
@@ -48,9 +51,31 @@ const validateWorkerProfile = ({
         "Technician"
     ];
 
+    const allowedHours = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+    ];
+
+
     if (!allowedCategories.includes(category)) {
         throw new Error("Invalid worker category");
     }
+
+    // if (!allowedHours.includes(...workingHours)) {
+    //     throw new Error("Invalid working days");
+    // }
+
+    if (
+    !Array.isArray(workingHours) ||
+    !workingHours.every(hour => allowedHours.includes(hour.day))
+) {
+    throw new Error("Invalid working days");
+}
 
     if (!Array.isArray(skills) || skills.length === 0) {
         throw new Error("At least one skill is required");

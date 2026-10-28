@@ -184,7 +184,10 @@ const resendOTP = async (email) => {
         100000 + Math.random() * 900000
     ).toString();
 
+    console.log("Resend OTP: ", otp);
+
     const otpHash = await bcrypt.hash(otp, 10);
+
 
     const expiresAt = new Date(
         Date.now() + 10 * 60 * 1000

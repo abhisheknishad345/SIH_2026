@@ -41,15 +41,6 @@ function WorkerEditProfile() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const handleLogout = async () => {
-        try {
-            await api.post("/auth/logout");
-            navigate("/");
-        } catch (error) {
-            console.error("Logout failed:", error);
-        }
-    };
-
   // -------------------------
   // Load existing profile
   // -------------------------
@@ -267,7 +258,7 @@ function WorkerEditProfile() {
         },
       };
 
-      await api.patch("/workers/editprofile", payload);
+      await api.put("/workers/editprofile", payload);
 
       setSuccess("Profile updated successfully!");
 

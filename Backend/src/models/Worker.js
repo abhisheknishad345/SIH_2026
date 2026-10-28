@@ -12,7 +12,7 @@ const workerSchema = new mongoose.Schema(
         cooperativeId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Cooperative",
-            required: true
+            // required: true
         },
 
         category: {
@@ -49,7 +49,7 @@ const workerSchema = new mongoose.Schema(
                     },
                     priceType: {
                         type: String,
-                        enum: ["per_hour", "per_visit", "per_day", "fixed"],
+                        enum: ["per_hour", "per_day", "per_visit", "fixed"],
                         required: true
                     }
                 }
@@ -100,7 +100,48 @@ const workerSchema = new mongoose.Schema(
         isAvailable: {
             type: Boolean,
             default: true
+        },
+
+        bookingActionLock: {
+    type: Boolean,
+    default: false
+},
+
+        workingHours: {
+    type: [
+        {
+            day: {
+                type: String,
+                enum: [
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                    "Sunday"
+                ],
+                required: true
+            },
+
+            isWorking: {
+                type: Boolean,
+                default: true
+            },
+
+            startTime: {
+                type: String,
+                default: "09:00"
+            },
+
+            endTime: {
+                type: String,
+                default: "17:00"
+            }
         }
+    ],
+    default: []
+},
     },
     {
         timestamps: true

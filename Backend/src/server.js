@@ -36,7 +36,7 @@ app.use(cookieParser());
 
 app.get("/", (req, res) => {
     res.json({
-        message: "SIH 2026 Backend is running"
+        message: "Minor Project 2026 Backend is running"
     });
 });
 

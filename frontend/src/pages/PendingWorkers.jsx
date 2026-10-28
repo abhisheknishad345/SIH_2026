@@ -37,7 +37,7 @@ function PendingWorkers() {
     try {
       setActionLoading(workerId);
 
-      await api.patch(`/workers/${workerId}/verify`);
+      await api.put(`/workers/${workerId}/verify`);
 
       setWorkers((prev) =>
         prev.filter((worker) => worker._id !== workerId)

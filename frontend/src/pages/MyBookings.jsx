@@ -42,7 +42,7 @@ function MyBookings() {
     if (!confirmCancel) return;
 
     try {
-      await api.patch(`/bookings/${bookingId}/cancel`);
+      await api.put(`/bookings/${bookingId}/cancel`);
 
       // Refresh bookings after cancellation
       fetchBookings();
@@ -214,7 +214,7 @@ function MyBookings() {
                     </span>
 
                     <p className="font-semibold text-gray-800">
-                      {booking.duration} hour(s)
+                      {booking.duration} Hour(s)
                     </p>
                   </div>
 

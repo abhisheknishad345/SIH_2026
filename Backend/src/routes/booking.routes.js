@@ -1,7 +1,9 @@
 const express = require("express");
 
 const {createBooking, getWorkerBookings, updateBookingStatus,
-    getCustomerBookings, cancelBooking, completeBooking } = require("../controllers/booking.controller");
+    getCustomerBookings, cancelBooking, completeBooking, getWorkerDashboardController,
+    getWorkerEarningsController,
+ } = require("../controllers/booking.controller");
 
 const authMiddleware = require("../middlewares/auth.middleware");
 const roleMiddleware = require("../middlewares/role.middleware");
@@ -48,6 +50,21 @@ router.get(
     authMiddleware,
     roleMiddleware(["customer"]),
     getCustomerBookings
+);
+
+
+router.get(
+    "/worker/dashboard",
+    authMiddleware,
+    roleMiddleware(["worker"]),
+    getWorkerDashboardController
+);
+
+router.get(
+    "/worker/earnings",
+    authMiddleware,
+    roleMiddleware(["worker"]),
+    getWorkerEarningsController
 );
 
 

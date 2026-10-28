@@ -2,6 +2,7 @@
 const Booking = require("../models/Booking");
 const Worker = require("../models/Worker");
 const Service = require("../models/Service");
+const mongoose = require("mongoose");
 
 const createBooking = async ({
     customerId,
@@ -98,9 +99,9 @@ const createBooking = async ({
 
     const existingBookings = await Booking.find({
         workerId,
-        status: {
-            $in: ["pending", "accepted"]
-        }
+        status: "accepted"
+           
+        
     });
 
     const hasConflict = existingBookings.some((booking) => {
@@ -140,17 +141,78 @@ const createBooking = async ({
     };
 };
 
-const getWorkerBookings = async (workerId) => {
-    const bookings = await Booking.find({
-        workerId
-    })
-        .populate("customerId", "fullName email")
-        .populate("serviceId", "name category")
-        .sort({ createdAt: -1 });
+const getWorkerBookings = async ({
+    workerId,
+    upcoming,
+    status,
+    page = 1,
+    limit = 10
+}) => {
+    const filter = { workerId };
+
+    // Optional status filter
+    if (status) {
+        filter.status = status;
+    }
+
+    // Only future bookings
+    if (upcoming) {
+    filter.scheduledAt = {
+        $gte: new Date(),
+    };
+
+    if (status) {
+        filter.status = status;
+    } else {
+        filter.status = {
+            $in: ["pending", "accepted"],
+        };
+    }
+} else if (status) {
+    filter.status = status;
+}
+
+    const skip = (page - 1) * limit;
+
+    const [bookings, totalBookings] = await Promise.all([
+        Booking.find(filter)
+            .populate("customerId", "fullName email")
+            .populate("serviceId", "name category")
+            .sort({ scheduledAt: 1 })
+            .skip(skip)
+            .limit(limit),
+
+        Booking.countDocuments(filter)
+    ]);
 
     return {
-        bookings
+        bookings,
+        pagination: {
+            totalBookings,
+            currentPage: page,
+            limit,
+            totalPages: Math.ceil(totalBookings / limit),
+            hasNextPage: page * limit < totalBookings,
+            hasPrevPage: page > 1
+        }
     };
+};
+
+const getBookingEnd = (booking) => {
+    return new Date(
+        new Date(booking.scheduledAt).getTime() +
+        booking.duration * 60 * 1000
+    );
+};
+
+const isBookingOverlapping = (bookingA, bookingB) => {
+    const startA = new Date(bookingA.scheduledAt);
+    const endA = getBookingEnd(bookingA);
+
+    const startB = new Date(bookingB.scheduledAt);
+    const endB = getBookingEnd(bookingB);
+
+    return startA < endB && endA > startB;
 };
 
 const updateBookingStatus = async ({
@@ -164,14 +226,13 @@ const updateBookingStatus = async ({
         throw new Error("Booking not found");
     }
 
-    // Check: kya ye booking isi worker ki hai?
     if (booking.workerId.toString() !== workerId.toString()) {
         throw new Error(
             "You are not allowed to update this booking"
         );
     }
 
-    // Pending → accepted/rejected
+    // Pending booking can only be accepted or rejected
     if (booking.status === "pending") {
         if (status !== "accepted" && status !== "rejected") {
             throw new Error(
@@ -180,30 +241,234 @@ const updateBookingStatus = async ({
         }
     }
 
-    // Accepted → completed
+    // Accepted booking can only be completed
     else if (booking.status === "accepted") {
         if (status !== "completed") {
             throw new Error(
                 "Accepted booking can only be completed"
             );
         }
-    }
-
-    // Baaki statuses se koi update allowed nahi
-    else {
+    } else {
         throw new Error(
             `Booking cannot be updated from ${booking.status} status`
         );
     }
 
-    booking.status = status;
+    // Manual rejection: only reject selected booking
+    if (status === "rejected") {
+        booking.status = "rejected";
 
-    await booking.save();
+        await booking.save();
 
-    return {
-        message: `Booking ${status} successfully`,
-        booking
-    };
+        return {
+            message: "Booking rejected successfully",
+            booking
+        };
+    }
+
+    // Lock worker's booking acceptance process
+    const worker = await Worker.findOneAndUpdate(
+        {
+            userId: workerId,
+            bookingActionLock: false
+        },
+        {
+            $set: {
+                bookingActionLock: true
+            }
+        },
+        {
+            new: true
+        }
+    );
+
+    if (!worker) {
+        const workerExists = await Worker.exists({
+            userId: workerId
+        });
+
+        if (!workerExists) {
+            throw new Error("Worker profile not found");
+        }
+
+        throw new Error(
+            "Another booking action is in progress. Please try again."
+        );
+    }
+
+    try {
+        // Recheck booking status after acquiring lock
+        const currentBooking = await Booking.findById(bookingId);
+
+        if (!currentBooking || currentBooking.status !== "pending") {
+            throw new Error(
+                "This booking is no longer pending"
+            );
+        }
+
+        // Check worker verification
+        if (!worker.isVerified) {
+            throw new Error("Worker is not verified");
+        }
+
+        // Check worker availability
+        if (!worker.isAvailable) {
+            throw new Error("Worker is currently unavailable");
+        }
+
+        const bookingStart = new Date(
+            currentBooking.scheduledAt
+        );
+
+        const bookingEnd = getBookingEnd(currentBooking);
+
+        // Find existing accepted bookings
+        const existingAcceptedBookings = await Booking.find({
+            workerId,
+            status: "accepted",
+            _id: {
+                $ne: currentBooking._id
+            },
+            scheduledAt: {
+                $lt: bookingEnd
+            }
+        });
+
+        // Check accepted booking overlap
+        const hasConflict = existingAcceptedBookings.some(
+            (existingBooking) =>
+                isBookingOverlapping(
+                    currentBooking,
+                    existingBooking
+                )
+        );
+
+        if (hasConflict) {
+            throw new Error(
+                "Worker already has an accepted booking during this time"
+            );
+        }
+
+        // Check working hours
+        const formatter = new Intl.DateTimeFormat("en-US", {
+            timeZone: "Asia/Kolkata",
+            weekday: "long",
+            hour: "2-digit",
+            minute: "2-digit",
+            hourCycle: "h23"
+        });
+
+        const getDateParts = (date) => {
+            const parts = formatter.formatToParts(date);
+
+            return Object.fromEntries(
+                parts.map(({ type, value }) => [
+                    type,
+                    value
+                ])
+            );
+        };
+
+        const startParts = getDateParts(bookingStart);
+        const endParts = getDateParts(bookingEnd);
+
+        const bookingDay = startParts.weekday;
+
+        const bookingStartTime =
+            `${startParts.hour}:${startParts.minute}`;
+
+        const bookingEndTime =
+            `${endParts.hour}:${endParts.minute}`;
+
+        const workingDay = worker.workingHours.find(
+            (item) => item.day === bookingDay
+        );
+
+        if (!workingDay || !workingDay.isWorking) {
+            throw new Error(
+                `Worker is not working on ${bookingDay}`
+            );
+        }
+
+        // Reject bookings outside working hours
+        if (
+            bookingStartTime < workingDay.startTime ||
+            bookingEndTime > workingDay.endTime ||
+            startParts.weekday !== endParts.weekday
+        ) {
+            throw new Error(
+                "Booking is outside worker working hours"
+            );
+        }
+
+        // Accept selected booking
+        currentBooking.status = "accepted";
+
+        await currentBooking.save();
+
+        // Find overlapping pending bookings
+        const pendingBookings = await Booking.find({
+            workerId,
+            status: "pending",
+            _id: {
+                $ne: currentBooking._id
+            },
+            scheduledAt: {
+                $lt: bookingEnd
+            }
+        });
+
+        // Keep only bookings that truly overlap
+        const overlappingPendingBookings =
+            pendingBookings.filter((pendingBooking) =>
+                isBookingOverlapping(
+                    currentBooking,
+                    pendingBooking
+                )
+            );
+
+        const overlappingBookingIds =
+            overlappingPendingBookings.map(
+                (pendingBooking) => pendingBooking._id
+            );
+
+        // Automatically reject overlapping pending requests
+        if (overlappingBookingIds.length > 0) {
+            await Booking.updateMany(
+                {
+                    _id: {
+                        $in: overlappingBookingIds
+                    },
+                    status: "pending"
+                },
+                {
+                    $set: {
+                        status: "rejected"
+                    }
+                }
+            );
+        }
+
+        return {
+            message: "Booking accepted successfully",
+            booking: currentBooking,
+            automaticallyRejected:
+                overlappingBookingIds.length
+        };
+
+    } finally {
+        // Always release lock
+        await Worker.updateOne(
+            {
+                userId: workerId
+            },
+            {
+                $set: {
+                    bookingActionLock: false
+                }
+            }
+        );
+    }
 };
 
 const getCustomerBookings = async (customerId) => {
@@ -297,7 +562,198 @@ const completeBooking = async ({
 };
 
 
+const getWorkerDashboard = async (workerId) => {
+    const result = await Booking.aggregate([
+        {
+            $match: {
+                workerId: new mongoose.Types.ObjectId(workerId)
+            }
+        },
+        {
+            $group: {
+                _id: null,
+
+                totalBookings: {
+                    $sum: 1
+                },
+
+                pendingBookings: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$status", "pending"] },
+                            1,
+                            0
+                        ]
+                    }
+                },
+
+                activeBookings: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$status", "accepted"] },
+                            1,
+                            0
+                        ]
+                    }
+                },
+
+                completedBookings: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$status", "completed"] },
+                            1,
+                            0
+                        ]
+                    }
+                },
+
+                totalEarnings: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$status", "completed"] },
+                            "$price",
+                            0
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                totalBookings: 1,
+                pendingBookings: 1,
+                activeBookings: 1,
+                completedBookings: 1,
+                totalEarnings: 1
+            }
+        }
+    ]);
+
+    return result[0] || {
+        totalBookings: 0,
+        pendingBookings: 0,
+        activeBookings: 0,
+        completedBookings: 0,
+        totalEarnings: 0
+    };
+};
+
+const getWorkerEarnings = async (workerId) => {
+    const workerObjectId = new mongoose.Types.ObjectId(workerId);
+
+    const now = new Date();
+
+    const currentMonthStart = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        1
+    );
+
+    const nextMonthStart = new Date(
+        now.getFullYear(),
+        now.getMonth() + 1,
+        1
+    );
+
+    const previousMonthStart = new Date(
+        now.getFullYear(),
+        now.getMonth() - 1,
+        1
+    );
+
+    const result = await Booking.aggregate([
+        {
+            $match: {
+                workerId: workerObjectId,
+                status: "completed"
+            }
+        },
+        {
+            $facet: {
+                lifetime: [
+                    {
+                        $group: {
+                            _id: null,
+                            totalEarnings: {
+                                $sum: "$price"
+                            },
+                            completedBookings: {
+                                $sum: 1
+                            }
+                        }
+                    }
+                ],
+
+                currentMonth: [
+                    {
+                        $match: {
+                            scheduledAt: {
+                                $gte: currentMonthStart,
+                                $lt: nextMonthStart
+                            }
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            earnings: {
+                                $sum: "$price"
+                            },
+                            bookings: {
+                                $sum: 1
+                            }
+                        }
+                    }
+                ],
+
+                previousMonth: [
+                    {
+                        $match: {
+                            scheduledAt: {
+                                $gte: previousMonthStart,
+                                $lt: currentMonthStart
+                            }
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            earnings: {
+                                $sum: "$price"
+                            },
+                            bookings: {
+                                $sum: 1
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ]);
+
+    const data = result[0];
+
+    return {
+        lifetime: data.lifetime[0] || {
+            totalEarnings: 0,
+            completedBookings: 0
+        },
+
+        currentMonth: data.currentMonth[0] || {
+            earnings: 0,
+            bookings: 0
+        },
+
+        previousMonth: data.previousMonth[0] || {
+            earnings: 0,
+            bookings: 0
+        }
+    };
+};
+
+
 module.exports = {
     createBooking, getWorkerBookings, updateBookingStatus, getCustomerBookings, cancelBooking
-    , completeBooking
+    , completeBooking, getWorkerDashboard, getWorkerEarnings
 };

@@ -121,9 +121,11 @@ const validateBooking = ({
 };
 
 const validateBookingStatus = ({ status }) => {
-    if (!["accepted", "rejected", "completed"].includes(status)) {
+    const allowedStatuses = ["accepted", "rejected", "completed"];
+
+    if (!allowedStatuses.includes(status)) {
         throw new Error(
-            "Status must be either accepted or rejected"
+            "Status must be accepted, rejected, or completed"
         );
     }
 };

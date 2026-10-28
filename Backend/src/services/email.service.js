@@ -39,7 +39,7 @@ const sendOTPEmail = async (email, otp) => {
     );
 
     await transporter.sendMail({
-        from: `"Cooperative Services" <${process.env.EMAIL_USER}>`,
+        from: `"TechConnect" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: "Email Verification OTP",
         html: html
@@ -56,7 +56,7 @@ const passwordResetOTPEmail = async (email, otp) => {
     );
 
     await transporter.sendMail({
-        from: `"Cooperative Services" <${process.env.EMAIL_USER}>`,
+        from: `"TechConnect Services" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: "Password Reset OTP",
         html: html
@@ -79,7 +79,7 @@ const cooperativeAdminCreatedEmail = async (email, fullName) => {
     html = html.replaceAll("{{EMAIL}}", email);
 
     await transporter.sendMail({
-        from: `"Cooperative Services" <${process.env.EMAIL_USER}>`,
+        from: `"TechConnect Services" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: "Your Cooperative Admin Account Has Been Created",
         html

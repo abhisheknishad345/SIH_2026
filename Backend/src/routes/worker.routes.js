@@ -3,7 +3,7 @@ const express = require("express");
 const {
     createWorkerProfile, getWorkerProfile, updateWorkerProfile,
     getNearbyWorkers, getPendingWorkers, verifyWorker, rejectWorker,
-    updateWorkerAvailability
+    updateWorkerAvailability, updateWorkerSchedule, getWorkerSchedule, resubmitWorkerProfile
 } = require("../controllers/worker.controller");
 
 const authMiddleware = require("../middlewares/auth.middleware");
@@ -32,11 +32,17 @@ router.put(
     updateWorkerAvailability
 );
 
-router.patch(
+router.put(
     "/editprofile",
     authMiddleware,
     roleMiddleware(["worker"]),
     updateWorkerProfile
+);
+
+router.put(
+    "/profile/resubmit",
+    authMiddleware,
+    resubmitWorkerProfile
 );
 
 router.get(
@@ -53,18 +59,32 @@ router.get(
     getPendingWorkers
 );
 
-router.patch(
+router.put(
     "/:workerId/verify",
     authMiddleware,
     roleMiddleware(["cooperative_admin"]),
     verifyWorker
 );
 
-router.patch(
+router.put(
     "/:workerId/reject",
     authMiddleware,
     roleMiddleware(["cooperative_admin"]),
     rejectWorker
+);
+
+router.patch(
+    "/working-hours",
+    authMiddleware,
+    roleMiddleware(["worker"]),
+    updateWorkerSchedule
+);
+
+router.get(
+    "/working-hours",
+    authMiddleware,
+    roleMiddleware(["worker"]),
+    getWorkerSchedule
 );
 
 

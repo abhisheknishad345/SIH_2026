@@ -4,7 +4,11 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  
     server: {
+      allowedHosts:[
+        "https://hungry-stars-stop.loca.lt"
+      ],
     proxy: {
       // Any request starting with /api will be forwarded
       '/api': {

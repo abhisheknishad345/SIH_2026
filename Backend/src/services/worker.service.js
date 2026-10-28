@@ -13,24 +13,32 @@ const createWorkerProfile = async ({
     experience,
     certifications,
     location,
+    workingHours
 
 }) => {
 
     // Check if worker profile already exists
     const existingWorker = await Worker.findOne({ userId });
-    const cooperative = await Cooperative.findById(cooperativeId);
+    // const cooperative = await Cooperative.findById(cooperativeId);
 
-    if (!cooperative) {
-        throw new Error("Cooperative not found");
-    }
+    // if (!cooperative) {
+    //     throw new Error("Cooperative not found");
+    // }
 
-    if (!cooperative.isActive) {
-        throw new Error("Cooperative is not active");
-    }
+    // if (!cooperative.isActive) {
+    //     throw new Error("Cooperative is not active");
+    // }
 
     if (existingWorker) {
         throw new Error("Worker profile already exists");
     }
+
+      workingHours = workingDays.map((day) => ({
+        day,
+        isWorking: true,
+        startTime: "09:00",
+        endTime: "17:00"
+    }));
 
     const worker = await Worker.create({
         userId,
@@ -39,7 +47,8 @@ const createWorkerProfile = async ({
         skills,
         experience,
         certifications,
-        location
+        location,
+        workingHours
     });
 
     return {
@@ -69,10 +78,14 @@ const updateWorkerProfile = async (userId, updateData) => {
         throw new Error("Worker profile not found");
     }
 
+
     const allowedFields = [
+        "cooperativeId",
+        "category",
         "skills",
         "experience",
         "certifications",
+        "workingHours",
         "location",
     ];
 
@@ -82,10 +95,40 @@ const updateWorkerProfile = async (userId, updateData) => {
         }
     });
 
+    if (updateData.workingDays !== undefined) {
+        worker.workingHours = updateData.workingDays.map((day) => ({
+            day,
+            isWorking: true,
+            startTime: "09:00",
+            endTime: "17:00"
+        }));
+    }
+
     await worker.save();
 
     return {
         message: "Worker profile updated successfully",
+        worker
+    };
+};
+
+const resubmitWorkerProfile = async (userId) => {
+    const worker = await Worker.findOne({ userId });
+
+    if (!worker) {
+        throw new Error("Worker profile not found");
+    }
+
+    if (worker.verificationStatus !== "rejected") {
+        throw new Error("Only rejected profiles can be resubmitted");
+    }
+
+    worker.verificationStatus = "pending";
+
+    await worker.save();
+
+    return {
+        message: "Profile resubmitted for verification",
         worker
     };
 };
@@ -307,6 +350,7 @@ const rejectWorker = async ({ adminId, workerId }) => {
     return worker;
 };
 
+
 const updateWorkerAvailability = async (userId, isAvailable) => {
 
     const worker = await Worker.findOne({ userId });
@@ -319,6 +363,11 @@ const updateWorkerAvailability = async (userId, isAvailable) => {
         throw new Error("isAvailable must be a boolean");
     }
 
+    // Only approved workers can become available
+    if (!worker.isVerified || worker.verificationStatus !== "approved") {
+        throw new Error("Your account is not verified yet");
+    }
+
     worker.isAvailable = isAvailable;
 
     await worker.save();
@@ -329,7 +378,89 @@ const updateWorkerAvailability = async (userId, isAvailable) => {
     };
 };
 
+const updateWorkerSchedule = async (userId, workingHours) => {
+    const worker = await Worker.findOne({ userId });
+
+    if (!worker) {
+        throw new Error("Worker profile not found");
+    }
+
+    if (!Array.isArray(workingHours)) {
+        throw new Error("workingHours must be an array");
+    }
+
+    const validDays = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+    ];
+
+    const seenDays = new Set();
+
+    for (const schedule of workingHours) {
+        const { day, isWorking, startTime, endTime } = schedule;
+
+        if (!validDays.includes(day)) {
+            throw new Error(`Invalid day: ${day}`);
+        }
+
+        if (seenDays.has(day)) {
+            throw new Error(`Duplicate schedule for ${day}`);
+        }
+
+        seenDays.add(day);
+
+        if (typeof isWorking !== "boolean") {
+            throw new Error(`isWorking must be boolean for ${day}`);
+        }
+
+        if (isWorking) {
+            const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+            if (
+                !timeRegex.test(startTime) ||
+                !timeRegex.test(endTime)
+            ) {
+                throw new Error(`Invalid time format for ${day}. Use HH:mm`);
+            }
+
+            if (startTime >= endTime) {
+                throw new Error(`Start time must be before end time for ${day}`);
+            }
+        }
+    }
+
+    worker.workingHours = workingHours;
+
+    await worker.save();
+
+    return {
+        message: "Working hours updated successfully",
+        workingHours: worker.workingHours
+    };
+};
+
+const getWorkerSchedule = async (userId) => {
+    const worker = await Worker.findOne({ userId })
+        .select("isAvailable workingHours");
+
+    if (!worker) {
+        throw new Error("Worker profile not found");
+    }
+
+    return {
+        isAvailable: worker.isAvailable,
+        workingHours: worker.workingHours
+    };
+};
+
+
 module.exports = {
-    createWorkerProfile, getWorkerProfile, updateWorkerProfile,
-    getNearbyWorkers, getPendingWorkers, verifyWorker, rejectWorker, updateWorkerAvailability
+    createWorkerProfile, getWorkerProfile, updateWorkerProfile, updateWorkerSchedule,
+    getNearbyWorkers, getPendingWorkers, verifyWorker, rejectWorker, updateWorkerAvailability,
+    getWorkerSchedule, resubmitWorkerProfile
 };

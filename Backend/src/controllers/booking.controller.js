@@ -1,7 +1,6 @@
 const bookingService = require("../services/booking.service");
 const mongoose = require("mongoose");
-const {
-    validateBooking, validateBookingStatus
+const {validateBooking, validateBookingStatus
 } = require("../validator/booking.validator");
 
 
@@ -32,17 +31,55 @@ const createBooking = async (req, res) => {
     }
 };
 
-const getWorkerBookings = async (req, res) => {
+const getWorkerBookings = async (req, res, next) => {
     try {
-        const result =
-            await bookingService.getWorkerBookings(
-                req.user._id
-            );
+        const { status } = req.query;
+        const upcoming = req.query.upcoming === "true";
 
-        res.status(200).json(result);
+        const allowedStatuses = [
+            "pending",
+            "accepted",
+            "rejected",
+            "cancelled",
+            "completed"
+        ];
+
+        if (
+            status &&
+            !allowedStatuses.includes(status)
+        ) {
+            return res.status(400).json({
+                message: "Invalid booking status"
+            });
+        }
+
+        const page = Math.max(
+            1,
+            parseInt(req.query.page, 10) || 1
+        );
+
+        const limit = Math.min(
+            50,
+            Math.max(1, parseInt(req.query.limit, 10) || 10)
+        );
+
+        const result =
+            await bookingService.getWorkerBookings({
+                workerId: req.user._id,
+                status,
+                upcoming,
+                page,
+                limit
+            });
+
+        return res.status(200).json({
+            success: true,
+            ...result,
+        });
 
     } catch (error) {
-        res.status(400).json({
+        next(error);
+        res.status(500).json({
             message: error.message
         });
     }
@@ -87,6 +124,44 @@ const getCustomerBookings = async (req, res) => {
     } catch (error) {
         res.status(400).json({
             message: error.message
+        });
+    }
+};
+
+const getWorkerDashboardController = async (req, res) => {
+    try {
+        const workerId = req.user._id;
+
+        const dashboard = await bookingService.getWorkerDashboard(workerId);
+
+        return res.status(200).json({
+            success: true,
+            message: "Worker dashboard fetched successfully",
+            data: dashboard
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message || "Failed to fetch worker dashboard"
+        });
+    }
+};
+
+const getWorkerEarningsController = async (req, res) => {
+    try {
+        const workerId = req.user._id;
+
+        const earnings = await bookingService.getWorkerEarnings(workerId);
+
+        return res.status(200).json({
+            success: true,
+            message: "Worker earnings fetched successfully",
+            data: earnings
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message || "Failed to fetch worker earnings"
         });
     }
 };
@@ -139,7 +214,12 @@ const completeBooking = async (req, res) => {
     }
 };
 
+
+
+
 module.exports = {
-    createBooking, getWorkerBookings, updateBookingStatus,
-    getCustomerBookings, cancelBooking, completeBooking
+    createBooking, getWorkerBookings, updateBookingStatus, 
+    getWorkerEarningsController,
+    getWorkerDashboardController,
+    getCustomerBookings, cancelBooking, completeBooking, 
 };
