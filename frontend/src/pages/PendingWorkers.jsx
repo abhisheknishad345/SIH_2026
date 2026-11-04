@@ -15,6 +15,7 @@ function PendingWorkers() {
       setError("");
 
       const response = await api.get("/workers/pending");
+      // console.log(response);
 
       setWorkers(response.data.workers || response.data || []);
     } catch (err) {
@@ -69,7 +70,7 @@ function PendingWorkers() {
     try {
       setActionLoading(workerId);
 
-      await api.patch(`/workers/${workerId}/reject`);
+      await api.put(`/workers/${workerId}/reject`);
 
       setWorkers((prev) =>
         prev.filter(

@@ -1,13 +1,31 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import WorkerProfileForm from "./WorkerProfileForm";
 import { createWorkerProfile } from "../services/workerService";
+import { getAllCooperatives } from "../services/cooperativeService";
+
 
 const WorkerCreateProfile = ({ cooperativeId }) => {
     const [error, setError] = useState("");
     const navigate = useNavigate();
+
+    const [cooperatives, setCooperatives] = useState([]);
+        
+            useEffect(() => {
+                const fetchCooperatives = async () => {
+                    try {
+                        const response = await getAllCooperatives();
+        
+                        setCooperatives(response.data.cooperatives);
+                    } catch (error) {
+                        console.error(error);
+                    }
+                };
+        
+                fetchCooperatives();
+            }, []);
 
     const handleCreate = async (payload) => {
         console.log(payload)
@@ -17,8 +35,9 @@ const WorkerCreateProfile = ({ cooperativeId }) => {
                 cooperativeId,
             });
 
-            navigate("/worker/pending");
+            navigate("/worker/profile-pending");
         } catch (err) {
+            console.log("hi")
             setError(
                 err.response?.data?.message ||
                     "Unable to create worker profile."
@@ -38,6 +57,7 @@ const WorkerCreateProfile = ({ cooperativeId }) => {
 
             <WorkerProfileForm
                 initialData={{ cooperativeId }}
+                cooperatives={cooperatives}
                 onSubmit={handleCreate}
                 submitLabel="Create Profile"
                 cooperativeLocked={false}

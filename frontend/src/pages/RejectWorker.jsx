@@ -100,7 +100,7 @@ const RejectWorker = () => {
 
     if (!worker) {
         return (
-            <p className="p-6 text-red-600">
+            <p className="p-6 text-red-600 text-lg">
                 {error || "Profile not found."}
             </p>
         );
@@ -120,7 +120,7 @@ const RejectWorker = () => {
             </div>
 
             {error && (
-                <p className="rounded bg-red-100 p-3 text-red-700">
+                <p className="rounded bg-red-100 p-3 text-red-700 text-md">
                     {error}
                 </p>
             )}

@@ -28,10 +28,10 @@ function VerifyEmail() {
 
       console.log(response.data);
 
-      setSuccess("Email verified successfully! You can now login.");
+      setSuccess("Email verified successfully! You can create Profile.");
 
       setTimeout(() => {
-        navigate("/");
+        navigate("/worker/create-profile");
       }, 1500);
     } catch (err) {
       setError(
@@ -88,13 +88,13 @@ function VerifyEmail() {
         </div>
 
         {error && (
-          <div className="mb-5 p-3 rounded-lg bg-red-50 text-red-600 text-sm">
+          <div className="mb-5 p-3 text-[16px] rounded-lg bg-red-50 text-red-600">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="mb-5 p-3 rounded-lg bg-green-50 text-green-600 text-sm">
+          <div className="mb-5 p-3 text-[16px] rounded-lg bg-green-50 text-green-600 text-sm">
             {success}
           </div>
         )}

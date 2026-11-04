@@ -24,6 +24,12 @@ const verifyEmail = async (req, res) => {
     try {
 
         const result = await authService.verifyEmail(req.body);
+        res.cookie("token", result.token, {
+            
+            expires: new Date(Date.now() + 12 * 60 * 60 * 1000)
+        });
+
+        delete result.token;
 
         res.status(200).json(result);
 
@@ -54,14 +60,12 @@ const login = async (req, res) => {
     try {
 
         validateLoginData(req.body);
-
+        
         const result = await authService.login(req.body);
 
         res.cookie("token", result.token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000
+            
+            expires: new Date(Date.now() + 12 * 60 * 60 * 1000)
         });
 
         delete result.token;
@@ -78,10 +82,9 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
     try {
-        res.clearCookie("token", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax"
+        res.cookie("token", null, {
+             expires: new Date(Date.now())
+           
         });
 
         res.status(200).json({

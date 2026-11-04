@@ -222,12 +222,12 @@ const login = async ({ email, password }) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-        throw new Error("Invalid email or password");
+        throw new Error("Invalid Credentials");
     }
 
     // 3. Check email verification
     if (!user.emailVerified) {
-        throw new Error("Please verify your email first");
+        throw new Error("Please verify your email");
     }
 
     // 4. Compare password
@@ -237,7 +237,7 @@ const login = async ({ email, password }) => {
     );
 
     if (!isPasswordValid) {
-        throw new Error("Invalid email or password");
+        throw new Error("Invalid Credentials");
     }
 
     // 5. Generate JWT
@@ -253,7 +253,8 @@ const login = async ({ email, password }) => {
             id: user._id,
             fullName: user.fullName,
             email: user.email,
-            role: user.role
+            role: user.role,
+            emailVerified: user.emailVerified
         }
     };
 };

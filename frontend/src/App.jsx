@@ -13,7 +13,6 @@ import WorkerProfilePending from "./pages/WorkerProfilePending";
 import PendingWorkers from "./pages/PendingWorkers";
 import CustomerCreateProfile from "./pages/CustomerCreateProfile";
 import CustomerEditProfile from "./pages/CustomerEditProfile";
-import WorkerEditProfile from "./pages/WorkerEditProfile";
 import WorkerProfileEdit from "./pages/WorkerProfileEdit";
 import CustomerProfile from "./pages/CustomerProfile";
 import AdminDashboard from "./pages/AdminDashboard"
@@ -24,7 +23,6 @@ import ResetPassword from "./pages/ResetPassword";
 import CustomerProfileGuard from "./pages/CustomerProfileGuard";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import WorkerBookings from "./pages/WorkerBookings";
-import RejectedWorker from "./pages/RejectedWorker";
 import RejectWorker from "./pages/RejectWorker";
 
 

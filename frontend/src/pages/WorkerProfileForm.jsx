@@ -52,7 +52,7 @@ const emptySkill = {
 
 const getCooperativeId = (value) => {
     if (!value) return "";
-    console.log(value);
+    // console.log(value);
     return typeof value === "object" ? value._id || "" : value;
 };
 
@@ -338,19 +338,19 @@ const WorkerProfileForm = ({
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
-        console.log("1");
+       
         
-        if (formData.cooperativeId) {
+        if (!formData.cooperativeId) {
             setError("Please select a cooperative.");
             return;
         }
-        console.log("2");
+        
         
         if (!formData.category.trim()) {
             setError("Please select a category.");
             return;
         }
-        console.log("3");
+       
         
         if (
             formData.experience === "" ||
@@ -360,26 +360,26 @@ const WorkerProfileForm = ({
             return;
         }
         
-        console.log("4");
+       
         const validSkills = formData.skills.filter(
             (skill) =>
                 skill.name.trim() &&
             skill.price !== "" &&
             Number(skill.price) >= 0
         );
-        console.log("5");
+       
         
         if (validSkills.length === 0) {
             setError("Please add at least one valid skill and price.");
             return;
         }
-        console.log("6");
+        
         
         if (formData.workingHours.length === 0) {
             setError("Please select at least one working day.");
             return;
         }
-        console.log("7");
+       
         
         if (
             formData.latitude === "" ||
@@ -388,18 +388,18 @@ const WorkerProfileForm = ({
             setError("Please provide your service location.");
             return;
         }
-        console.log("8");
+       
         
         const invalidTiming = formData.workingHours.some(
             (item) => item.startTime >= item.endTime
         );
-        console.log("9");
+        
         
         if (invalidTiming) {
             setError("End time must be after start time.");
             return;
         }
-        console.log("10");
+       
 
         const payload = {
             cooperativeId: formData.cooperativeId,
@@ -418,7 +418,7 @@ const WorkerProfileForm = ({
 
             workingHours: formData.workingHours.map((item) => ({
                 day: item.day,
-                isWorking: true,
+                isWorking: item.isWorking,
                 startTime: item.startTime,
                 endTime: item.endTime,
             })),
@@ -432,16 +432,16 @@ const WorkerProfileForm = ({
             },
         };
 
-        console.log("Payload: ", payload);
+        // console.log("Payload: ", payload);
         
         try {
             setLoading(true);
-            console.log("Payload 2: ", payload);
+            // console.log("Payload 2: ", payload);
             
             await onSubmit(payload);
 
         } catch (err) {
-            console.log("Hello");
+            // console.log("Hello");
             setError(
                 err.response?.data?.message ||
                     err.message ||
@@ -471,7 +471,7 @@ const WorkerProfileForm = ({
     const verificationStatus = initialData?.verificationStatus;
 
     return (
-        <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-indigo-50 via-slate-50 to-slate-100 px-4 py-5 sm:px-6 sm:py-8">
+        <div className="relative min-h-screen overflow-hidden bg-linear-to-b from-indigo-50 via-slate-50 to-slate-100 px-4 py-5 sm:px-6 sm:py-8">
             {/* Soft background glow */}
             <div className="pointer-events-none absolute -top-24 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-indigo-300/30 blur-3xl sm:h-96 sm:w-96" />
 
@@ -518,7 +518,7 @@ const WorkerProfileForm = ({
                 </div>
 
                 {/* Hero */}
-                <div className="rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-600 to-purple-600 p-5 text-white shadow-lg shadow-indigo-200 sm:p-8">
+                <div className="rounded-2xl bg-linear-to-r from-indigo-600 via-indigo-600 to-purple-600 p-5 text-white shadow-lg shadow-indigo-200 sm:p-8">
                     <div className="flex items-start gap-4">
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/15 sm:h-14 sm:w-14">
                             <HardHat size={26} />
@@ -567,7 +567,7 @@ const WorkerProfileForm = ({
                 </div>
 
                 {error && (
-                    <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+                    <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-4 text-md text-red-600">
                         <CircleAlert size={18} className="mt-0.5 shrink-0" />
                         <p>{error}</p>
                     </div>
@@ -595,8 +595,8 @@ const WorkerProfileForm = ({
                                     value={formData.cooperativeId}
                                     onChange={handleChange}
                                     disabled={cooperativeLocked}
-                                    // required
-                                    className={`${inputClass} appearance-none pl-11 pr-11 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500`}
+                                    required
+                                    className={`${inputClass} cursor-pointer appearance-none pl-11 pr-11 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500`}
                                 >
                                     <option value="">
                                         Select Cooperative
@@ -627,7 +627,7 @@ const WorkerProfileForm = ({
                                     value={formData.category}
                                     onChange={handleChange}
                                     required
-                                    className={`${inputClass} appearance-none pl-11 pr-11`}
+                                    className={`${inputClass} cursor-pointer appearance-none pl-11 pr-11`}
                                 >
                                     <option value="">
                                         Select Category
@@ -1048,7 +1048,7 @@ const WorkerProfileForm = ({
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex flex-[2] cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-3 text-sm font-semibold text-white shadow-md shadow-indigo-200 transition hover:from-indigo-500 hover:to-purple-500 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none sm:text-base"
+                        className="flex flex-2 cursor-pointer items-center justify-center gap-2 rounded-xl bg-linear-to-r from-indigo-600 to-purple-600 px-8 py-3 text-sm font-semibold text-white shadow-md shadow-indigo-200 transition hover:from-indigo-500 hover:to-purple-500 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none sm:text-base"
                     >
                         {loading ? (
                             <>

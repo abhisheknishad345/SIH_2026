@@ -206,7 +206,7 @@ const WorkerProfile = () => {
 
                     <button
                         onClick={() => navigate("/worker/dashboard")}
-                        className="mt-5 w-full cursor-pointer rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 py-3 font-semibold text-white shadow-md shadow-indigo-200 transition hover:from-indigo-500 hover:to-purple-500"
+                        className="mt-5 w-full cursor-pointer rounded-xl bg-linear-to-r from-indigo-600 to-purple-600 py-3 font-semibold text-white shadow-md shadow-indigo-200 transition hover:from-indigo-500 hover:to-purple-500"
                     >
                         Back to Dashboard
                     </button>
@@ -310,7 +310,7 @@ const WorkerProfile = () => {
                     <div className="relative flex flex-col items-center gap-4 text-center sm:flex-row sm:items-center sm:text-left">
                         {/* Avatar */}
                         <div className="relative shrink-0">
-                            <div className="flex h-24 w-24 select-none items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 text-4xl font-bold text-white shadow-md ring-4 ring-white">
+                            <div className="flex h-24 w-24 select-none items-center justify-center rounded-full bg-linear-to-br from-indigo-600 to-purple-600 text-4xl font-bold text-white shadow-md ring-4 ring-white">
                                 {initial}
                             </div>
 
@@ -324,7 +324,7 @@ const WorkerProfile = () => {
                         {/* Identity details */}
                         <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-                                <h1 className="break-words text-2xl font-bold text-slate-900 sm:text-3xl">
+                                <h1 className="wrap-break-words text-2xl font-bold text-slate-900 sm:text-3xl">
                                     {fullName}
                                 </h1>
 
@@ -417,7 +417,7 @@ const WorkerProfile = () => {
                                         className="shrink-0 text-indigo-600"
                                     />
 
-                                    <span className="break-words text-sm font-semibold text-slate-900">
+                                    <span className="wrap-break-words text-sm font-semibold text-slate-900">
                                         {worker.category || "Not specified"}
                                     </span>
                                 </div>
@@ -553,7 +553,7 @@ const WorkerProfile = () => {
                                                 <Wrench size={15} />
                                             </span>
 
-                                            <h3 className="break-words text-sm font-semibold text-slate-900">
+                                            <h3 className="wrap-break-words text-sm font-semibold text-slate-900">
                                                 {skill.name}
                                             </h3>
                                         </div>
@@ -616,7 +616,7 @@ const WorkerProfile = () => {
                                                 className="mt-0.5 shrink-0 text-indigo-500"
                                             />
 
-                                            <p className="break-words text-sm font-medium text-slate-700">
+                                            <p className="wrap-break-words text-sm font-medium text-slate-700">
                                                 {certificate}
                                             </p>
                                         </div>
@@ -677,14 +677,14 @@ const WorkerProfile = () => {
                                         Cooperative Organization
                                     </span>
 
-                                    <p className="break-words text-sm font-bold text-slate-900">
+                                    <p className="wrap-break-words text-sm font-bold text-slate-900">
                                         {worker.cooperativeId?.name ||
                                             "Not assigned"}
                                     </p>
 
                                     {worker.cooperativeId
                                         ?.registrationNumber && (
-                                        <p className="mt-2 break-words text-xs text-slate-500">
+                                        <p className="mt-2 wrap-break-words text-xs text-slate-500">
                                             Registration:{" "}
                                             <span className="font-mono font-semibold text-slate-700">
                                                 {
@@ -734,7 +734,7 @@ const WorkerProfile = () => {
                         </div>
 
                         {coordinates?.length === 2 && (
-                            <div className="flex flex-wrap items-center gap-x-6 gap-y-1 bg-gradient-to-r from-indigo-50 to-slate-50 px-4 py-3 text-xs text-slate-600">
+                            <div className="flex flex-wrap items-center gap-x-6 gap-y-1 bg-linear-to-r from-indigo-50 to-slate-50 px-4 py-3 text-xs text-slate-600">
                                 <span className="flex items-center gap-1.5">
                                     <Radio
                                         size={14}
@@ -759,7 +759,7 @@ const WorkerProfile = () => {
 
                 {/* Verification banner */}
                 <section
-                    className={`flex items-center gap-3.5 rounded-2xl border bg-gradient-to-br p-4 shadow-sm ${verification.banner}`}
+                    className={`flex items-center gap-3.5 rounded-2xl border bg-linear-to-br p-4 shadow-sm ${verification.banner}`}
                 >
                     <div
                         className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border bg-white shadow-sm ${verification.iconBox}`}

@@ -4,6 +4,7 @@ const {
 } = require("../validator/worker.validator");
 
 const createWorkerProfile = async (req, res) => {
+    console.log(req.body)
     try {
         validateWorkerProfile(req.body);
         const result = await workerService.createWorkerProfile({
@@ -17,8 +18,11 @@ const createWorkerProfile = async (req, res) => {
             workingHours: req.body.workingHours
         });
 
+        // console.log(result)
+
         res.status(201).json(result);
     } catch (error) {
+        console.log("from createworker api.")
         res.status(400).json({
             message: error.message
         });

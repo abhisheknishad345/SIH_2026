@@ -268,7 +268,7 @@ function LandingPage() {
             `}</style>
 
             {/* ================= NAVBAR ================= */}
-            <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#070b14]/90 backdrop-blur-xl">
+            <nav className="sticky top-0 z-50 border-b-2 border-white/60 rounded-b-3xl bg-[#070b14]/90 backdrop-blur-xl">
                 <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
 
                     <Link
@@ -376,7 +376,7 @@ function LandingPage() {
                         {/* Search Card */}
                         <form
                             onSubmit={handleSearch}
-                            className="mt-8 grid max-w-xl gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3 sm:grid-cols-[1fr_1fr_auto]"
+                            className="mt-8 grid max-w-xl gap-3 rounded-2xl border border-white/10 bg-white/3 p-3 sm:grid-cols-[1fr_1fr_auto]"
                         >
                             <select
                                 value={service}
@@ -436,7 +436,7 @@ function LandingPage() {
 
                             {/* Mini map */}
                             <div className="relative mb-5 h-36 overflow-hidden rounded-2xl border border-white/5 bg-[#0d1320]">
-                                <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:28px_28px]" />
+                                <div className="absolute inset-0 opacity-30 bg-[linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-size-[28px_28px]" />
                                 <span className="absolute left-[48%] top-[45%] flex h-4 w-4 items-center justify-center rounded-full bg-indigo-400 shadow-lg shadow-indigo-400/50">
                                     <span className="h-1.5 w-1.5 rounded-full bg-white" />
                                 </span>
@@ -451,7 +451,7 @@ function LandingPage() {
                             <div className="space-y-3">
                                 <TechnicianRow initials="RK" name="Ravi K." trade="Electrician" distance="0.8 km" rating="4.8" available />
                                 <TechnicianRow initials="SM" name="Sunita M." trade="AC Technician" distance="1.4 km" rating="4.7" available />
-                                <TechnicianRow initials="AJ" name="Amit J." trade="Plumber" distance="2.1 km" rating="4.5" available={false} />
+                                <TechnicianRow initials="AJ" name="Rahul" trade="Plumber" distance="2.1 km" rating="4.5" available={false} />
                             </div>
                         </div>
                     </div>
@@ -460,7 +460,7 @@ function LandingPage() {
 
 
             {/* ================= TRUST STRIP ================= */}
-            <section className="border-y border-white/5 bg-white/[0.02]">
+            <section className="border-y border-white/5 bg-white/2">
                 <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-5 py-8 sm:px-8 md:grid-cols-4">
                     <TrustItem icon="🛡️" text="Verified profiles" />
                     <TrustItem icon="📍" text="Distance-based search" />
@@ -504,7 +504,7 @@ function LandingPage() {
                     />
 
                     {/* Tabs */}
-                    <div className="mx-auto mt-8 flex w-fit rounded-xl border border-white/10 bg-white/[0.03] p-1">
+                    <div className="mx-auto mt-8 flex w-fit rounded-xl border border-white/10 bg-white/3 p-1">
                         <TabButton
                             active={activeTab === "customer"}
                             onClick={() => setActiveTab("customer")}
@@ -975,7 +975,7 @@ function TrustItem({ icon, text }) {
 
 function TechnicianRow({ initials, name, trade, distance, rating, available }) {
     return (
-        <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] p-3">
+        <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/3 p-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-sm font-bold text-indigo-300">
                 {initials}
             </span>
@@ -1050,7 +1050,7 @@ function Step({ number, title, description }) {
 
 function FeatureCard({ icon, title, description }) {
     return (
-        <div className="group rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition duration-300 hover:-translate-y-1 hover:border-indigo-400/30 hover:bg-white/[0.05]">
+        <div className="group rounded-2xl border border-white/10 bg-white/3 p-6 transition duration-300 hover:-translate-y-1 hover:border-indigo-400/30 hover:bg-white/5">
             <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-2xl">
                 {icon}
             </div>
@@ -1064,7 +1064,7 @@ function FeatureCard({ icon, title, description }) {
 
 function MiniStat({ value, label }) {
     return (
-        <div className="rounded-xl border border-white/5 bg-white/[0.03] px-2 py-3">
+        <div className="rounded-xl border border-white/5 bg-white/3 px-2 py-3">
             <p className="text-lg font-bold text-indigo-400">{value}</p>
             <p className="mt-0.5 text-[11px] text-gray-500">{label}</p>
         </div>

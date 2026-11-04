@@ -108,8 +108,8 @@ function Login() {
   // Customer profile check
   const handleCustomerLogin = async () => {
     try {
-      await api.get("/customers/profile");
-
+    const res =   await api.get("/customers/profile");
+   // console.log("Customer",res);
       navigate("/customer", { replace: true });
     } catch (err) {
       if (err.response?.status === 404) {
@@ -126,12 +126,8 @@ function Login() {
     try {
       const response = await api.get("/workers/profile");
 
-      const worker = response.data.worker;
-
-      if(!worker.isVerified){
-        navigate("/verify-email")
-      }
-
+      const worker = response?.data?.worker;
+    
       if (
         worker.verificationStatus === "approved" &&
         worker.isVerified === true
@@ -146,7 +142,7 @@ function Login() {
       }
 
       if (worker.verificationStatus === "rejected") {
-        navigate("/worker/edit-profile", { replace: true });
+        navigate("/worker/rejected", { replace: true });
         return;
       }
 
@@ -173,7 +169,8 @@ function Login() {
       const response = await api.post("/auth/login", formData);
 
       const user = response.data.user;
-
+      console.log("User Data",user);
+      console.log("Email", user.emailVerified);
       // Customer
       if (user.role === "customer") {
         await handleCustomerLogin();
@@ -197,14 +194,21 @@ function Login() {
       // Unknown role
       setError("Invalid user role.");
     } catch (err) {
-      console.error(err);
+      console.error("Error",err?.response?.data);
+      if (err?.response?.data?.message == "Please verify your email") {
+         navigate("/verify-email", {
+          state: { email: formData.email }
+        })
+        
+      }
 
       setError(
         err.response?.data?.message ||
-          "Login failed. Please check your credentials."
+          "Login failed. Please check your credentials"
       );
     } finally {
       setLoading(false);
+      console.log("Final Execution Done !!");
     }
   };
 
@@ -214,10 +218,10 @@ function Login() {
 
     
 
-      <div className="pointer-events-none absolute -top-32 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-indigo-600/20 blur-3xl sm:h-96 sm:w-96 lg:h-[30rem] lg:w-[30rem]" />
+      <div className="pointer-events-none absolute -top-32 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-indigo-600/20 blur-3xl sm:h-96 sm:w-96 lg:h-120 lg:w-120" />
       <div className="pointer-events-none absolute -bottom-32 right-0 h-64 w-64 rounded-full bg-blue-700/10 blur-3xl sm:h-80 sm:w-80" />
 
-      <div className="relative z-10 flex w-full max-w-sm flex-col items-center sm:max-w-md lg:max-w-[28rem]">
+      <div className="relative z-10 flex w-full max-w-sm flex-col items-center sm:max-w-md lg:max-w-md">
         {/* Logo + heading */}
         <div className="mb-6 flex flex-col items-center text-center sm:mb-8">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-400/20 bg-indigo-500/15 text-indigo-300 shadow-lg shadow-indigo-900/40 sm:h-16 sm:w-16">
@@ -234,7 +238,7 @@ function Login() {
         </div>
 
         {/* Card */}
-        <div className="w-full rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-black/40 backdrop-blur-md sm:p-7 lg:p-8">
+        <div className="w-full rounded-2xl border border-white/10 bg-white/4 p-5 shadow-2xl shadow-black/40 backdrop-blur-md sm:p-7 lg:p-8">
           <h2 className="text-lg font-bold text-white sm:text-xl">
             Welcome Back
           </h2>
@@ -244,7 +248,7 @@ function Login() {
           </p>
 
           {error && (
-            <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-300">
+            <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-md text-red-300">
               {error}
             </div>
           )}
@@ -272,7 +276,7 @@ function Login() {
                   value={formData.email}
                   onChange={handleChange}
                   autoComplete="email"
-                  className="w-full rounded-xl border border-white/5 bg-white/[0.06] py-3 pl-12 pr-4 text-sm text-white placeholder-gray-500
+                  className="w-full rounded-xl border border-white/5 bg-white/6 py-3 pl-12 pr-4 text-sm text-white placeholder-gray-500
                              focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 sm:py-3.5 sm:text-base"
                   required
                 />
@@ -301,7 +305,7 @@ function Login() {
                   value={formData.password}
                   onChange={handleChange}
                   autoComplete="current-password"
-                  className="w-full rounded-xl border border-white/5 bg-white/[0.06] py-3 pl-12 pr-12 text-sm text-white placeholder-gray-500
+                  className="w-full rounded-xl border border-white/5 bg-white/6 py-3 pl-12 pr-12 text-sm text-white placeholder-gray-500
                              focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 sm:py-3.5 sm:text-base"
                   required
                 />
@@ -369,7 +373,7 @@ function Login() {
             <button
             
               type="button"
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/[0.06] py-3 text-sm font-medium text-white transition hover:bg-white/10"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/6 py-3 text-sm font-medium text-white transition hover:bg-white/10"
             >
               <AppleIcon />
               Apple
@@ -377,7 +381,7 @@ function Login() {
 
             <button
               type="button"
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/[0.06] py-3 text-sm font-medium text-white transition hover:bg-white/10"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/6 py-3 text-sm font-medium text-white transition hover:bg-white/10"
             >
               <GoogleIcon />
               Google
@@ -396,7 +400,7 @@ function Login() {
           </Link>
         </p>
 
-        <div className="mt-4 flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[10px] text-gray-300 sm:text-xs">
+        <div className="mt-4 flex items-center gap-2 rounded-full border border-white/10 bg-white/4 px-3 py-1.5 text-[10px] text-gray-300 sm:text-xs">
           <span className="text-emerald-400">
             <ShieldIcon />
           </span>

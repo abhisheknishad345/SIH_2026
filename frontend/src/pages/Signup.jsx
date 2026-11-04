@@ -96,7 +96,7 @@ function Signup() {
         navigate("/verify-email", {
           state: { email: formData.email },
         });
-      }, 1000);
+      }, 2000);
     } catch (err) {
       setError(
         err.response?.data?.message || "Signup failed. Please try again."

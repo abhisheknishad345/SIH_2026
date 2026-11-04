@@ -8,9 +8,10 @@ import {
     updateWorkerProfile,
 } from "../services/workerService";
 
+import { getAllCooperatives } from "../services/cooperativeService";
+
 const WorkerProfileEdit = () => {
     const [worker, setWorker] = useState(null);
-    // const [isEditing, setIsEditing] = useState(false);
     const navigate = useNavigate()
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -19,6 +20,22 @@ const WorkerProfileEdit = () => {
     useEffect(() => {
         fetchProfile();
     }, []);
+
+    const [cooperatives, setCooperatives] = useState([]);
+    
+        useEffect(() => {
+            const fetchCooperatives = async () => {
+                try {
+                    const response = await getAllCooperatives();
+    
+                    setCooperatives(response.data.cooperatives);
+                } catch (error) {
+                    console.error(error);
+                }
+            };
+    
+            fetchCooperatives();
+        }, []);
 
     const fetchProfile = async () => {
         try {
@@ -42,7 +59,7 @@ const WorkerProfileEdit = () => {
 
         setWorker(response.data.worker);
         // setIsEditing(false);
-        setSuccess("Profile updated successfully.");
+        setSuccess("Profile Changes Saved.");
     };
 
     if (loading) {
@@ -77,6 +94,7 @@ const WorkerProfileEdit = () => {
 
            
                 <WorkerProfileForm
+                    cooperatives={cooperatives}
                     initialData={worker}
                     onSubmit={handleUpdate}
                     onCancel={() => navigate(-1)}

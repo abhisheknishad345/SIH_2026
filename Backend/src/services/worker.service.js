@@ -19,25 +19,25 @@ const createWorkerProfile = async ({
 
     // Check if worker profile already exists
     const existingWorker = await Worker.findOne({ userId });
-    // const cooperative = await Cooperative.findById(cooperativeId);
+    const cooperative = await Cooperative.findById(cooperativeId);
 
-    // if (!cooperative) {
-    //     throw new Error("Cooperative not found");
-    // }
+    if (!cooperative) {
+        throw new Error("Cooperative not found");
+    }
 
-    // if (!cooperative.isActive) {
-    //     throw new Error("Cooperative is not active");
-    // }
+    if (!cooperative.isActive) {
+        throw new Error("Cooperative is not active");
+    }
 
     if (existingWorker) {
         throw new Error("Worker profile already exists");
     }
 
-      workingHours = workingDays.map((day) => ({
-        day,
-        isWorking: true,
-        startTime: "09:00",
-        endTime: "17:00"
+    workingHours = workingHours.map((item) => ({
+        day: item.day,
+        isWorking: item.isWorking,
+        startTime: item.startTime,
+        endTime: item.endTime
     }));
 
     const worker = await Worker.create({
@@ -95,12 +95,12 @@ const updateWorkerProfile = async (userId, updateData) => {
         }
     });
 
-    if (updateData.workingDays !== undefined) {
-        worker.workingHours = updateData.workingDays.map((day) => ({
-            day,
-            isWorking: true,
-            startTime: "09:00",
-            endTime: "17:00"
+    if (updateData.workingHours !== undefined) {
+        worker.workingHours = updateData.workingHours.map((item) => ({
+            day: item.day,
+            isWorking: item.isWorking,
+            startTime: item.startTime,
+            endTime: item.endTime
         }));
     }
 

@@ -12,7 +12,7 @@ const workerSchema = new mongoose.Schema(
         cooperativeId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Cooperative",
-            // required: true
+            required: true
         },
 
         category: {
