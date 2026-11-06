@@ -1,7 +1,7 @@
 
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
-import { HardHat, ArrowRight } from "lucide-react";
+import { ArrowRight, LogOut, Users } from "lucide-react";
 
 function AdminDashboard() {
     const navigate = useNavigate();
@@ -26,18 +26,19 @@ function AdminDashboard() {
                             Cooperative Admin Dashboard
                         </h1>
 
-                        <p className="mt-1 text-sm text-white ">
-                            Manage your cooperative and its workers.
+                        <p className="mt-1 text-sm text-white capitalize">
+                            Manage your cooperative and its workers
                         </p>
                     </div>
                     {/* <div className="border-2 p-2"> */}
 
                     <button
                         onClick={handleLogout}
-                        className="text-md font-bold border-2 border-white text-white my-2 p-2 rounded-2xl
-                     cursor-pointer hover:text-red-600"
+                        className="text-md flex items-center justify-center gap-2  font-bold border-2 border-white text-white my-2 p-2 rounded-2xl
+                     cursor-pointer hover:text-red-400"
                     >
-                        Logout
+                     <LogOut size={25} />
+                     <span>Logout</span>
                     </button>
                     {/* </div> */}
                 </div>
@@ -51,23 +52,24 @@ function AdminDashboard() {
                         }
                         className="rounded-2xl border-2  bg-white p-6 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md cursor-pointer"
                     >
-                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-yellow-50 text-2xl">
-                            👷
+                        <div className="flex h-12 w-12 items-center text-black justify-center rounded-xl bg-yellow-100 text-2xl">
+                            <Users size={30}/>
+                            
                         </div>
 
                         <h2 className="mt-5 text-lg font-bold text-gray-900">
                             Pending Workers
                         </h2>
 
-                        <p className="mt-2 text-sm leading-6 text-black">
-                            Review worker profiles waiting for verification.
+                        <p className="mt-2 text-sm leading-6 text-black capitalize">
+                            Review worker profiles waiting for verification
                         </p>
 
-                        <div className="mt-5 flex  text-md font-mono font-semibold text-indigo-600">
+                        <div className="mt-5 flex gap-4 text-md text-xl font-mono font-bold text-indigo-600">
                             Review Workers
                             <ArrowRight
-                                size={22}
-                                className=""
+                                size={25}
+                                
                             />
                         </div>
                     </button>

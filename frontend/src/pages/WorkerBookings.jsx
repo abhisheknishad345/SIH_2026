@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import {ArrowLeft, RefreshCw} from 'lucide-react'
 
 const filters = [
   { label: "All", value: "all" },
@@ -142,9 +143,10 @@ function WorkerBookings() {
             <div>
               <button
                 onClick={() => navigate("/worker/dashboard")}
-                className="text-xs font-semibold font-mono text-red-500 mb-4 border-2 border-black rounded-full p-2 cursor-pointer"
+                className="text-sm flex items-center gap-2 font-semibold text-gray-700 mb-4 border-2 border-black rounded-xl p-2 cursor-pointer"
               >
-                Go Back
+                <ArrowLeft size={20}/> 
+                <span>Back</span> 
               </button>
 
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
@@ -159,10 +161,11 @@ function WorkerBookings() {
             <button
               onClick={() => fetchBookings()}
               disabled={loading}
-              className="px-4 py-2 rounded-full border-2 border-black
-                         text-sm font-mono font-semibold text-black cursor-pointer
+              className="px-4 py-2 flex gap-2 items-center rounded-xl border-2 border-black
+                         text-sm font-semibold text-green-600 cursor-pointer
                         "
             >
+              <RefreshCw size={18}/>
               {loading ? "Loading..." : "Refresh"}
             </button>
           </div>
@@ -290,10 +293,10 @@ function WorkerBookings() {
 
                   {/* Booking details */}
                   <div className="grid grid-cols-1 sm:grid-cols-2
-                                  lg:grid-cols-4 gap-4 mt-5 text-sm">
+                                  lg:grid-cols-2 gap-4 mt-5 text-sm">
 
                     <div>
-                      <p className="text-gray-700">
+                      <p className="text-gray-700 uppercase">
                         Customer Name
                       </p>
 
@@ -303,7 +306,7 @@ function WorkerBookings() {
                     </div>
 
                     <div>
-                      <p className="text-gray-700">
+                      <p className="text-gray-700 uppercase">
                         Scheduled
                       </p>
 
@@ -322,7 +325,7 @@ function WorkerBookings() {
                     </div>
 
                     <div>
-                      <p className="text-gray-700">
+                      <p className="text-gray-700 uppercase">
                         Duration
                       </p>
 
@@ -332,7 +335,7 @@ function WorkerBookings() {
                     </div>
 
                     <div>
-                      <p className="text-gray-700">
+                      <p className="text-gray-700 uppercase">
                         Amount
                       </p>
 
@@ -345,11 +348,11 @@ function WorkerBookings() {
                   {/* Service address */}
                   {booking.address && (
                     <div className="mt-4 text-sm">
-                      <p className="text-gray-700">
+                      <p className="text-gray-700 uppercase">
                         Service Address
                       </p>
 
-                      <p className="text-gray-900 mt-1">
+                      <p className="text-gray-900 mt-1 capitalize">
                         {booking.address}
                       </p>
                     </div>

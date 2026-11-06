@@ -19,6 +19,28 @@ const createCooperative = async ({
         );
     }
 
+    const existingMail = await Cooperative.findOne({
+        contactEmail: contactEmail.trim()
+
+    })
+
+    if (existingMail) {
+        throw new Error(
+            "Cooperative with this email already exists"
+        )
+    }
+
+    const existPhone = await Cooperative.findOne({
+        contactPhone: contactPhone.trim()
+
+    })
+
+    if (existPhone) {
+        throw new Error(
+            "Cooperative with this phone number already exists"
+        )
+    }
+
     const cooperative = await Cooperative.create({
         name: name.trim(),
         registrationNumber: registrationNumber.trim(),

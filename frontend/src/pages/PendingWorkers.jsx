@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { CircleCheck, ArrowLeft, CircleUserRound, MapPin } from "lucide-react"
 
 function PendingWorkers() {
   const navigate = useNavigate();
@@ -93,8 +94,8 @@ function PendingWorkers() {
       <div className="min-h-screen bg-gray-100 px-4 py-6">
         <div className="mx-auto max-w-6xl">
           <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-            <p className="text-sm text-gray-500">
-              Loading pending workers...
+            <p className="text-lg text-gray-800">
+              Loading Pending Workers...
             </p>
           </div>
         </div>
@@ -115,17 +116,20 @@ function PendingWorkers() {
               Pending Workers
             </h1>
 
-            <p className="mt-1 text-sm text-gray-500">
-              Review and verify worker profiles from your cooperative.
+            <p className="mt-1 text-sm text-gray-800 capitalize">
+              Review & verify worker profiles from your cooperative
             </p>
           </div>
 
+
           <button
             onClick={() => navigate("/cooperative-admin")}
-            className="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 sm:w-auto cursor-pointer"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-gray-200 sm:w-auto"
           >
-            ⬅ Back to Dashboard
+            <ArrowLeft size={18} />
+            <span>Back</span>
           </button>
+
 
         </div>
 
@@ -137,8 +141,8 @@ function PendingWorkers() {
         )}
 
         {/* Count */}
-        <div className="mb-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-gray-500">
+        <div className="mb-5 rounded-2xl border-2 border-gray-400 bg-white p-5 shadow-sm">
+          <p className="text-md text-gray-700 capitalize">
             Workers awaiting verification
           </p>
 
@@ -152,15 +156,15 @@ function PendingWorkers() {
           <div className="rounded-2xl border border-gray-200 bg-white px-5 py-12 text-center shadow-sm">
 
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
-              <span className="text-3xl">✓</span>
+              <span className="text-green-500"> <CircleCheck size={50} /> </span>
             </div>
 
-            <h2 className="mt-5 text-lg font-semibold text-gray-900">
+            <h2 className="mt-5 text-lg font-semibold text-gray-900 capitalize">
               No pending workers
             </h2>
 
-            <p className="mt-2 text-sm text-gray-500">
-              All worker profiles have been reviewed.
+            <p className="mt-2 text-md text-gray-700 capitalize">
+              All worker profiles have been reviewed
             </p>
 
           </div>
@@ -180,14 +184,15 @@ function PendingWorkers() {
               return (
                 <div
                   key={worker._id}
-                  className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6"
+                  className="rounded-2xl border-2 border-gray-400 bg-white p-5 shadow-sm sm:p-6"
                 >
 
                   {/* Worker Header */}
                   <div className="flex items-start gap-4">
 
                     <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xl font-bold text-indigo-600">
-                      {workerName.charAt(0).toUpperCase()}
+                      {/* {workerName.charAt(0).toUpperCase()} */}
+                      < CircleUserRound size={33}/>
                     </div>
 
                     <div className="min-w-0 flex-1">
@@ -196,7 +201,7 @@ function PendingWorkers() {
                         {workerName}
                       </h2>
 
-                      <p className="truncate text-sm text-gray-500">
+                      <p className="truncate text-sm  text-gray-800">
                         {workerEmail}
                       </p>
 
@@ -211,23 +216,23 @@ function PendingWorkers() {
                   {/* Worker Information */}
                   <div className="mt-6 grid grid-cols-2 gap-4">
 
-                    <div className="rounded-xl bg-gray-50 p-3">
-                      <p className="text-xs text-gray-500">
-                        Category
+                    <div className="rounded-xl bg-gray-200 p-3">
+                      <p className="text-md uppercase text-gray-900 font-bold">
+                        Category:
                       </p>
 
                       <p className="mt-1 text-sm font-semibold text-gray-800">
-                        {worker.category || "—"}
+                        {worker.category || "Not Define"}
                       </p>
                     </div>
 
-                    <div className="rounded-xl bg-gray-50 p-3">
-                      <p className="text-xs text-gray-500">
-                        Experience
+                    <div className="rounded-xl bg-gray-200 p-3">
+                      <p className="text-md uppercase text-gray-900 font-bold">
+                        Experience:
                       </p>
 
                       <p className="mt-1 text-sm font-semibold text-gray-800">
-                        {worker.experience ?? "—"} years
+                        {worker.experience ?? "—"} Years
                       </p>
                     </div>
 
@@ -236,8 +241,8 @@ function PendingWorkers() {
                   {/* Skills */}
                   <div className="mt-5">
 
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                      Skills
+                    <p className="mb-2 text-md font-semibold uppercase tracking-wide text-gray-900">
+                      Skills:
                     </p>
 
                     <div className="flex flex-wrap gap-2">
@@ -246,9 +251,9 @@ function PendingWorkers() {
                         worker.skills.map((skill, index) => (
                           <span
                             key={index}
-                            className="rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-medium text-indigo-700"
+                            className="rounded-lg capitalize bg-indigo-50 px-3 py-1.5 text-[15px] font-medium text-indigo-700"
                           >
-                            {skill.name}
+                           {skill.name} ₹{skill.price} {skill.priceType}
                           </span>
                         ))
                       ) : (
@@ -265,11 +270,11 @@ function PendingWorkers() {
                   {worker.certifications?.length > 0 && (
                     <div className="mt-5">
 
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                        Certifications
+                      <p className="mb-2 text-md font-semibold uppercase tracking-wide text-gray-900">
+                        Certifications:
                       </p>
 
-                      <p className="text-sm text-gray-700">
+                      <p className="text-sm capitalize text-gray-700">
                         {worker.certifications.join(", ")}
                       </p>
 
@@ -277,16 +282,19 @@ function PendingWorkers() {
                   )}
 
                   {/* Location */}
-                  <div className="mt-5">
+                  <div className="mt-5 bg-gray-200 rounded-xl p-2">
 
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                      Location
+                    <p className="mb-2 text-md font-semibold uppercase tracking-wide text-gray-900">
+                      Location:
                     </p>
 
-                    <p className="text-sm text-gray-600">
-                      📍{" "}
+                    <p className="text-sm flex items-center gap-2 capitalize text-blue-500">
+                      < MapPin size={22} 
+                      className="text-black text-xl font-bold" />
+                     <span>
                       {worker.address ||
                         "Location coordinates available"}
+                        </span> 
                     </p>
 
                   </div>

@@ -90,7 +90,7 @@ function ResetPassword() {
 
                     <div className="w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-sm sm:p-8">
 
-                        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-3xl">
+                        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-green-200 text-3xl text-black">
                             ✓
                         </div>
 

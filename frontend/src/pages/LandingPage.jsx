@@ -295,7 +295,7 @@ function LandingPage() {
                     <div className="flex items-center gap-2 sm:gap-3">
                         <Link
                             to="/login"
-                            className="rounded-xl border border-indigo-400/60 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500/10 sm:px-6 sm:py-2.5"
+                            className="rounded-xl border-2 border-white/80 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500/10 sm:px-6 sm:py-2.5"
                         >
                             Login
                         </Link>
@@ -403,7 +403,7 @@ function LandingPage() {
 
                             <button
                                 type="submit"
-                                className="rounded-xl bg-indigo-500 px-6 py-3 text-sm font-bold text-white shadow-xl shadow-indigo-500/20 transition hover:-translate-y-0.5 hover:bg-indigo-600"
+                                className="rounded-xl bg-indigo-500 px-6 py-3 text-sm font-bold text-white shadow-xl shadow-indigo-500/20 transition hover:-translate-y-0.5 hover:bg-indigo-600 cursor-pointer"
                             >
                                 Find
                             </button>
@@ -460,12 +460,12 @@ function LandingPage() {
 
 
             {/* ================= TRUST STRIP ================= */}
-            <section className="border-y border-white/5 bg-white/2">
+            <section className="border-y border-white/20 bg-white/2">
                 <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 px-5 py-8 sm:px-8 md:grid-cols-4">
-                    <TrustItem icon="🛡️" text="Verified profiles" />
-                    <TrustItem icon="📍" text="Distance-based search" />
-                    <TrustItem icon="🔔" text="Real-time updates" />
-                    <TrustItem icon="⭐" text="Genuine reviews" />
+                    <TrustItem icon="🛡️" text="Verified Profiles" />
+                    <TrustItem icon="📍" text="Distance-Based Search" />
+                    <TrustItem icon="🔔" text="Real-Time Updates" />
+                    <TrustItem icon="⭐" text="Genuine Reviews" />
                 </div>
             </section>
 
@@ -872,7 +872,7 @@ function LandingPage() {
 
                             <button
                                 type="submit"
-                                className="w-full rounded-xl bg-indigo-500 px-7 py-3.5 text-sm font-bold text-white shadow-xl shadow-indigo-500/20 transition hover:bg-indigo-600"
+                                className="w-full rounded-xl bg-indigo-500 px-7 py-3.5 text-sm font-bold text-white shadow-xl shadow-indigo-500/20 transition hover:bg-indigo-600 cursor-pointer"
                             >
                                 Send Message
                             </button>
@@ -975,7 +975,7 @@ function TrustItem({ icon, text }) {
 
 function TechnicianRow({ initials, name, trade, distance, rating, available }) {
     return (
-        <div className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/3 p-3">
+        <div className="flex items-center gap-3 rounded-xl border-2 border-white/5 bg-white/3 p-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-sm font-bold text-indigo-300">
                 {initials}
             </span>
@@ -1012,7 +1012,7 @@ function ServiceCard({ icon, title, description }) {
             <p className="mt-2 text-sm leading-6 text-gray-500">{description}</p>
 
             <span className="mt-4 inline-block text-sm font-semibold text-indigo-400 opacity-0 transition group-hover:opacity-100">
-                Find technicians →
+                Find Technicians →
             </span>
         </Link>
     );
@@ -1023,7 +1023,7 @@ function TabButton({ active, onClick, children }) {
         <button
             type="button"
             onClick={onClick}
-            className={`rounded-lg px-5 py-2.5 text-sm font-semibold transition ${
+            className={`rounded-lg px-5 py-2.5 text-sm font-semibold transition cursor-pointer ${
                 active
                     ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
                     : "text-gray-400 hover:text-white"
