@@ -63,7 +63,21 @@ const WorkerProfileEdit = () => {
     };
 
     if (loading) {
-        return <p className="p-6">Loading profile...</p>;
+        return (
+
+            <div className="flex min-h-screen items-center justify-center">
+
+
+            <button
+            
+            className="flex items-center justify-center m-3 gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-white font-semibold disabled:opacity-70 text-xl"
+            >
+                <div className="p-2 h-7 w-7 animate-spin rounded-full border-4 border-white/30 border-t-white">
+                </div>
+                Loading Profile
+            </button>
+            </div>
+            )
     }
 
     if (error && !worker) {

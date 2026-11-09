@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 /* ---------- Small inline icons (no extra dependency needed) ---------- */
 const iconProps = {
@@ -79,6 +80,7 @@ const GoogleIcon = () => (
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -169,6 +171,7 @@ function Login() {
       const response = await api.post("/auth/login", formData);
 
       const user = response.data.user;
+      login(user);
       console.log("User Data",user);
       console.log("Email", user.emailVerified);
       // Customer

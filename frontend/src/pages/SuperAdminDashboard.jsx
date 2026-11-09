@@ -1,17 +1,21 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
+
+
 
 function SuperAdminDashboard() {
+    const { logout } = useAuth();
     const navigate = useNavigate();
 
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const handleLogout = async () => {
         try {
-            await api.post("/auth/logout");
+            await logout();
 
-            navigate("/", {
+            navigate("/login", {
                 replace: true,
             });
         } catch (error) {

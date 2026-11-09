@@ -24,11 +24,13 @@ import CustomerProfileGuard from "./pages/CustomerProfileGuard";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import WorkerBookings from "./pages/WorkerBookings";
 import RejectWorker from "./pages/RejectWorker";
+import { AuthProvider } from "./context/AuthContext";
 
 
 function App() {
   return (
 
+    <AuthProvider>
 
     <BrowserRouter>
       <Routes>
@@ -122,6 +124,7 @@ function App() {
         />
       </Routes>
     </BrowserRouter>
+     </AuthProvider>
   );
 }
 

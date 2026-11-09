@@ -26,6 +26,9 @@ import {
 } from "lucide-react";
 import { MdVerified } from "react-icons/md";
 import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
+
+
 
 /* ---------- Status styles ---------- */
 const VERIFICATION_STYLES = {
@@ -115,6 +118,7 @@ const LinkButton = ({ onClick, icon: Icon, children }) => (
 
 const WorkerProfile = () => {
     const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const [worker, setWorker] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -159,8 +163,8 @@ const WorkerProfile = () => {
 
     const handleLogout = async () => {
         try {
-            await api.post("/auth/logout");
-            navigate("/");
+            await logout();
+            navigate("/login", {replace: true});
         } catch (error) {
             console.error("Logout failed:", error);
         }

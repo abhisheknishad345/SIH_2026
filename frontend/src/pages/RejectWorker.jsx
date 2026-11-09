@@ -100,7 +100,7 @@ const RejectWorker = () => {
 
     if (!worker) {
         return (
-            <p className="p-6 text-red-600 text-lg">
+            <p className="p-6 text-red-600 bg-red-100 text-xl">
                 {error || "Profile not found."}
             </p>
         );

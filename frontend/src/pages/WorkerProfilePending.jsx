@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 function WorkerProfilePending() {
     const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const [status, setStatus] = useState("loading");
     const [worker, setWorker] = useState(null);
@@ -132,8 +134,8 @@ function WorkerProfilePending() {
 
     const handleLogout = async () => {
         try {
-            await api.post("/auth/logout");
-            navigate("/");
+            await logout();
+            navigate("/login", {replace: true});
         } catch (error) {
             console.error("Logout failed:", error);
         }

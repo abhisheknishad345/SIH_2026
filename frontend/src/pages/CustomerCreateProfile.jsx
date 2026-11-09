@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { replace, useNavigate } from "react-router-dom";
 import {
   UserPlus,
   User,
@@ -15,11 +15,15 @@ import {
   CircleCheck,
 } from "lucide-react";
 import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
+
+
 
 const ADDRESS_MAX_LENGTH = 200;
 
 function CustomerCreateProfile() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const [formData, setFormData] = useState({
     phone: "",
@@ -137,8 +141,8 @@ function CustomerCreateProfile() {
 
   const handleLogout = async () => {
     try {
-      await api.post("/auth/logout");
-      navigate("/");
+      await logout();
+      navigate("/login", {replace:true});
     } catch (error) {
       console.error("Logout failed:", error);
     }

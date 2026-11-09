@@ -937,6 +937,15 @@ function LandingPage() {
                 </div>
             </footer>
 
+            <button
+            
+            className="flex items-center justify-center m-3 gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-white font-semibold disabled:opacity-70 text-lg"
+            >
+                <div className="p-2 h-7 w-7 animate-spin rounded-full border-4 border-white/30 border-t-white">
+                </div>
+                Loading Profile
+            </button>
+
         </div>
     );
 }
@@ -1023,11 +1032,10 @@ function TabButton({ active, onClick, children }) {
         <button
             type="button"
             onClick={onClick}
-            className={`rounded-lg px-5 py-2.5 text-sm font-semibold transition cursor-pointer ${
-                active
+            className={`rounded-lg px-5 py-2.5 text-sm font-semibold transition cursor-pointer ${active
                     ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
                     : "text-gray-400 hover:text-white"
-            }`}
+                }`}
         >
             {children}
         </button>
@@ -1082,9 +1090,8 @@ function FaqItem({ question, answer, open, onToggle }) {
             >
                 <span className="font-semibold">{question}</span>
                 <span
-                    className={`flex h-8 text-xl w-8 shrink-0 items-center justify-center rounded-full bg-white/5 text-indigo-400 transition ${
-                        open ? "rotate-45" : ""
-                    }`}
+                    className={`flex h-8 text-xl w-8 shrink-0 items-center justify-center rounded-full bg-white/5 text-indigo-400 transition ${open ? "rotate-45" : ""
+                        }`}
                 >
                     +
                 </span>

@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
+import { TurkishLira } from "lucide-react";
+
+
 
 function CustomerDashboard() {
+    const { logout } = useAuth();
     const navigate = useNavigate();
 
     const [services, setServices] = useState([]);
@@ -36,8 +41,8 @@ function CustomerDashboard() {
 
     const handleLogout = async () => {
         try {
-            await api.post("/auth/logout");
-            navigate("/");
+            await logout();
+            navigate("/login", {replace: true});
         } catch (error) {
             console.error("Logout failed:", error);
         }

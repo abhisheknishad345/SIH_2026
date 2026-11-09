@@ -22,6 +22,10 @@ import {
   AlertCircle,
 } from "lucide-react";
 
+import { useAuth } from "../context/AuthContext";
+
+
+
 
 const navigation = [
   { label: "Dashboard", path: "/worker/dashboard", icon: LayoutDashboard, active: true },
@@ -80,15 +84,17 @@ const EarningsCard = ({ title, amount, bookings, highlighted = false }) => (
 export default function WorkerDashboard() {
   const [dashboard, setDashboard] = useState(null);
   const [earnings, setEarnings] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loadingdata, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
-
+  const { logout } = useAuth();
+  const { user, loading} = useAuth();
+  
   const handleLogout = async () => {
     try {
-      await api.post("/auth/logout");
-      navigate("/");
+      await logout();
+      navigate("/login", { replace: true});
     } catch (error) {
       console.error("Logout failed:", error);
     }
@@ -208,7 +214,7 @@ export default function WorkerDashboard() {
     },
   ];
 
-  if (loading) {
+  if (loadingdata) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="text-center">
@@ -377,7 +383,7 @@ export default function WorkerDashboard() {
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-                  Welcome back, Worker!
+                  Welcome Back, {user?.fullName || "Worker"}
                 </h1>
 
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
