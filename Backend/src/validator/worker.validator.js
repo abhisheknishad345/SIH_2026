@@ -1,37 +1,32 @@
 
+
+const mongoose = require("mongoose");
+
 const validateSkill = (skill) => {
     if (!skill || typeof skill !== "object") {
         throw new Error("Each skill must be an object");
     }
 
-    if (
-        typeof skill.name !== "string" ||
-        !skill.name.trim()
-    ) {
-        throw new Error("Skill name must be valid text");
+    if (!mongoose.Types.ObjectId.isValid(skill.serviceId)) {
+        throw new Error("Invalid service ID");
     }
 
     if (
-        typeof skill.price !== "number" ||
-        skill.price < 0
+        typeof skill.experience !== "number" ||
+        !Number.isInteger(skill.experience) ||
+        skill.experience < 0
     ) {
-        throw new Error("Skill price must be a non-negative number");
-    }
-
-    if (
-        !["per_hour", "per_visit", "per_day", "fixed"].includes(
-            skill.priceType
-        )
-    ) {
-        throw new Error("Invalid skill price type");
+        throw new Error(
+            "Skill experience must be a non-negative integer"
+        );
     }
 };
+
 
 
 const validateWorkerProfile = ({
     category,
     skills,
-    experience,
     certifications,
     location,
     workingHours
@@ -83,13 +78,7 @@ const validateWorkerProfile = ({
 
     skills.forEach(validateSkill);
 
-    if (
-        typeof experience !== "number" ||
-        !Number.isInteger(experience) ||
-        experience < 0
-    ) {
-        throw new Error("Experience must be a non-negative integer");
-    }
+    
 
     if (certifications !== undefined && !Array.isArray(certifications)) {
         throw new Error("Certifications must be an array");
@@ -130,7 +119,6 @@ const validateWorkerProfile = ({
 
 const validateWorkerProfileUpdate = ({
     skills,
-    experience,
     certifications,
     location,
     isAvailable
@@ -145,18 +133,6 @@ const validateWorkerProfileUpdate = ({
         skills.forEach(validateSkill);
     }
 
-    if (experience !== undefined) {
-
-        if (
-            typeof experience !== "number" ||
-            !Number.isInteger(experience) ||
-            experience < 0
-        ) {
-            throw new Error(
-                "Experience must be a non-negative integer"
-            );
-        }
-    }
 
     if (certifications !== undefined) {
 

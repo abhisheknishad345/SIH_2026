@@ -1,8 +1,8 @@
 const express = require("express");
 
 const {
-    createWorkerProfile, getWorkerProfile, updateWorkerProfile,
-    getNearbyWorkers, getPendingWorkers, verifyWorker, rejectWorker,
+    createWorkerProfile, getWorkerProfile, updateWorkerProfile, getApprovedWorkers,
+    getNearbyWorkers, getPendingWorkers, verifyWorker, rejectWorker, getRejectedWorkers,
     updateWorkerAvailability, updateWorkerSchedule, getWorkerSchedule, resubmitWorkerProfile
 } = require("../controllers/worker.controller");
 
@@ -85,6 +85,20 @@ router.get(
     authMiddleware,
     roleMiddleware(["worker"]),
     getWorkerSchedule
+);
+
+router.get(
+    "/approved",
+    authMiddleware,
+    roleMiddleware(["cooperative_admin"]),
+    getApprovedWorkers
+);
+
+router.get(
+    "/rejected",
+    authMiddleware,
+    roleMiddleware(["cooperative_admin"]),
+    getRejectedWorkers
 );
 
 

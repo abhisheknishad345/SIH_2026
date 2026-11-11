@@ -1,6 +1,9 @@
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const mongoose = require("mongoose");
+const Worker = require("../models/Worker");
+const Booking = require("../models/Booking");
+const Service = require("../models/Service");
 
 const { cooperativeAdminCreatedEmail } = require("./email.service");
 
@@ -115,6 +118,97 @@ const createCooperativeAdmin = async ({
     };
 };
 
+const getDashboardStats = async (adminId) => {
+    const admin = await CooperativeAdmin.findOne({
+        userId: adminId,
+        isActive: true
+    });
+
+    if (!admin) {
+        throw new Error("Cooperative admin not found");
+    }
+
+    const cooperativeId = admin.cooperativeId;
+
+    const [
+        totalWorkers,
+        approvedWorkers,
+        pendingWorkers,
+        rejectedWorkers,
+        totalServices,
+        activeServices
+    ] = await Promise.all([
+        Worker.countDocuments({ cooperativeId }),
+
+        Worker.countDocuments({
+            cooperativeId,
+            verificationStatus: "approved"
+        }),
+
+        Worker.countDocuments({
+            cooperativeId,
+            verificationStatus: "pending"
+        }),
+
+        Worker.countDocuments({
+            cooperativeId,
+            verificationStatus: "rejected"
+        }),
+
+        Service.countDocuments({ cooperativeId }),
+
+        Service.countDocuments({
+            cooperativeId,
+            isActive: true
+        })
+    ]);
+
+    const serviceIds = await Service.find({
+        cooperativeId
+    }).distinct("_id");
+
+    const [
+        totalBookings,
+        pendingBookings,
+        completedBookings
+    ] = await Promise.all([
+        Booking.countDocuments({
+            serviceId: { $in: serviceIds }
+        }),
+
+        Booking.countDocuments({
+            serviceId: { $in: serviceIds },
+            status: "pending"
+        }),
+
+        Booking.countDocuments({
+            serviceId: { $in: serviceIds },
+            status: "completed"
+        })
+    ]);
+
+    return {
+        workers: {
+            total: totalWorkers,
+            approved: approvedWorkers,
+            pending: pendingWorkers,
+            rejected: rejectedWorkers
+        },
+
+        services: {
+            total: totalServices,
+            active: activeServices
+        },
+
+        bookings: {
+            total: totalBookings,
+            pending: pendingBookings,
+            completed: completedBookings
+        }
+    };
+};
+
 module.exports = {
-    createCooperativeAdmin
+    createCooperativeAdmin,
+    getDashboardStats
 };

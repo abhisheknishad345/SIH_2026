@@ -403,11 +403,11 @@ function Login() {
           </Link>
         </p>
 
-        <div className="mt-4 flex items-center gap-2 rounded-full border border-white/10 bg-white/4 px-3 py-1.5 text-[10px] text-gray-300 sm:text-xs">
+        <div className="mt-4 flex items-center gap-2 rounded-full border border-white/10 bg-white/4 px-3 py-1.5 text-[14px] text-gray-300 sm:text-md">
           <span className="text-emerald-400">
             <ShieldIcon />
           </span>
-          256-bit SSL secured &bull; Cooperative Network
+          256-bit SSL Secured &bull; Cooperative Network
         </div>
       </div>
     </div>

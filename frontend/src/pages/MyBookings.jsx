@@ -201,11 +201,19 @@ function MyBookings() {
                       Scheduled
                     </span>
 
-                    <p className="font-semibold text-gray-800">
-                      {new Date(
-                        booking.scheduledAt
-                      ).toLocaleString()}
-                    </p>
+                    <p className="font-semibold text-gray-800 mt-1">
+                        Date & Time:{" "}
+                        {new Date(booking.scheduledAt).toLocaleString("en-IN", {
+                          day: "2-digit",
+                          
+                          month: "short",
+                          year: "numeric",
+                          hour: "numeric",
+                          minute: "2-digit",
+                          hour12: true,
+                          timeZone: "Asia/Kolkata"
+                        }).replace(/\b(am|pm)\b/gi, (match) => match.toUpperCase())}
+                      </p>
                   </div>
 
                   <div>

@@ -4,20 +4,18 @@ const mongoose = require("mongoose");
 const Cooperative = require("../models/Cooperative");
 const { getWorkerRatingSummary } = require("./rating.service");
 const CooperativeAdmin = require("../models/CooperativeAdmin");
+const Service = require("../models/Service");
+
 
 const createWorkerProfile = async ({
     userId,
     cooperativeId,
     category,
     skills,
-    experience,
     certifications,
     location,
     workingHours
-
 }) => {
-
-    // Check if worker profile already exists
     const existingWorker = await Worker.findOne({ userId });
     const cooperative = await Cooperative.findById(cooperativeId);
 
@@ -33,7 +31,40 @@ const createWorkerProfile = async ({
         throw new Error("Worker profile already exists");
     }
 
-    workingHours = workingHours.map((item) => ({
+    // Prevent duplicate service selection
+    const serviceIds = skills.map(skill => skill.serviceId.toString());
+
+    if (new Set(serviceIds).size !== serviceIds.length) {
+        throw new Error("Duplicate services are not allowed");
+    }
+
+    // Fetch selected services from database
+    const services = await Service.find({
+        _id: { $in: serviceIds },
+        cooperativeId,
+        isActive: true
+    });
+
+    if (services.length !== skills.length) {
+        throw new Error(
+            "One or more selected services are invalid or inactive"
+        );
+    }
+
+    // Create skills using trusted service names
+    const workerSkills = skills.map(skill => {
+        const service = services.find(
+            item => item._id.toString() === skill.serviceId.toString()
+        );
+
+        return {
+            serviceId: service._id,
+            name: service.name,
+            experience: skill.experience
+        };
+    });
+
+    const formattedWorkingHours = workingHours.map(item => ({
         day: item.day,
         isWorking: item.isWorking,
         startTime: item.startTime,
@@ -44,11 +75,10 @@ const createWorkerProfile = async ({
         userId,
         cooperativeId,
         category,
-        skills,
-        experience,
+        skills: workerSkills,
         certifications,
         location,
-        workingHours
+        workingHours: formattedWorkingHours
     });
 
     return {
@@ -56,6 +86,7 @@ const createWorkerProfile = async ({
         worker
     };
 };
+
 
 const getWorkerProfile = async (userId) => {
     const worker = await Worker.findOne({ userId })
@@ -80,14 +111,46 @@ const updateWorkerProfile = async (userId, updateData) => {
 
 
     const allowedFields = [
-        "cooperativeId",
-        "category",
-        "skills",
-        "experience",
-        "certifications",
-        "workingHours",
-        "location",
-    ];
+    "category",
+    "skills",
+    "certifications",
+    "workingHours",
+    "location"
+];
+
+if (updateData.skills !== undefined) {
+    const serviceIds = updateData.skills.map(
+        skill => skill.serviceId.toString()
+    );
+
+    if (new Set(serviceIds).size !== serviceIds.length) {
+        throw new Error("Duplicate services are not allowed");
+    }
+
+    const services = await Service.find({
+        _id: { $in: serviceIds },
+        cooperativeId: worker.cooperativeId,
+        isActive: true
+    });
+
+    if (services.length !== updateData.skills.length) {
+        throw new Error(
+            "One or more selected services are invalid or inactive"
+        );
+    }
+
+    updateData.skills = updateData.skills.map(skill => {
+        const service = services.find(
+            item => item._id.toString() === skill.serviceId.toString()
+        );
+
+        return {
+            serviceId: service._id,
+            name: service.name,
+            experience: skill.experience
+        };
+    });
+}
 
     allowedFields.forEach((field) => {
         if (updateData[field] !== undefined) {
@@ -225,7 +288,6 @@ const getNearbyWorkers = async ({
             fullName: worker.userId.fullName,
             category: worker.category,
             skills: worker.skills,
-            experience: worker.experience,
             averageRating: rating?.averageRating || 0,
             totalRatings: rating?.totalRatings || 0,
             distance: Number(distance.toFixed(2))
@@ -261,6 +323,49 @@ const getPendingWorkers = async (adminId) => {
 
     // console.log("PENDING WORKERS:", workers);
 
+
+    return workers;
+};
+
+const getApprovedWorkers = async (adminId) => {
+    const admin = await CooperativeAdmin.findOne({
+        userId: adminId,
+        isActive: true
+    });
+
+    if (!admin) {
+        throw new Error("Cooperative admin not found");
+    }
+
+    const workers = await Worker.find({
+        cooperativeId: admin.cooperativeId,
+        verificationStatus: "approved",
+        isVerified: true
+    })
+        .populate("userId", "fullName email")
+        .populate("cooperativeId", "name registrationNumber");
+
+    return workers;
+};
+
+
+const getRejectedWorkers = async (adminId) => {
+    const admin = await CooperativeAdmin.findOne({
+        userId: adminId,
+        isActive: true
+    });
+
+    if (!admin) {
+        throw new Error("Cooperative admin not found");
+    }
+
+    const workers = await Worker.find({
+        cooperativeId: admin.cooperativeId,
+        verificationStatus: "rejected",
+        isVerified: false
+    })
+        .populate("userId", "fullName email")
+        .populate("cooperativeId", "name registrationNumber");
 
     return workers;
 };
@@ -462,5 +567,5 @@ const getWorkerSchedule = async (userId) => {
 module.exports = {
     createWorkerProfile, getWorkerProfile, updateWorkerProfile, updateWorkerSchedule,
     getNearbyWorkers, getPendingWorkers, verifyWorker, rejectWorker, updateWorkerAvailability,
-    getWorkerSchedule, resubmitWorkerProfile
+    getWorkerSchedule, resubmitWorkerProfile, getApprovedWorkers, getRejectedWorkers
 };

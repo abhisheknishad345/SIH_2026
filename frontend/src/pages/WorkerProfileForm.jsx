@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getActiveServices } from "../services/serviceService";
 import {
     ArrowLeft,
     HardHat,
@@ -45,9 +46,8 @@ const CATEGORIES = [
 ];
 
 const emptySkill = {
-    name: "",
-    price: "",
-    priceType: "per_visit",
+    serviceId: "",
+    experience: "",
 };
 
 const getCooperativeId = (value) => {
@@ -127,13 +127,15 @@ const WorkerProfileForm = ({
     const [formData, setFormData] = useState({
         cooperativeId: "",
         category: "",
-        experience: "",
         skills: [{ ...emptySkill }],
         certifications: [""],
         workingHours: [],
         latitude: "",
         longitude: "",
     });
+
+    const [activeServices, setActiveServices] = useState([]);
+    const [servicesLoading, setServicesLoading] = useState(false);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -148,29 +150,29 @@ const WorkerProfileForm = ({
             cooperativeId:
                 getCooperativeId(initialData.cooperativeId) ||
                 prev.cooperativeId,
-                
+
 
             category: initialData.category ?? prev.category,
-
-            experience: initialData.experience ?? prev.experience,
 
             skills:
                 initialData.skills?.length > 0
                     ? initialData.skills.map((skill) => ({
-                          name: skill.name || "",
-                          price: skill.price ?? "",
-                          priceType: skill.priceType || "per_visit",
-                      }))
+                        serviceId:
+                            typeof skill.serviceId === "object"
+                                ? skill.serviceId?._id || ""
+                                : skill.serviceId || "",
+                        experience: skill.experience ?? "",
+                    }))
                     : initialData._id
-                      ? [{ ...emptySkill }]
-                      : prev.skills,
+                        ? [{ ...emptySkill }]
+                        : prev.skills,
 
             certifications:
                 initialData.certifications?.length > 0
                     ? [...initialData.certifications]
                     : initialData._id
-                      ? [""]
-                      : prev.certifications,
+                        ? [""]
+                        : prev.certifications,
 
             workingHours:
                 initialData.workingHours ?? prev.workingHours,
@@ -187,12 +189,49 @@ const WorkerProfileForm = ({
         initialData?._id,
         initialData?.cooperativeId,
         initialData?.category,
-        initialData?.experience,
         initialData?.skills,
         initialData?.certifications,
         initialData?.workingHours,
         initialData?.location,
     ]);
+
+    useEffect(() => {
+        const fetchServices = async () => {
+            if (!formData.cooperativeId) {
+                setActiveServices([]);
+                return;
+            }
+
+            try {
+                setServicesLoading(true);
+
+                const response = await getActiveServices();
+
+                const services = response.data.services || [];
+
+                const filteredServices = services.filter((service) => {
+                    const serviceCooperativeId =
+                        typeof service.cooperativeId === "object"
+                            ? service.cooperativeId?._id
+                            : service.cooperativeId;
+
+                    return (
+                        serviceCooperativeId === formData.cooperativeId
+                    );
+                });
+
+                setActiveServices(filteredServices);
+
+            } catch (error) {
+                console.error("Failed to fetch services:", error);
+                setActiveServices([]);
+            } finally {
+                setServicesLoading(false);
+            }
+        };
+
+        fetchServices();
+    }, [formData.cooperativeId]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -279,17 +318,17 @@ const WorkerProfileForm = ({
 
             const updatedHours = exists
                 ? prev.workingHours.filter(
-                      (item) => item.day !== day
-                  )
+                    (item) => item.day !== day
+                )
                 : [
-                      ...prev.workingHours,
-                      {
-                          day,
-                          isWorking: true,
-                          startTime: "09:00",
-                          endTime: "17:00",
-                      },
-                  ];
+                    ...prev.workingHours,
+                    {
+                        day,
+                        isWorking: true,
+                        startTime: "09:00",
+                        endTime: "17:00",
+                    },
+                ];
 
             return {
                 ...prev,
@@ -338,49 +377,52 @@ const WorkerProfileForm = ({
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
-       
-        
+
+
         if (!formData.cooperativeId) {
             setError("Please select a cooperative.");
             return;
         }
-        
-        
+
+
         if (!formData.category.trim()) {
             setError("Please select a category.");
             return;
         }
-       
-        
-        if (
-            formData.experience === "" ||
-            Number(formData.experience) < 0
-        ) {
-            setError("Please enter valid experience.");
-            return;
-        }
-        
-       
+
+
         const validSkills = formData.skills.filter(
             (skill) =>
-                skill.name.trim() &&
-            skill.price !== "" &&
-            Number(skill.price) >= 0
+                skill.serviceId &&
+                skill.experience !== "" &&
+                Number(skill.experience) >= 0
         );
-       
-        
+
         if (validSkills.length === 0) {
-            setError("Please add at least one valid skill and price.");
+            setError("Please select at least one service and enter experience.");
             return;
         }
-        
-        
+
+        if (validSkills.length !== formData.skills.length) {
+            setError("Please complete all selected skills or remove empty ones.");
+            return;
+        }
+
+        const uniqueServiceIds = new Set(
+            validSkills.map((skill) => skill.serviceId)
+        );
+
+        if (uniqueServiceIds.size !== validSkills.length) {
+            setError("A service can only be selected once.");
+            return;
+        }
+
         if (formData.workingHours.length === 0) {
             setError("Please select at least one working day.");
             return;
         }
-       
-        
+
+
         if (
             formData.latitude === "" ||
             formData.longitude === ""
@@ -388,29 +430,27 @@ const WorkerProfileForm = ({
             setError("Please provide your service location.");
             return;
         }
-       
-        
+
+
         const invalidTiming = formData.workingHours.some(
             (item) => item.startTime >= item.endTime
         );
-        
-        
+
+
         if (invalidTiming) {
             setError("End time must be after start time.");
             return;
         }
-       
+
 
         const payload = {
-            cooperativeId: formData.cooperativeId,
-            category: formData.category.trim(),
-            experience: Number(formData.experience),
+    cooperativeId: formData.cooperativeId,
+    category: formData.category.trim(),
 
-            skills: validSkills.map((skill) => ({
-                name: skill.name.trim(),
-                price: Number(skill.price),
-                priceType: skill.priceType,
-            })),
+    skills: validSkills.map((skill) => ({
+        serviceId: skill.serviceId,
+        experience: Number(skill.experience),
+    })),
 
             certifications: formData.certifications
                 .map((cert) => cert.trim())
@@ -433,19 +473,19 @@ const WorkerProfileForm = ({
         };
 
         // console.log("Payload: ", payload);
-        
+
         try {
             setLoading(true);
             // console.log("Payload 2: ", payload);
-            
+
             await onSubmit(payload);
 
         } catch (err) {
             // console.log("Hello");
             setError(
                 err.response?.data?.message ||
-                    err.message ||
-                    "Something went wrong."
+                err.message ||
+                "Something went wrong."
             );
         } finally {
             setLoading(false);
@@ -454,15 +494,14 @@ const WorkerProfileForm = ({
 
     /* ---------- UI-only: profile strength ---------- */
     const completedChecks = [
-        !!formData.cooperativeId,
-        !!formData.category,
-        formData.experience !== "",
-        formData.skills.some(
-            (skill) => skill.name.trim() && skill.price !== ""
-        ),
-        formData.workingHours.length > 0,
-        formData.latitude !== "" && formData.longitude !== "",
-    ];
+    !!formData.cooperativeId,
+    !!formData.category,
+    formData.skills.some(
+        (skill) => skill.serviceId && skill.experience !== ""
+    ),
+    formData.workingHours.length > 0,
+    formData.latitude !== "" && formData.longitude !== "",
+];
 
     const totalChecks = completedChecks.length;
     const doneChecks = completedChecks.filter(Boolean).length;
@@ -506,10 +545,9 @@ const WorkerProfileForm = ({
 
                     {verificationStatus && (
                         <span
-                            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold capitalize ${
-                                STATUS_STYLES[verificationStatus] ||
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold capitalize ${STATUS_STYLES[verificationStatus] ||
                                 "border-slate-200 bg-white text-slate-600"
-                            }`}
+                                }`}
                         >
                             <span className="h-1.5 w-1.5 rounded-full bg-current" />
                             {verificationStatus}
@@ -645,162 +683,166 @@ const WorkerProfileForm = ({
                             </SelectWrapper>
                         </div>
 
-                        <div>
-                            <label htmlFor="experience" className={labelClass}>
-                                Experience (Years){" "}
-                                <span className="text-red-500">*</span>
-                            </label>
+                        
+                    </div>
+                </section>
 
-                            <div className="relative">
-                                <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
-                                    <Briefcase size={18} />
-                                </span>
+                {/* Skills & Pricing */}
+                
+{/* Skills & Pricing */}
+<section className={sectionClass}>
+    <SectionHeader
+        icon={Wrench}
+        title="My Services & Experience"
+        subtitle="Select services offered by your cooperative and add your experience"
+        action={
+            <button
+                type="button"
+                onClick={addSkill}
+                disabled={!formData.cooperativeId || activeServices.length === 0}
+                className={`${smallBtnClass} disabled:cursor-not-allowed disabled:opacity-50`}
+            >
+                <Plus size={14} />
+                Add Service
+            </button>
+        }
+    />
+
+    {!formData.cooperativeId ? (
+        <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-700">
+            Please select a cooperative first.
+        </p>
+    ) : servicesLoading ? (
+        <p className="flex items-center gap-2 text-sm text-slate-500">
+            <Loader2 size={16} className="animate-spin" />
+            Loading available services...
+        </p>
+    ) : activeServices.length === 0 ? (
+        <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-700">
+            No active services found for this cooperative.
+        </p>
+    ) : (
+        <div className="space-y-4">
+            {formData.skills.map((skill, index) => {
+                const selectedService = activeServices.find(
+                    (service) => service._id === skill.serviceId
+                );
+
+                return (
+                    <div
+                        key={index}
+                        className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4"
+                    >
+                        <div className="mb-3 flex items-center justify-between">
+                            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                                Service {index + 1}
+                            </span>
+
+                            {formData.skills.length > 1 && (
+                                <button
+                                    type="button"
+                                    onClick={() => removeSkill(index)}
+                                    className="flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-500"
+                                >
+                                    <Trash2 size={13} />
+                                    Remove
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="space-y-3">
+                            <div>
+                                <label className={labelClass}>
+                                    Select Service
+                                </label>
+
+                                <div className="relative">
+                                    <select
+                                        value={skill.serviceId}
+                                        onChange={(e) =>
+                                            handleSkillChange(
+                                                index,
+                                                "serviceId",
+                                                e.target.value
+                                            )
+                                        }
+                                        className={`${inputClass} appearance-none pr-10`}
+                                        required
+                                    >
+                                        <option value="">
+                                            Choose a service
+                                        </option>
+
+                                        {activeServices.map((service) => (
+                                            <option
+                                                key={service._id}
+                                                value={service._id}
+                                                disabled={formData.skills.some(
+                                                    (item, itemIndex) =>
+                                                        itemIndex !== index &&
+                                                        item.serviceId === service._id
+                                                )}
+                                            >
+                                                {service.name}
+                                            </option>
+                                        ))}
+                                    </select>
+
+                                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+                                        <ChevronDown size={16} />
+                                    </span>
+                                </div>
+                            </div>
+
+                            {selectedService && (
+                                <div className="rounded-lg border border-indigo-100 bg-indigo-50 p-3">
+                                    <p className="text-xs font-semibold text-indigo-700">
+                                        Admin-defined service charge
+                                    </p>
+
+                                    <p className="mt-1 text-sm font-bold text-slate-900">
+                                        ₹{selectedService.price} / {
+                                            selectedService.priceType?.replace("_", " ")
+                                        }
+                                    </p>
+
+                                    <p className="mt-1 text-xs text-slate-500">
+                                        Pricing is managed by your cooperative admin.
+                                    </p>
+                                </div>
+                            )}
+
+                            <div>
+                                <label className={labelClass}>
+                                    Experience in this service (Years)
+                                </label>
 
                                 <input
-                                    id="experience"
                                     type="number"
                                     min="0"
-                                    name="experience"
-                                    value={formData.experience}
-                                    onChange={handleChange}
+                                    step="1"
+                                    value={skill.experience}
+                                    onChange={(e) =>
+                                        handleSkillChange(
+                                            index,
+                                            "experience",
+                                            e.target.value
+                                        )
+                                    }
                                     placeholder="e.g. 3"
-                                    className={`${inputClass} pl-11`}
+                                    className={inputClass}
                                     required
                                 />
                             </div>
                         </div>
                     </div>
-                </section>
+                );
+            })}
+        </div>
+    )}
+</section>
 
-                {/* Skills & Pricing */}
-                <section className={sectionClass}>
-                    <SectionHeader
-                        icon={Wrench}
-                        title="Skills & Pricing"
-                        subtitle="Add your skills and service charges"
-                        action={
-                            <button
-                                type="button"
-                                onClick={addSkill}
-                                className={smallBtnClass}
-                            >
-                                <Plus size={14} />
-                                Add Skill
-                            </button>
-                        }
-                    />
-
-                    <div className="space-y-4">
-                        {formData.skills.map((skill, index) => (
-                            <div
-                                key={index}
-                                className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4"
-                            >
-                                <div className="mb-3 flex items-center justify-between">
-                                    <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600">
-                                        Skill {index + 1}
-                                    </span>
-
-                                    {formData.skills.length > 1 && (
-                                        <button
-                                            type="button"
-                                            onClick={() => removeSkill(index)}
-                                            className="flex cursor-pointer items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-500 transition hover:bg-red-100"
-                                        >
-                                            <Trash2 size={13} />
-                                            Remove
-                                        </button>
-                                    )}
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-3 sm:grid-cols-[2fr_1fr_1fr]">
-                                    <div className="col-span-2 sm:col-span-1">
-                                        <label className={labelClass}>
-                                            Skill Name
-                                        </label>
-
-                                        <input
-                                            value={skill.name}
-                                            onChange={(e) =>
-                                                handleSkillChange(
-                                                    index,
-                                                    "name",
-                                                    e.target.value
-                                                )
-                                            }
-                                            placeholder="e.g. Pipe Fitting"
-                                            className={inputClass}
-                                            required
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className={labelClass}>
-                                            Price (₹)
-                                        </label>
-
-                                        <div className="relative">
-                                            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                                                <IndianRupee size={15} />
-                                            </span>
-
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                value={skill.price}
-                                                onChange={(e) =>
-                                                    handleSkillChange(
-                                                        index,
-                                                        "price",
-                                                        e.target.value
-                                                    )
-                                                }
-                                                placeholder="300"
-                                                className={`${inputClass} pl-9`}
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label className={labelClass}>
-                                            Type
-                                        </label>
-
-                                        <div className="relative">
-                                            <select
-                                                value={skill.priceType}
-                                                onChange={(e) =>
-                                                    handleSkillChange(
-                                                        index,
-                                                        "priceType",
-                                                        e.target.value
-                                                    )
-                                                }
-                                                className={`${inputClass} appearance-none pr-9`}
-                                            >
-                                                <option value="per_visit">
-                                                    Per Visit
-                                                </option>
-                                                <option value="per_hour">
-                                                    Per Hour
-                                                </option>
-                                                <option value="per_day">
-                                                    Per Day
-                                                </option>
-                                            </select>
-
-                                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
-                                                <ChevronDown size={16} />
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
+            
                 {/* Certifications */}
                 <section className={sectionClass}>
                     <SectionHeader
@@ -879,11 +921,10 @@ const WorkerProfileForm = ({
                             return (
                                 <div
                                     key={day}
-                                    className={`rounded-xl border p-3 transition sm:p-4 ${
-                                        selected
+                                    className={`rounded-xl border p-3 transition sm:p-4 ${selected
                                             ? "border-indigo-200 bg-indigo-50/60"
                                             : "border-slate-200 bg-white"
-                                    }`}
+                                        }`}
                                 >
                                     <label className="flex cursor-pointer items-center gap-3">
                                         <input
@@ -896,21 +937,19 @@ const WorkerProfileForm = ({
                                         />
 
                                         <span
-                                            className={`text-xs font-bold uppercase tracking-wide sm:text-sm ${
-                                                selected
+                                            className={`text-xs font-bold uppercase tracking-wide sm:text-sm ${selected
                                                     ? "text-slate-900"
                                                     : "text-slate-500"
-                                            }`}
+                                                }`}
                                         >
                                             {day}
                                         </span>
 
                                         <span
-                                            className={`ml-auto rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-                                                selected
+                                            className={`ml-auto rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${selected
                                                     ? "bg-emerald-100 text-emerald-700"
                                                     : "bg-slate-100 text-slate-400"
-                                            }`}
+                                                }`}
                                         >
                                             {selected
                                                 ? "Available"

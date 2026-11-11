@@ -62,6 +62,9 @@ const WorkerProfileEdit = () => {
         setSuccess("Profile Changes Saved.");
     };
 
+    const pageBg =
+        "relative min-h-screen overflow-hidden bg-gradient-to-b from-indigo-50 via-slate-50 to-slate-100";
+
     if (loading) {
         return (
 
@@ -93,7 +96,7 @@ const WorkerProfileEdit = () => {
     }
 
     return (
-        <div className="mx-auto max-w-4xl space-y-5 p-4">
+        <div className="mx-auto max-w-4xl space-y-5 p-4 ">
             {success && (
                 <p className="rounded bg-green-100 p-3 text-green-700">
                     {success}

@@ -12,7 +12,6 @@ const createWorkerProfile = async (req, res) => {
             cooperativeId: req.body.cooperativeId,
             category: req.body.category,
             skills: req.body.skills,
-            experience: req.body.experience,
             certifications: req.body.certifications,
             location: req.body.location,
             workingHours: req.body.workingHours
@@ -121,6 +120,37 @@ const getPendingWorkers = async (req, res) => {
             message: error.message
         });
 
+    }
+};
+
+const getApprovedWorkers = async (req, res) => {
+    try {
+        const workers = await workerService.getApprovedWorkers(req.user._id);
+
+        return res.status(200).json({
+            message: "Approved workers fetched successfully",
+            workers
+        });
+    } catch (error) {
+        return res.status(400).json({
+            message: error.message
+        });
+    }
+};
+
+
+const getRejectedWorkers = async (req, res) => {
+    try {
+        const workers = await workerService.getRejectedWorkers(req.user._id);
+
+        return res.status(200).json({
+            message: "Rejected workers fetched successfully",
+            workers
+        });
+    } catch (error) {
+        return res.status(400).json({
+            message: error.message
+        });
     }
 };
 
@@ -241,5 +271,5 @@ module.exports = {
     createWorkerProfile, getWorkerProfile, updateWorkerProfile,
     getNearbyWorkers, getPendingWorkers, verifyWorker, rejectWorker,
     updateWorkerAvailability, updateWorkerSchedule, getWorkerSchedule,
-    resubmitWorkerProfile
+    resubmitWorkerProfile, getApprovedWorkers, getRejectedWorkers
 };

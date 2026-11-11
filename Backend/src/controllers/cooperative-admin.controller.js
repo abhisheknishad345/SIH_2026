@@ -63,8 +63,29 @@ const createBootstrapAdmin = async (req, res) => {
     }
 };
 
+const getDashboardStats = async (req, res) => {
+    try {
+        const stats = await cooperativeAdminService.getDashboardStats(
+            req.user._id
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Dashboard statistics fetched successfully",
+            stats
+        });
+
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
 
 module.exports = {
     createCooperativeAdmin,
-    createBootstrapAdmin
+    createBootstrapAdmin,
+    getDashboardStats
 };

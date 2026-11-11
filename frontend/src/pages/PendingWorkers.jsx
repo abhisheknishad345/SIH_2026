@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { CircleCheck, ArrowLeft, CircleUserRound, MapPin } from "lucide-react"
+import AdminSidebar from "../components/AdminSidebar";
 
 function PendingWorkers() {
   const navigate = useNavigate();
@@ -90,8 +91,11 @@ function PendingWorkers() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 px-4 py-6">
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <AdminSidebar />
+
+      <main className="min-h-screen px-4 py-6 pt-20 sm:px-6 lg:ml-64 lg:p-8">
         <div className="mx-auto max-w-6xl">
           <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
             <p className="text-lg text-gray-800">
@@ -99,14 +103,20 @@ function PendingWorkers() {
             </p>
           </div>
         </div>
-      </div>
-    );
-  }
+      </main>
+    </div>
+  );
+}
 
   return (
-    <div className="min-h-screen bg-gray-100 px-4 py-5 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-100">
+
+    <AdminSidebar />
+
+    <main className="min-h-screen px-4 py-6 pt-20 sm:px-6 lg:ml-64 lg:p-8">
 
       <div className="mx-auto max-w-6xl">
+
 
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -155,8 +165,8 @@ function PendingWorkers() {
         {workers.length === 0 ? (
           <div className="rounded-2xl border border-gray-200 bg-white px-5 py-12 text-center shadow-sm">
 
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
-              <span className="text-green-500"> <CircleCheck size={50} /> </span>
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full">
+              <span className="text-green-500"> <CircleCheck size={50} strokeWidth={1.4} /> </span>
             </div>
 
             <h2 className="mt-5 text-lg font-semibold text-gray-900 capitalize">
@@ -328,6 +338,8 @@ function PendingWorkers() {
         )}
 
       </div>
+      </main>
+
     </div>
   );
 }

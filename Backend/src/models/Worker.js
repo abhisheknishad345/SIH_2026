@@ -34,23 +34,26 @@ const workerSchema = new mongoose.Schema(
             ]
         },
 
+
         skills: {
             type: [
                 {
+                    serviceId: {
+                        type: mongoose.Schema.Types.ObjectId,
+                        ref: "Service",
+                        required: true
+                    },
+
                     name: {
                         type: String,
                         required: true,
                         trim: true
                     },
-                    price: {
+
+                    experience: {
                         type: Number,
                         required: true,
                         min: 0
-                    },
-                    priceType: {
-                        type: String,
-                        enum: ["per_hour", "per_day", "per_visit", "fixed"],
-                        required: true
                     }
                 }
             ],
@@ -63,11 +66,6 @@ const workerSchema = new mongoose.Schema(
             }
         },
 
-        experience: {
-            type: Number,
-            required: true,
-            min: 0
-        },
 
         certifications: {
             type: [String],
@@ -103,45 +101,45 @@ const workerSchema = new mongoose.Schema(
         },
 
         bookingActionLock: {
-    type: Boolean,
-    default: false
-},
+            type: Boolean,
+            default: false
+        },
 
         workingHours: {
-    type: [
-        {
-            day: {
-                type: String,
-                enum: [
-                    "Monday",
-                    "Tuesday",
-                    "Wednesday",
-                    "Thursday",
-                    "Friday",
-                    "Saturday",
-                    "Sunday"
-                ],
-                required: true
-            },
+            type: [
+                {
+                    day: {
+                        type: String,
+                        enum: [
+                            "Monday",
+                            "Tuesday",
+                            "Wednesday",
+                            "Thursday",
+                            "Friday",
+                            "Saturday",
+                            "Sunday"
+                        ],
+                        required: true
+                    },
 
-            isWorking: {
-                type: Boolean,
-                default: true
-            },
+                    isWorking: {
+                        type: Boolean,
+                        default: true
+                    },
 
-            startTime: {
-                type: String,
-                default: "09:00"
-            },
+                    startTime: {
+                        type: String,
+                        default: "09:00"
+                    },
 
-            endTime: {
-                type: String,
-                default: "17:00"
-            }
-        }
-    ],
-    default: []
-},
+                    endTime: {
+                        type: String,
+                        default: "17:00"
+                    }
+                }
+            ],
+            default: []
+        },
     },
     {
         timestamps: true

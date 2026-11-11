@@ -75,6 +75,7 @@ const bookingSchema = new mongoose.Schema(
                 "pending",
                 "accepted",
                 "rejected",
+                "in_progress",
                 "cancelled",
                 "completed"
             ],

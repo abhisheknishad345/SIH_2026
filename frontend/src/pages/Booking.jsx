@@ -41,6 +41,9 @@ function Booking() {
           (item) => item._id === serviceId
         );
 
+        console.log("Booking Service:", selectedService);
+console.log("Price Type:", selectedService?.priceType);
+
         const selectedWorker = workersResponse.data.workers.find(
           (item) => item.userId === workerId
         );
@@ -128,7 +131,7 @@ function Booking() {
         workerId,
         serviceId,
         skillName: formData.skillName,
-        quantity: Number(formData.quantity),
+        quantity: service?.priceType === "fixed" ? 1 : Number(formData.quantity),
         scheduledAt: new Date(formData.scheduledAt),
         duration: Number(formData.duration),
         address: formData.address,
@@ -268,76 +271,83 @@ function Booking() {
           </div>
 
           {/* Quantity */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Quantity
-            </label>
+          
+{/* Quantity */}
+{service?.priceType !== "fixed" && (
+  <div>
+    <label className="block text-sm font-semibold text-gray-700 mb-2">
+      {service?.priceType === "per_hour"
+        ? "Number of Hours"
+        : service?.priceType === "per_day"
+        ? "Number of Days"
+        : "Number of Visits"}
+    </label>
 
-            <input
-              type="number"
-              name="quantity"
-              min="1"
-              value={formData.quantity}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl
-                         focus:outline-none focus:ring-2
-                         focus:ring-indigo-500 text-black"
-              required
-            />
-          </div>
+    <input
+      type="number"
+      name="quantity"
+      min="1"
+      value={formData.quantity}
+      onChange={handleChange}
+      className="w-full px-4 py-3 border border-gray-300 rounded-xl
+                 focus:outline-none focus:ring-2
+                 focus:ring-indigo-500 text-black"
+      required
+    />
+  </div>
+)}
+
 
           {/* Date and time */}
-          
-{/* Scheduled Date & Time */}
-{/* Schedule Date & Time */}
-<div>
-  <label className="block text-sm font-semibold text-gray-700 mb-2">
-    Schedule Date & Time
-  </label>
+          {/* Schedule Date & Time */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Schedule Date & Time
+            </label>
 
-  <DatePicker
-    selected={
-      formData.scheduledAt
-        ? new Date(formData.scheduledAt)
-        : null
-    }
-    onChange={(date) => {
-      const localDate = date
-        ? `${date.getFullYear()}-${String(
-            date.getMonth() + 1
-          ).padStart(2, "0")}-${String(
-            date.getDate()
-          ).padStart(2, "0")}T${String(
-            date.getHours()
-          ).padStart(2, "0")}:${String(
-            date.getMinutes()
-          ).padStart(2, "0")}`
-        : "";
+            <DatePicker
+              selected={
+                formData.scheduledAt
+                  ? new Date(formData.scheduledAt)
+                  : null
+              }
+              onChange={(date) => {
+                const localDate = date
+                  ? `${date.getFullYear()}-${String(
+                    date.getMonth() + 1
+                  ).padStart(2, "0")}-${String(
+                    date.getDate()
+                  ).padStart(2, "0")}T${String(
+                    date.getHours()
+                  ).padStart(2, "0")}:${String(
+                    date.getMinutes()
+                  ).padStart(2, "0")}`
+                  : "";
 
-      setFormData((prev) => ({
-        ...prev,
-        scheduledAt: localDate,
-      }));
-    }}
-    showTimeSelect
-    timeIntervals={30}
-    dateFormat="dd MMM yyyy, h:mm aa"
-    minDate={new Date()}
-    filterTime={(time) => time.getTime() > Date.now()}
-    placeholderText="Select date and time"
-    autoComplete="off"
-    required
-    className="w-full px-4 py-3 border border-gray-300 rounded-xl
+                setFormData((prev) => ({
+                  ...prev,
+                  scheduledAt: localDate,
+                }));
+              }}
+              showTimeSelect
+              timeIntervals={30}
+              dateFormat="dd MMM yyyy, h:mm aa"
+              minDate={new Date()}
+              filterTime={(time) => time.getTime() > Date.now()}
+              placeholderText="Select date and time"
+              autoComplete="off"
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl
       bg-white text-gray-800 focus:outline-none
       focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-    wrapperClassName="w-full"
-    calendarClassName="booking-calendar"
-  />
+              wrapperClassName="w-full"
+              calendarClassName="booking-calendar"
+            />
 
-  <p className="text-xs text-gray-500 mt-2">
-    Choose a date and available time for your service.
-  </p>
-</div>
+            <p className="text-xs text-gray-500 mt-2">
+              Choose a date and available time for your service.
+            </p>
+          </div>
 
 
           {/* Duration */}
@@ -355,12 +365,14 @@ function Booking() {
              focus:ring-indigo-500 text-black"
               required
             >
-              <option value="1">1 Hour</option>
-              <option value="2">2 Hours</option>
-              <option value="3">3 Hours</option>
-              <option value="4">4 Hours</option>
-              <option value="6">6 Hours</option>
-              <option value="8">8 Hours</option>
+
+              <option value="60">1 Hour</option>
+              <option value="120">2 Hours</option>
+              <option value="180">3 Hours</option>
+              <option value="240">4 Hours</option>
+              <option value="360">6 Hours</option>
+              <option value="480">8 Hours</option>
+
             </select>
           </div>
 

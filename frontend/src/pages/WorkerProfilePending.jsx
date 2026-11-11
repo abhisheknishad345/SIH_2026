@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import {Check, CircleCheckBig, Hourglass} from "lucide-react"
+
 
 function WorkerProfilePending() {
     const navigate = useNavigate();
     const { logout } = useAuth();
+    const { user} = useAuth();
 
     const [status, setStatus] = useState("loading");
     const [worker, setWorker] = useState(null);
@@ -155,8 +158,8 @@ function WorkerProfilePending() {
 
                 {/* Icon */}
                 <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-indigo-50">
-                    <div className="text-4xl">
-                        ⏳
+                    <div className="text-4xl text-green-500">
+                        <Hourglass size={50} strokeWidth={1.5}/>
                     </div>
                 </div>
 
@@ -176,16 +179,16 @@ function WorkerProfilePending() {
                 {/* Status */}
                 <div className="mt-8 rounded-xl border border-indigo-100 bg-indigo-50 p-4">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-black">
-                            ✓
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full ">
+                            <CircleCheckBig size={35} className="text-green-500"/>
                         </div>
 
                         <div>
-                            <p className="text-sm font-semibold text-gray-900">
+                            <p className="text-md font-semibold text-gray-900">
                                 Profile Submitted
                             </p>
 
-                            <p className="mt-1 text-xs text-gray-600">
+                            <p className="mt-1 text-sm text-gray-700">
                                 Waiting for cooperative verification
                             </p>
                         </div>
@@ -195,11 +198,22 @@ function WorkerProfilePending() {
                 {/* Profile summary */}
                 {worker && (
                     <div className="mt-5 rounded-xl border border-gray-200 p-4">
-                        <h2 className="mb-3 text-sm font-semibold text-gray-900">
+                        <h2 className="mb-3 text-lg font-semibold text-gray-900">
                             Profile Details
                         </h2>
 
                         <div className="space-y-2 text-sm">
+
+                            <div className="flex justify-between gap-4">
+                                <span className="text-gray-500">
+                                    Full Name
+                                </span>
+
+                                <span className="font-medium text-[15px] text-gray-900">
+                                    {user?.fullName || "Worker"}
+                                    
+                                </span>
+                            </div>
                             <div className="flex justify-between gap-4">
                                 <span className="text-gray-500">
                                     Category
@@ -207,6 +221,7 @@ function WorkerProfilePending() {
 
                                 <span className="font-medium text-gray-900">
                                     {worker.category || "—"}
+                                    
                                 </span>
                             </div>
 
@@ -216,7 +231,7 @@ function WorkerProfilePending() {
                                 </span>
 
                                 <span className="font-medium text-gray-900">
-                                    {worker.experience ?? "—"} years
+                                    {worker.experience ?? "—"} Years
                                 </span>
                             </div>
 
@@ -234,11 +249,11 @@ function WorkerProfilePending() {
                 )}
 
                 {/* Bottom note */}
-                <div className="mt-6 text-center">
-                    <p className="text-md leading-5 text-red-400">
-                        You can safely leave this page. Once your
-                        profile is approved, you will be able to
-                        access your worker dashboard.
+                <div className="mt-6">
+                    <p className="text-md leading-5 text-black">
+                        1. You can safely leave this page <br />
+                        2. Once your profile is approved <br />
+                        3. You will be able to access your Worker Dashboard
                     </p>
                 </div>
 

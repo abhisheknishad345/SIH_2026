@@ -97,12 +97,23 @@ const createBooking = async ({
         newBookingStart.getTime() + duration * 60 * 1000
     );
 
-    const existingBookings = await Booking.find({
+//     console.log("Worker ID:", workerId);
+// console.log("New Booking Start:", newBookingStart);
+// console.log("New Booking End:", newBookingEnd);
+
+
+const existingBookings = await Booking.find({
         workerId,
-        status: "accepted"
-           
+        status: {
+        $in: ["pending", "accepted"]
+        },
+        scheduledAt: {
+            $lt: newBookingEnd
+        }
+        
         
     });
+    // console.log("Existing Bookings Found:", existingBookings.length);
 
     const hasConflict = existingBookings.some((booking) => {
         const existingStart = new Date(booking.scheduledAt);
@@ -111,11 +122,22 @@ const createBooking = async ({
             existingStart.getTime() + booking.duration * 60 * 1000
         );
 
-        return (
-            newBookingStart < existingEnd &&
-            newBookingEnd > existingStart
-        );
+        const overlap =
+        newBookingStart < existingEnd &&
+        newBookingEnd > existingStart;
+
+    //     console.log({
+    //     existingStart,
+    //     existingEnd,
+    //     existingStatus: booking.status,
+    //     overlap 
+    // });
+
+        return overlap;
+               
     });
+
+    // console.log("Has Conflict:", hasConflict);
 
     if (hasConflict) {
         throw new Error("Worker is already booked during this time");

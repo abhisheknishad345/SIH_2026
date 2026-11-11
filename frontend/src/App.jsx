@@ -25,6 +25,8 @@ import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import WorkerBookings from "./pages/WorkerBookings";
 import RejectWorker from "./pages/RejectWorker";
 import { AuthProvider } from "./context/AuthContext";
+import ApprovedWorkers from "./pages/ApprovedWorkers";
+import RejectedWorkers from "./pages/RejectedWorkers";
 
 
 function App() {
@@ -32,99 +34,108 @@ function App() {
 
     <AuthProvider>
 
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={<LandingPage />} />
-        <Route path="*" element={<HandleError />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route
-          path="/customer"
-          element={
-            <CustomerProfileGuard>
-              <CustomerDashboard />
-            </CustomerProfileGuard>
-          }
-        />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="*" element={<HandleError />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route
+            path="/customer"
+            element={
+              <CustomerProfileGuard>
+                <CustomerDashboard />
+              </CustomerProfileGuard>
+            }
+          />
 
-        <Route
-          path="/customer/edit-profile"
-          element={
-            <CustomerProfileGuard>
+          <Route
+            path="/customer/edit-profile"
+            element={
+              <CustomerProfileGuard>
 
-          <CustomerEditProfile />
-            </CustomerProfileGuard>
-        }
+                <CustomerEditProfile />
+              </CustomerProfileGuard>
+            }
 
-        />
+          />
 
-        <Route
-          path="/customer/create-profile"
-          element={<CustomerCreateProfile />}
-        />
-        <Route path="/worker/dashboard" element={<WorkerDashboard />} />
-        <Route path="/worker/bookings" element={<WorkerBookings />}/>
-        <Route path="/cooperative-admin" element={<AdminDashboard />} />
-        <Route path="/admin" element={<SuperAdminDashboard />} />
+          <Route
+            path="/customer/create-profile"
+            element={<CustomerCreateProfile />}
+          />
+          <Route path="/worker/dashboard" element={<WorkerDashboard />} />
+          <Route path="/worker/bookings" element={<WorkerBookings />} />
+          <Route path="/cooperative-admin" element={<AdminDashboard />} />
+          <Route path="/admin" element={<SuperAdminDashboard />} />
 
-        <Route
-          path="/booking"
-          element={
-            <CustomerProfileGuard>
-              <Booking />
-            </CustomerProfileGuard>
-          }
-        />
+          <Route
+            path="/booking"
+            element={
+              <CustomerProfileGuard>
+                <Booking />
+              </CustomerProfileGuard>
+            }
+          />
 
-        <Route path="/worker/profile" element={<WorkerProfile />} />
-        <Route path="/worker/create-profile" element={<WorkerCreateProfile />} />
-        <Route path="/worker/rejected" element={<RejectWorker />}/>
-        <Route path="/worker/profile-pending" element={<WorkerProfilePending />}/>
+          <Route path="/worker/profile" element={<WorkerProfile />} />
+          <Route path="/worker/create-profile" element={<WorkerCreateProfile />} />
+          <Route path="/worker/rejected" element={<RejectWorker />} />
+          <Route path="/worker/profile-pending" element={<WorkerProfilePending />} />
 
-        <Route
-          path="/customer/profile"
-          element={<CustomerProfile />}
-        />
+          <Route
+            path="/customer/profile"
+            element={<CustomerProfile />}
+          />
 
-        <Route
-          path="/cooperative-admin/workers/pending"
-          element={<PendingWorkers />}
-        />
-        <Route
-          path="/worker/edit-profile"
-          element={<WorkerProfileEdit />}
-        />
+          <Route
+            path="/cooperative-admin/workers/pending"
+            element={<PendingWorkers />}
+          />
+          <Route
+            path="/cooperative-admin/workers/approved"
+            element={<ApprovedWorkers />}
+          />
 
-        <Route
-          path="/customer/bookings"
-          element={
-            <CustomerProfileGuard>
-              <MyBookings />
-            </CustomerProfileGuard>
-          }
-        />
-        <Route
-          path="/services/:serviceId/workers"
-          element={
-            <CustomerProfileGuard>
-              <ServiceWorkers />
-            </CustomerProfileGuard>
-          }
-        />
+          <Route
+            path="/cooperative-admin/workers/rejected"
+            element={<RejectedWorkers />}
+          />
+          <Route
+            path="/worker/edit-profile"
+            element={<WorkerProfileEdit />}
+          />
 
-        <Route
-          path="/forgot-password"
-          element={<ForgotPassword />}
-        />
+          <Route
+            path="/customer/bookings"
+            element={
+              <CustomerProfileGuard>
+                <MyBookings />
+              </CustomerProfileGuard>
+            }
+          />
+          <Route
+            path="/services/:serviceId/workers"
+            element={
+              <CustomerProfileGuard>
+                <ServiceWorkers />
+              </CustomerProfileGuard>
+            }
+          />
 
-        <Route
-          path="/reset-password"
-          element={<ResetPassword />}
-        />
-      </Routes>
-    </BrowserRouter>
-     </AuthProvider>
+          <Route
+            path="/forgot-password"
+            element={<ForgotPassword />}
+          />
+
+          <Route
+            path="/reset-password"
+            element={<ResetPassword />}
+          />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

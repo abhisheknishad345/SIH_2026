@@ -314,6 +314,7 @@ function WorkerBookings() {
                         Date & Time:{" "}
                         {new Date(booking.scheduledAt).toLocaleString("en-IN", {
                           day: "2-digit",
+                          
                           month: "short",
                           year: "numeric",
                           hour: "numeric",

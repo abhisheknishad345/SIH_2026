@@ -177,9 +177,7 @@ const getServiceWorkers = async ({ serviceId }) => {
 
     const workers = await Worker.find({
         cooperativeId: service.cooperativeId,
-        category: {
-            $regex: new RegExp(`^${service.category}$`, "i")
-        },
+        "skills.serviceId": service._id,
         isVerified: true,
         isAvailable: true
     }).populate("userId", "fullName email");
@@ -204,18 +202,22 @@ const getServiceWorkers = async ({ serviceId }) => {
             worker.userId._id.toString()
         );
 
+        const matchedSkill = worker.skills.find(
+            skill => skill.serviceId.toString() === service._id.toString()
+        );
+
         return {
             workerId: worker._id,
             userId: worker.userId._id,
             fullName: worker.userId.fullName,
             category: worker.category,
-            skills: worker.skills,
-            experience: worker.experience,
+            skill: matchedSkill,
             averageRating: rating?.averageRating || 0,
             totalRatings: rating?.totalRatings || 0
         };
     });
-};
+
+}
 
 
 

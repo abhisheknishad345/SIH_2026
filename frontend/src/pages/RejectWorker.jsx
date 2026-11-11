@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import WorkerProfileForm from "./WorkerProfileForm";
+import { useAuth } from "../context/AuthContext";
 
 import {
     getWorkerProfile,
@@ -30,6 +31,7 @@ const RejectWorker = () => {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const { logout } = useAuth();
 
     const navigate = useNavigate();
 
@@ -73,7 +75,7 @@ const RejectWorker = () => {
         const response = await updateWorkerProfile(payload);
 
         setWorker(response.data.worker);
-        setSuccess("Changes saved. You can now resubmit.");
+        setSuccess("Changes saved. You can now resubmit");
     };
 
     const handleResubmit = async () => {
@@ -94,6 +96,15 @@ const RejectWorker = () => {
         }
     };
 
+    const handleLogout = async () => {
+        try {
+            await logout();
+            navigate("/login", {replace: true});
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
+    };
+
     if (loading) {
         return <p className="p-6">Loading profile...</p>;
     }
@@ -108,15 +119,27 @@ const RejectWorker = () => {
 
     return (
         <div className="mx-auto max-w-4xl space-y-5 p-4">
-            <div className="rounded-xl border border-red-200 bg-slate-100 p-5">
+            <div className=" flex justify-between rounded-xl border border-red-200 bg-slate-100 p-5">
+                <div>
+
                 <h2 className="text-xl font-semibold text-red-600">
                     Profile Rejected
                 </h2>
 
                 <p className="mt-2 text-rose-500">
                     {worker.rejectionReason ||
-                        "Please update your profile and resubmit it for verification."}
+                        "Please update your profile and resubmit it for verification"}
                 </p>
+                        </div>
+
+                <div>
+                <button 
+                onClick={handleLogout}
+                className=" border-3 text-lg text-rose-500 rounded-2xl cursor-pointer p-2">
+                    Logout
+                    </button>
+
+                </div>
             </div>
 
             {error && (
@@ -144,7 +167,7 @@ const RejectWorker = () => {
                 type="button"
                 onClick={handleResubmit}
                 disabled={saving}
-                className="w-100 cursor-pointer text-md font-semibold rounded bg-green-600 hover:bg-green-700 px-3 py-3 text-white disabled:opacity-50 font-mono"
+                className="w-75 border-2 cursor-pointer text-md font-semibold rounded-xl px-3 py-3 text-green-400 disabled:opacity-50 bg-gray-950"
             >
                 {saving
                     ? "Resubmitting..."

@@ -26,7 +26,7 @@ router.post(
 router.get(
     "/",
     authMiddleware,
-    roleMiddleware(["customer"]),
+    roleMiddleware(["customer", "worker"]),
     getActiveServices
 );
 

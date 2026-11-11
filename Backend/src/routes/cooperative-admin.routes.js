@@ -1,7 +1,7 @@
 const express = require("express");
 
 const {
-    createCooperativeAdmin, createBootstrapAdmin
+    createCooperativeAdmin, createBootstrapAdmin, getDashboardStats
 } = require("../controllers/cooperative-admin.controller");
 
 const authMiddleware = require("../middlewares/auth.middleware");
@@ -21,6 +21,13 @@ router.post(
     "/bootstrap",
     adminSetupMiddleware,
     createBootstrapAdmin
+);
+
+router.get(
+    "/dashboard/stats",
+    authMiddleware,
+    roleMiddleware("cooperative_admin"),
+    getDashboardStats
 );
 
 module.exports = router;
