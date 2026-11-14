@@ -34,17 +34,7 @@ const validateWorkerProfile = ({
 
     console.log(workingHours);
 
-    const allowedCategories = [
-        "Plumber",
-        "Electrician",
-        "Carpenter",
-        "Painter",
-        "Cleaner",
-        "Gardener",
-        "Driver",
-        "Caregiver",
-        "Technician"
-    ];
+    
 
     const allowedHours = [
         "Monday",
@@ -56,14 +46,12 @@ const validateWorkerProfile = ({
         "Sunday"
     ];
 
-
-    if (!allowedCategories.includes(category)) {
-        throw new Error("Invalid worker category");
-    }
-
-    // if (!allowedHours.includes(...workingHours)) {
-    //     throw new Error("Invalid working days");
-    // }
+    if (
+    typeof category !== "string" ||
+    !category.trim()
+) {
+    throw new Error("Valid worker category is required");
+}
 
     if (
     !Array.isArray(workingHours) ||

@@ -8,7 +8,6 @@ const createBooking = async ({
     customerId,
     workerId,
     serviceId,
-    skillName,
     quantity,
     scheduledAt,
     duration,
@@ -55,17 +54,18 @@ const createBooking = async ({
     }
 
     // 5. Find selected skill
-    const skill = worker.skills.find(
-        (item) =>
-            item.name.toLowerCase() ===
-            skillName.trim().toLowerCase()
-    );
+    
+const skill = worker.skills.find(
+    item =>
+        item.serviceId.toString() === service._id.toString()
+);
 
-    if (!skill) {
-        throw new Error(
-            "Selected skill is not offered by this worker"
-        );
-    }
+if (!skill) {
+    throw new Error(
+        "Selected service is not offered by this worker"
+    );
+}
+
 
     // 6. Calculate price on backend
     let price;
@@ -199,7 +199,7 @@ const getWorkerBookings = async ({
     const [bookings, totalBookings] = await Promise.all([
         Booking.find(filter)
             .populate("customerId", "fullName email")
-            .populate("serviceId", "name category")
+            .populate("serviceId", "name category price priceType")
             .sort({ scheduledAt: 1 })
             .skip(skip)
             .limit(limit),

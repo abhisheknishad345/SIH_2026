@@ -6,21 +6,15 @@ const authMiddleware = require("../middlewares/auth.middleware");
 const roleMiddleware = require("../middlewares/role.middleware");
 
 const {
-    createService, createPaidService, getActiveServices, getServiceWorkers
+    createService, getServiceCategories,
+    getActiveServices, getServiceWorkers
 } = require("../controllers/service.controller");
 
 router.post(
-    "/free",
+    "/create",
     authMiddleware,
     roleMiddleware(["cooperative_admin"]),
     createService
-);
-
-router.post(
-    "/paid",
-    authMiddleware,
-    roleMiddleware(["cooperative_admin"]),
-    createPaidService
 );
 
 router.get(
@@ -28,6 +22,13 @@ router.get(
     authMiddleware,
     roleMiddleware(["customer", "worker"]),
     getActiveServices
+);
+
+router.get(
+    "/categories",
+    authMiddleware,
+    roleMiddleware(["worker"]),
+    getServiceCategories
 );
 
 router.get(

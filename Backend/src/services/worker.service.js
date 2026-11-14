@@ -17,7 +17,12 @@ const createWorkerProfile = async ({
     workingHours
 }) => {
     const existingWorker = await Worker.findOne({ userId });
+    console.log("Worker User ID:", userId);
+    console.log("Received Cooperative ID:", cooperativeId);
+
+
     const cooperative = await Cooperative.findById(cooperativeId);
+    console.log("Found Cooperative:", cooperative);
 
     if (!cooperative) {
         throw new Error("Cooperative not found");
@@ -42,6 +47,7 @@ const createWorkerProfile = async ({
     const services = await Service.find({
         _id: { $in: serviceIds },
         cooperativeId,
+        category: category.trim(),
         isActive: true
     });
 
@@ -88,78 +94,134 @@ const createWorkerProfile = async ({
 };
 
 
+
 const getWorkerProfile = async (userId) => {
+
     const worker = await Worker.findOne({ userId })
         .populate("userId", "fullName email role")
-        .populate("cooperativeId", "name registrationNumber contactEmail contactPhone address");
+        .populate(
+            "cooperativeId",
+            "name registrationNumber contactEmail contactPhone address"
+        )
+        .populate(
+            "skills.serviceId",
+            "price priceType"
+        );
 
     if (!worker) {
         throw new Error("Worker profile not found");
     }
 
+    // Add admin-defined service pricing to each skill
+    const workerData = worker.toObject();
+
+    workerData.skills = workerData.skills.map(skill => ({
+        ...skill,
+        serviceId: skill.serviceId?._id || skill.serviceId,
+        price: skill.serviceId?.price ?? 0,
+        priceType: skill.serviceId?.priceType ?? ""
+    }));
+
     return {
-        worker
+        worker: workerData
     };
 };
 
+
+
 const updateWorkerProfile = async (userId, updateData) => {
+
     const worker = await Worker.findOne({ userId });
 
     if (!worker) {
         throw new Error("Worker profile not found");
     }
 
-
     const allowedFields = [
-    "category",
-    "skills",
-    "certifications",
-    "workingHours",
-    "location"
-];
+        "category",
+        "skills",
+        "certifications",
+        "workingHours",
+        "location"
+    ];
 
-if (updateData.skills !== undefined) {
-    const serviceIds = updateData.skills.map(
-        skill => skill.serviceId.toString()
-    );
+    const targetCategory =
+        updateData.category !== undefined
+            ? updateData.category.trim()
+            : worker.category;
 
-    if (new Set(serviceIds).size !== serviceIds.length) {
-        throw new Error("Duplicate services are not allowed");
+    // Validate category and services together
+    if (
+        updateData.category !== undefined ||
+        updateData.skills !== undefined
+    ) {
+
+        if (!targetCategory) {
+            throw new Error("Worker category is required");
+        }
+
+        const selectedSkills =
+            updateData.skills !== undefined
+                ? updateData.skills
+                : worker.skills;
+
+        if (
+            !Array.isArray(selectedSkills) ||
+            selectedSkills.length === 0
+        ) {
+            throw new Error("At least one skill is required");
+        }
+
+        const serviceIds = selectedSkills.map(
+            skill => skill.serviceId.toString()
+        );
+
+        if (new Set(serviceIds).size !== serviceIds.length) {
+            throw new Error("Duplicate services are not allowed");
+        }
+
+        const services = await Service.find({
+            _id: { $in: serviceIds },
+            cooperativeId: worker.cooperativeId,
+            category: targetCategory,
+            isActive: true
+        });
+
+        if (services.length !== selectedSkills.length) {
+            throw new Error(
+                "Selected services must belong to your cooperative and category"
+            );
+        }
+
+        updateData.skills = selectedSkills.map(skill => {
+
+            const service = services.find(
+                item =>
+                    item._id.toString() ===
+                    skill.serviceId.toString()
+            );
+
+            return {
+                serviceId: service._id,
+                name: service.name,
+                experience: skill.experience
+            };
+        });
     }
 
-    const services = await Service.find({
-        _id: { $in: serviceIds },
-        cooperativeId: worker.cooperativeId,
-        isActive: true
-    });
+    allowedFields.forEach(field => {
 
-    if (services.length !== updateData.skills.length) {
-        throw new Error(
-            "One or more selected services are invalid or inactive"
-        );
-    }
-
-    updateData.skills = updateData.skills.map(skill => {
-        const service = services.find(
-            item => item._id.toString() === skill.serviceId.toString()
-        );
-
-        return {
-            serviceId: service._id,
-            name: service.name,
-            experience: skill.experience
-        };
-    });
-}
-
-    allowedFields.forEach((field) => {
         if (updateData[field] !== undefined) {
-            worker[field] = updateData[field];
+            worker[field] =
+                field === "category"
+                    ? updateData[field].trim()
+                    : updateData[field];
         }
     });
 
     if (updateData.workingHours !== undefined) {
-        worker.workingHours = updateData.workingHours.map((item) => ({
+
+        worker.workingHours = updateData.workingHours.map(item => ({
             day: item.day,
             isWorking: item.isWorking,
             startTime: item.startTime,
@@ -174,6 +236,7 @@ if (updateData.skills !== undefined) {
         worker
     };
 };
+
 
 const resubmitWorkerProfile = async (userId) => {
     const worker = await Worker.findOne({ userId });

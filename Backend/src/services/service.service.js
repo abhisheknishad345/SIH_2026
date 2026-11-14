@@ -9,46 +9,6 @@ const createService = async ({
     adminId,
     name,
     description,
-    category
-}) => {
-
-    const admin = await CooperativeAdmin.findOne({
-        userId: adminId,
-        isActive: true
-    });
-
-    if (!admin) {
-        throw new Error("Cooperative admin not found");
-    }
-
-    const existingService = await Service.findOne({
-        cooperativeId: admin.cooperativeId,
-        name: name.trim()
-    });
-
-    if (existingService) {
-        throw new Error("Service already exists");
-    }
-
-    const service = await Service.create({
-        cooperativeId: admin.cooperativeId,
-        createdBy: adminId,
-        name: name.trim(),
-        description,
-        category: category.trim()
-    });
-
-    return {
-        message: "Service created successfully",
-        service
-    };
-};
-
-
-const createPaidService = async ({
-    adminId,
-    name,
-    description,
     category,
     price,
     priceType
@@ -69,35 +29,78 @@ const createPaidService = async ({
     });
 
     if (existingService) {
-        throw new Error("Service with this name already exists");
+        throw new Error("Service already exists");
     }
 
-    const service = await Service.create({
+    const serviceData = {
         cooperativeId: admin.cooperativeId,
         createdBy: adminId,
         name: name.trim(),
         description,
-        category: category.trim(),
-        price,
-        priceType
-    });
+        category: category.trim()
+    };
+
+    // Add pricing only when provided
+    if (price !== undefined && price !== null) {
+        serviceData.price = price;
+        serviceData.priceType = priceType;
+    }
+
+    const service = await Service.create(serviceData);
 
     return {
-        message: "Paid Service created successfully",
+        message: "Service created successfully",
         service
     };
 };
 
-const getActiveServices = async () => {
 
-    const services = await Service.find({
+
+const getActiveServices = async ({ cooperativeId, category } = {}) => {
+
+    const query = {
         isActive: true
-    })
+    };
+
+    // Apply filters only when supplied
+    if (cooperativeId) {
+        if (!mongoose.Types.ObjectId.isValid(cooperativeId)) {
+            throw new Error("Invalid cooperative ID");
+        }
+
+        query.cooperativeId = cooperativeId;
+    }
+
+    if (category !== undefined) {
+        if (typeof category !== "string" || !category.trim()) {
+            throw new Error("Invalid category");
+        }
+
+        query.category = category.trim();
+    }
+
+    const services = await Service.find(query)
         .populate("cooperativeId", "name registrationNumber")
-        .sort({ createdAt: -1 });
+        .sort({ name: 1 });
 
     return services;
 };
+
+
+const getServiceCategories = async (cooperativeId) => {
+
+    if (!mongoose.Types.ObjectId.isValid(cooperativeId)) {
+        throw new Error("Invalid cooperative ID");
+    }
+
+    const categories = await Service.distinct("category", {
+        cooperativeId,
+        isActive: true
+    });
+
+    return categories.sort((a, b) => a.localeCompare(b));
+};
+
 
 
 const getAllServices = async () => {
@@ -212,6 +215,7 @@ const getServiceWorkers = async ({ serviceId }) => {
             fullName: worker.userId.fullName,
             category: worker.category,
             skill: matchedSkill,
+            skills: [matchedSkill],
             averageRating: rating?.averageRating || 0,
             totalRatings: rating?.totalRatings || 0
         };
@@ -224,8 +228,7 @@ const getServiceWorkers = async ({ serviceId }) => {
 
 
 module.exports = {
-    createService,
-    createPaidService,
+    createService, getServiceCategories,
     getAllServices,
     getServiceById,
     updateService,

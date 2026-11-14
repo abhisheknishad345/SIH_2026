@@ -100,6 +100,42 @@ function WorkerBookings() {
     );
   }, [bookings, activeFilter]);
 
+   const getPriceType = (priceType) => {
+        const types = {
+            per_hour: "Per Hour",
+            per_day: "Per Day",
+            per_visit: "Per Visit",
+            fixed: "Fixed Price",
+        };
+
+        return types[priceType] || "Fixed Price";
+    };
+
+    const formatDuration = (duration) => {
+        const minutes = Number(duration);
+
+        if (!Number.isFinite(minutes) || minutes <= 0) {
+            return "Not specified";
+        }
+
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+
+        if (remainingMinutes === 0) {
+    return `${hours} ${hours === 1 ? "Hour" : "Hours"}`;
+}
+
+        if (hours === 0) {
+            return `${remainingMinutes} Minutes`;
+        }
+
+        if (remainingMinutes === 0) {
+            return `${hours} Hour(s)`;
+        }
+
+        return `${hours}h ${remainingMinutes}m`;
+    };
+
   // Status badge styles
   const getStatusClass = (status) => {
     switch (status) {
@@ -331,19 +367,25 @@ function WorkerBookings() {
                       </p>
 
                       <p className="font-semibold text-gray-800 mt-1">
-                        {booking.duration} Hour(s)
+                        {formatDuration(booking.duration)}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-gray-700 uppercase">
-                        Amount
-                      </p>
+  <p className="text-gray-700 uppercase">
+    Amount
+  </p>
 
-                      <p className="font-semibold text-gray-800 mt-1">
-                        ₹{booking.price}
-                      </p>
-                    </div>
+  <div className="flex flex-wrap items-center gap-2 mt-1">
+    <p className="font-bold text-gray-900 text-lg">
+      ₹{booking.price ?? 0}
+    </p>
+
+    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+      {getPriceType(booking.serviceId?.priceType)}
+    </span>
+  </div>
+</div>
                   </div>
 
                   {/* Service address */}

@@ -15,24 +15,13 @@ const workerSchema = new mongoose.Schema(
             required: true
         },
 
-        category: {
-            type: String,
-            required: true,
-            trim: true,
-            enum: [
-                "Plumber",
-                "Electrician",
-                "Carpenter",
-                "Painter",
-                "Cleaner",
-                "Gardener",
-                "Driver",
-                "Caregiver",
-                "Technician",
-                "Domestic Helper",
-                "Caregivers"
-            ]
-        },
+        
+category: {
+    type: String,
+    required: true,
+    trim: true
+},
+
 
 
         skills: {

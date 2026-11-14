@@ -46,26 +46,17 @@ const validateService = ({
         );
     }
 
-    if (
-        typeof price !== "number" ||
-        !Number.isFinite(price) ||
-        price < 0
-    ) {
-        throw new Error("Price must be a valid non-negative number");
+    if (price !== undefined && price !== null) {
+    if (typeof price !== "number" || price <= 0) {
+        throw new Error("Valid price is required");
     }
 
-    const allowedPriceTypes = [
-        "per_hour",
-        "per_visit",
-        "per_day",
-        "fixed"
-    ];
-
-    if (!allowedPriceTypes.includes(priceType)) {
-        throw new Error(
-            "Invalid price type. Allowed values: per_hour, per_visit, per_day, fixed"
-        );
+    if (!["per_hour", "per_visit", "per_day", "fixed"].includes(priceType)) {
+        throw new Error("Invalid price type");
     }
+}
+
+    
 };
 
 module.exports = {

@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { getActiveServices } from "../services/serviceService";
+// import { getActiveServices } from "../services/serviceService";
+import {
+    getActiveServices,
+    getServiceCategories
+} from "../services/serviceService";
 import {
     ArrowLeft,
     HardHat,
@@ -31,18 +35,6 @@ const DAYS = [
     "Friday",
     "Saturday",
     "Sunday",
-];
-
-const CATEGORIES = [
-    "Plumber",
-    "Electrician",
-    "Carpenter",
-    "Painter",
-    "Cleaner",
-    "Gardener",
-    "Driver",
-    "Caregiver",
-    "Technician",
 ];
 
 const emptySkill = {
@@ -136,6 +128,8 @@ const WorkerProfileForm = ({
 
     const [activeServices, setActiveServices] = useState([]);
     const [servicesLoading, setServicesLoading] = useState(false);
+    const [categories, setCategories] = useState([]);
+    const [categoriesLoading, setCategoriesLoading] = useState(false);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -196,8 +190,53 @@ const WorkerProfileForm = ({
     ]);
 
     useEffect(() => {
-        const fetchServices = async () => {
+        let cancelled = false;
+
+        const fetchCategories = async () => {
             if (!formData.cooperativeId) {
+                setCategories([]);
+                return;
+            }
+
+            try {
+                setCategoriesLoading(true);
+
+                const response = await getServiceCategories(
+                    formData.cooperativeId
+                );
+
+                if (!cancelled) {
+                    setCategories(response.data.categories || []);
+                }
+
+            } catch (error) {
+                console.error("Failed to fetch categories:", error);
+
+                if (!cancelled) {
+                    setCategories([]);
+                }
+
+            } finally {
+                if (!cancelled) {
+                    setCategoriesLoading(false);
+                }
+            }
+        };
+
+        fetchCategories();
+
+        return () => {
+            cancelled = true;
+        };
+
+    }, [formData.cooperativeId]);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        const fetchServices = async () => {
+
+            if (!formData.cooperativeId || !formData.category) {
                 setActiveServices([]);
                 return;
             }
@@ -205,41 +244,66 @@ const WorkerProfileForm = ({
             try {
                 setServicesLoading(true);
 
-                const response = await getActiveServices();
+                const response = await getActiveServices(
+                    formData.cooperativeId,
+                    formData.category
+                );
 
-                const services = response.data.services || [];
-
-                const filteredServices = services.filter((service) => {
-                    const serviceCooperativeId =
-                        typeof service.cooperativeId === "object"
-                            ? service.cooperativeId?._id
-                            : service.cooperativeId;
-
-                    return (
-                        serviceCooperativeId === formData.cooperativeId
-                    );
-                });
-
-                setActiveServices(filteredServices);
+                if (!cancelled) {
+                    setActiveServices(response.data.services || []);
+                }
 
             } catch (error) {
                 console.error("Failed to fetch services:", error);
-                setActiveServices([]);
+
+                if (!cancelled) {
+                    setActiveServices([]);
+                }
+
             } finally {
-                setServicesLoading(false);
+                if (!cancelled) {
+                    setServicesLoading(false);
+                }
             }
         };
 
         fetchServices();
-    }, [formData.cooperativeId]);
+
+        return () => {
+            cancelled = true;
+        };
+
+    }, [formData.cooperativeId, formData.category]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+        setFormData((prev) => {
+
+            if (name === "cooperativeId") {
+                return {
+                    ...prev,
+                    cooperativeId: value,
+                    category: "",
+                    skills: [{ ...emptySkill }]
+                };
+            }
+
+            if (name === "category") {
+                return {
+                    ...prev,
+                    category: value,
+                    skills: [{ ...emptySkill }]
+                };
+            }
+
+            return {
+                ...prev,
+                [name]: value,
+            };
+        });
+
+        setError("");
     };
 
     // Skills
@@ -444,13 +508,13 @@ const WorkerProfileForm = ({
 
 
         const payload = {
-    cooperativeId: formData.cooperativeId,
-    category: formData.category.trim(),
+            cooperativeId: formData.cooperativeId,
+            category: formData.category.trim(),
 
-    skills: validSkills.map((skill) => ({
-        serviceId: skill.serviceId,
-        experience: Number(skill.experience),
-    })),
+            skills: validSkills.map((skill) => ({
+                serviceId: skill.serviceId,
+                experience: Number(skill.experience),
+            })),
 
             certifications: formData.certifications
                 .map((cert) => cert.trim())
@@ -494,14 +558,14 @@ const WorkerProfileForm = ({
 
     /* ---------- UI-only: profile strength ---------- */
     const completedChecks = [
-    !!formData.cooperativeId,
-    !!formData.category,
-    formData.skills.some(
-        (skill) => skill.serviceId && skill.experience !== ""
-    ),
-    formData.workingHours.length > 0,
-    formData.latitude !== "" && formData.longitude !== "",
-];
+        !!formData.cooperativeId,
+        !!formData.category,
+        formData.skills.some(
+            (skill) => skill.serviceId && skill.experience !== ""
+        ),
+        formData.workingHours.length > 0,
+        formData.latitude !== "" && formData.longitude !== "",
+    ];
 
     const totalChecks = completedChecks.length;
     const doneChecks = completedChecks.filter(Boolean).length;
@@ -657,192 +721,199 @@ const WorkerProfileForm = ({
                                 Worker Category{" "}
                                 <span className="text-red-500">*</span>
                             </label>
-
                             <SelectWrapper icon={Wrench}>
                                 <select
                                     id="category"
                                     name="category"
                                     value={formData.category}
                                     onChange={handleChange}
+                                    disabled={
+                                        !formData.cooperativeId ||
+                                        categoriesLoading ||
+                                        categories.length === 0
+                                    }
                                     required
-                                    className={`${inputClass} cursor-pointer appearance-none pl-11 pr-11`}
+                                    className={`${inputClass} cursor-pointer appearance-none pl-11 pr-11 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500`}
                                 >
                                     <option value="">
-                                        Select Category
+                                        {!formData.cooperativeId
+                                            ? "First Select Cooperative"
+                                            : categoriesLoading
+                                                ? "Loading Categories..."
+                                                : categories.length === 0
+                                                    ? "No Categories Available"
+                                                    : "Select Category"}
                                     </option>
 
-                                    {CATEGORIES.map((category) => (
-                                        <option
-                                            key={category}
-                                            value={category}
-                                        >
+                                    {categories.map((category) => (
+                                        <option key={category} value={category}>
                                             {category}
                                         </option>
                                     ))}
                                 </select>
                             </SelectWrapper>
+
+
                         </div>
 
-                        
+
                     </div>
                 </section>
 
                 {/* Skills & Pricing */}
-                
-{/* Skills & Pricing */}
-<section className={sectionClass}>
-    <SectionHeader
-        icon={Wrench}
-        title="My Services & Experience"
-        subtitle="Select services offered by your cooperative and add your experience"
-        action={
-            <button
-                type="button"
-                onClick={addSkill}
-                disabled={!formData.cooperativeId || activeServices.length === 0}
-                className={`${smallBtnClass} disabled:cursor-not-allowed disabled:opacity-50`}
-            >
-                <Plus size={14} />
-                Add Service
-            </button>
-        }
-    />
+                <section className={sectionClass}>
+                    <SectionHeader
+                        icon={Wrench}
+                        title="My Services & Experience"
+                        subtitle="Select services offered by your cooperative and add your experience"
+                        action={
+                            <button
+                                type="button"
+                                onClick={addSkill}
+                                disabled={!formData.cooperativeId || activeServices.length === 0}
+                                className={`${smallBtnClass} disabled:cursor-not-allowed disabled:opacity-50`}
+                            >
+                                <Plus size={14} />
+                                Add Service
+                            </button>
+                        }
+                    />
 
-    {!formData.cooperativeId ? (
-        <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-700">
-            Please select a cooperative first.
-        </p>
-    ) : servicesLoading ? (
-        <p className="flex items-center gap-2 text-sm text-slate-500">
-            <Loader2 size={16} className="animate-spin" />
-            Loading available services...
-        </p>
-    ) : activeServices.length === 0 ? (
-        <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-700">
-            No active services found for this cooperative.
-        </p>
-    ) : (
-        <div className="space-y-4">
-            {formData.skills.map((skill, index) => {
-                const selectedService = activeServices.find(
-                    (service) => service._id === skill.serviceId
-                );
+                    {!formData.cooperativeId ? (
+                        <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-700">
+                            Please select a cooperative first.
+                        </p>
+                    ) : servicesLoading ? (
+                        <p className="flex items-center gap-2 text-sm text-slate-500">
+                            <Loader2 size={16} className="animate-spin" />
+                            Loading available services...
+                        </p>
+                    ) : activeServices.length === 0 ? (
+                        <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-700">
+                            No active services found for this cooperative.
+                        </p>
+                    ) : (
+                        <div className="space-y-4">
+                            {formData.skills.map((skill, index) => {
+                                const selectedService = activeServices.find(
+                                    (service) => service._id === skill.serviceId
+                                );
 
-                return (
-                    <div
-                        key={index}
-                        className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4"
-                    >
-                        <div className="mb-3 flex items-center justify-between">
-                            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
-                                Service {index + 1}
-                            </span>
-
-                            {formData.skills.length > 1 && (
-                                <button
-                                    type="button"
-                                    onClick={() => removeSkill(index)}
-                                    className="flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-500"
-                                >
-                                    <Trash2 size={13} />
-                                    Remove
-                                </button>
-                            )}
-                        </div>
-
-                        <div className="space-y-3">
-                            <div>
-                                <label className={labelClass}>
-                                    Select Service
-                                </label>
-
-                                <div className="relative">
-                                    <select
-                                        value={skill.serviceId}
-                                        onChange={(e) =>
-                                            handleSkillChange(
-                                                index,
-                                                "serviceId",
-                                                e.target.value
-                                            )
-                                        }
-                                        className={`${inputClass} appearance-none pr-10`}
-                                        required
+                                return (
+                                    <div
+                                        key={index}
+                                        className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 sm:p-4"
                                     >
-                                        <option value="">
-                                            Choose a service
-                                        </option>
+                                        <div className="mb-3 flex items-center justify-between">
+                                            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                                                Service {index + 1}
+                                            </span>
 
-                                        {activeServices.map((service) => (
-                                            <option
-                                                key={service._id}
-                                                value={service._id}
-                                                disabled={formData.skills.some(
-                                                    (item, itemIndex) =>
-                                                        itemIndex !== index &&
-                                                        item.serviceId === service._id
-                                                )}
-                                            >
-                                                {service.name}
-                                            </option>
-                                        ))}
-                                    </select>
+                                            {formData.skills.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeSkill(index)}
+                                                    className="flex items-center gap-1 rounded-lg bg-red-50 px-2.5 py-1.5 text-xs font-semibold text-red-500"
+                                                >
+                                                    <Trash2 size={13} />
+                                                    Remove
+                                                </button>
+                                            )}
+                                        </div>
 
-                                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
-                                        <ChevronDown size={16} />
-                                    </span>
-                                </div>
-                            </div>
+                                        <div className="space-y-3">
+                                            <div>
+                                                <label className={labelClass}>
+                                                    Select Service
+                                                </label>
 
-                            {selectedService && (
-                                <div className="rounded-lg border border-indigo-100 bg-indigo-50 p-3">
-                                    <p className="text-xs font-semibold text-indigo-700">
-                                        Admin-defined service charge
-                                    </p>
+                                                <div className="relative">
+                                                    <select
+                                                        value={skill.serviceId}
+                                                        onChange={(e) =>
+                                                            handleSkillChange(
+                                                                index,
+                                                                "serviceId",
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        className={`${inputClass} appearance-none pr-10`}
+                                                        required
+                                                    >
+                                                        <option value="">
+                                                            Choose a service
+                                                        </option>
 
-                                    <p className="mt-1 text-sm font-bold text-slate-900">
-                                        ₹{selectedService.price} / {
-                                            selectedService.priceType?.replace("_", " ")
-                                        }
-                                    </p>
+                                                        {activeServices.map((service) => (
+                                                            <option
+                                                                key={service._id}
+                                                                value={service._id}
+                                                                disabled={formData.skills.some(
+                                                                    (item, itemIndex) =>
+                                                                        itemIndex !== index &&
+                                                                        item.serviceId === service._id
+                                                                )}
+                                                            >
+                                                                {service.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
 
-                                    <p className="mt-1 text-xs text-slate-500">
-                                        Pricing is managed by your cooperative admin.
-                                    </p>
-                                </div>
-                            )}
+                                                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+                                                        <ChevronDown size={16} />
+                                                    </span>
+                                                </div>
+                                            </div>
 
-                            <div>
-                                <label className={labelClass}>
-                                    Experience in this service (Years)
-                                </label>
+                                            {selectedService && (
+                                                <div className="rounded-lg border border-indigo-100 bg-indigo-50 p-3">
+                                                    <p className="text-xs font-semibold text-indigo-700">
+                                                        Admin-defined service charge
+                                                    </p>
 
-                                <input
-                                    type="number"
-                                    min="0"
-                                    step="1"
-                                    value={skill.experience}
-                                    onChange={(e) =>
-                                        handleSkillChange(
-                                            index,
-                                            "experience",
-                                            e.target.value
-                                        )
-                                    }
-                                    placeholder="e.g. 3"
-                                    className={inputClass}
-                                    required
-                                />
-                            </div>
+                                                    <p className="mt-1 text-sm font-bold text-slate-900">
+                                                        ₹{selectedService.price} / {
+                                                            selectedService.priceType?.replace("_", " ")
+                                                        }
+                                                    </p>
+
+                                                    <p className="mt-1 text-xs text-slate-500">
+                                                        Pricing is managed by your cooperative admin.
+                                                    </p>
+                                                </div>
+                                            )}
+
+                                            <div>
+                                                <label className={labelClass}>
+                                                    Experience in this service (Years)
+                                                </label>
+
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="1"
+                                                    value={skill.experience}
+                                                    onChange={(e) =>
+                                                        handleSkillChange(
+                                                            index,
+                                                            "experience",
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    placeholder="e.g. 3"
+                                                    className={inputClass}
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
-                    </div>
-                );
-            })}
-        </div>
-    )}
-</section>
+                    )}
+                </section>
 
-            
+
                 {/* Certifications */}
                 <section className={sectionClass}>
                     <SectionHeader
@@ -922,8 +993,8 @@ const WorkerProfileForm = ({
                                 <div
                                     key={day}
                                     className={`rounded-xl border p-3 transition sm:p-4 ${selected
-                                            ? "border-indigo-200 bg-indigo-50/60"
-                                            : "border-slate-200 bg-white"
+                                        ? "border-indigo-200 bg-indigo-50/60"
+                                        : "border-slate-200 bg-white"
                                         }`}
                                 >
                                     <label className="flex cursor-pointer items-center gap-3">
@@ -938,8 +1009,8 @@ const WorkerProfileForm = ({
 
                                         <span
                                             className={`text-xs font-bold uppercase tracking-wide sm:text-sm ${selected
-                                                    ? "text-slate-900"
-                                                    : "text-slate-500"
+                                                ? "text-slate-900"
+                                                : "text-slate-500"
                                                 }`}
                                         >
                                             {day}
@@ -947,8 +1018,8 @@ const WorkerProfileForm = ({
 
                                         <span
                                             className={`ml-auto rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${selected
-                                                    ? "bg-emerald-100 text-emerald-700"
-                                                    : "bg-slate-100 text-slate-400"
+                                                ? "bg-emerald-100 text-emerald-700"
+                                                : "bg-slate-100 text-slate-400"
                                                 }`}
                                         >
                                             {selected

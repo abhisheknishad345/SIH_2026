@@ -1,7 +1,7 @@
 const serviceService = require("../services/service.service");
 const { validateService } = require("../validator/service.validator");
 
-const createPaidService = async (req, res) => {
+const createService = async (req, res) => {
 
     try {
 
@@ -15,7 +15,7 @@ const createPaidService = async (req, res) => {
             priceType
         } = req.body;
 
-        const service = await serviceService.createPaidService({
+        const service = await serviceService.createService({
             adminId: req.user._id,
             name,
             description,
@@ -38,44 +38,40 @@ const createPaidService = async (req, res) => {
     }
 };
 
-const createService = async (req, res) => {
+
+const getServiceCategories = async (req, res) => {
 
     try {
+        const { cooperativeId } = req.query;
 
-        validateService(req.body);
+        const categories = await serviceService.getServiceCategories(
+            cooperativeId
+        );
 
-        const {
-            name,
-            description,
-            category,
-        } = req.body;
-
-        const service = await serviceService.createService({
-            adminId: req.user._id,
-            name,
-            description,
-            category
-        });
-
-        res.status(201).json({
-            message: "Service created successfully",
-            service
+        res.status(200).json({
+            message: "Categories fetched successfully",
+            categories
         });
 
     } catch (error) {
-
         res.status(400).json({
             message: error.message
         });
-
     }
 };
+
+
+
 
 const getActiveServices = async (req, res) => {
 
     try {
+        const { cooperativeId, category } = req.query;
 
-        const services = await serviceService.getActiveServices();
+        const services = await serviceService.getActiveServices({
+            cooperativeId,
+            category
+        });
 
         res.status(200).json({
             message: "Services fetched successfully",
@@ -83,13 +79,13 @@ const getActiveServices = async (req, res) => {
         });
 
     } catch (error) {
-
-        res.status(500).json({
+        res.status(400).json({
             message: error.message
         });
-
     }
 };
+
+
 
 const getServiceWorkers = async (req, res) => {
 
@@ -119,5 +115,7 @@ const getServiceWorkers = async (req, res) => {
 
 
 module.exports = {
-    createPaidService, createService, getActiveServices, getServiceWorkers
+    createService,
+    getActiveServices, getServiceWorkers,
+    getServiceCategories
 };

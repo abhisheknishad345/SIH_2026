@@ -27,25 +27,26 @@ const WorkerCreateProfile = ({ cooperativeId }) => {
                 fetchCooperatives();
             }, []);
 
-    const handleCreate = async (payload) => {
-        console.log(payload)
-        try {
-            await createWorkerProfile({
-                ...payload,
-                cooperativeId,
-            });
+    
+const handleCreate = async (payload) => {
+    console.log("Worker Profile Payload:", payload);
 
-            navigate("/worker/profile-pending");
-        } catch (err) {
-            console.log("hi")
-            setError(
-                err.response?.data?.message ||
-                    "Unable to create worker profile."
-            );
+    try {
+        await createWorkerProfile(payload);
 
-            throw err;
-        }
-    };
+        navigate("/worker/profile-pending");
+    } catch (err) {
+        console.error("Create Worker Error:", err);
+
+        setError(
+            err.response?.data?.message ||
+            "Unable to create worker profile."
+        );
+
+        throw err;
+    }
+};
+
 
     return (
         <div className="mx-auto max-w-4xl p-4">
