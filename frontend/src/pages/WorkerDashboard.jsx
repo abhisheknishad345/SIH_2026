@@ -20,6 +20,7 @@ import {
   ArrowUpRight,
   ShieldCheck,
   AlertCircle,
+  MessageCircle,
 } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
@@ -30,6 +31,7 @@ import { useAuth } from "../context/AuthContext";
 const navigation = [
   { label: "Dashboard", path: "/worker/dashboard", icon: LayoutDashboard, active: true },
   { label: "My Bookings", path: "/worker/bookings", icon: CalendarDays },
+  { label: "Messages", path: "/worker/chat", icon: MessageCircle },
   { label: "Earnings", path: "/worker/earning", icon: Wallet },
   { label: "My Profile", path: "/worker/profile", icon: UserRound },
   { label: "Settings", icon: Settings },
