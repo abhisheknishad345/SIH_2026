@@ -37,6 +37,15 @@ const getWorkerAndAdmin = async (user, workerId) => {
       }
     }
 
+    // Ignore stale admin records whose linked User account no longer exists.
+    for (const candidate of admins) {
+      const linkedUser = await User.findById(candidate.userId).select("_id");
+      if (linkedUser) {
+        admin = candidate;
+        break;
+      }
+    }
+
     if (!admin) {
       throw new Error("No active cooperative admin with a valid user account is linked to your cooperative. Please contact the super admin.");
     }
