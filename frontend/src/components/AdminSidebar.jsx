@@ -8,6 +8,7 @@ import {
   UserX,
   BriefcaseBusiness,
   CalendarDays,
+  MessageCircle,
   Menu,
   X,
   LogOut,
@@ -45,6 +46,11 @@ const navigation = [
     name: "Bookings",
     path: "/cooperative-admin/bookings",
     icon: CalendarDays,
+  },
+  {
+    name: "Messages",
+    path: "/cooperative-admin/chat",
+    icon: MessageCircle,
   },
 ];
 
