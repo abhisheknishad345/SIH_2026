@@ -27,6 +27,7 @@ import RejectWorker from "./pages/RejectWorker";
 import { AuthProvider } from "./context/AuthContext";
 import ApprovedWorkers from "./pages/ApprovedWorkers";
 import RejectedWorkers from "./pages/RejectedWorkers";
+import CooperativeChat from "./pages/CooperativeChat";
 
 
 function App() {
@@ -67,6 +68,8 @@ function App() {
           />
           <Route path="/worker/dashboard" element={<WorkerDashboard />} />
           <Route path="/worker/bookings" element={<WorkerBookings />} />
+          <Route path="/worker/chat" element={<CooperativeChat />} />
+          <Route path="/cooperative-admin/chat" element={<CooperativeChat />} />
           <Route path="/cooperative-admin" element={<AdminDashboard />} />
           <Route path="/admin" element={<SuperAdminDashboard />} />
 
