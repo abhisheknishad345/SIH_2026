@@ -111,6 +111,15 @@ function RejectedWorkers() {
                     </div>
                   </div>
 
+                  <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4">
+                    <p className="text-sm font-semibold uppercase text-red-800">
+                      Rejection Reason
+                    </p>
+                    <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-red-700">
+                      {worker.rejectionReason || "No reason was recorded."}
+                    </p>
+                  </div>
+
                   <div className="mt-6 grid grid-cols-2 gap-4">
                     <div className="rounded-xl bg-gray-200 p-3">
                       <p className="text-sm font-bold uppercase text-gray-900">
