@@ -124,7 +124,7 @@ function WorkerProfilePending() {
 
                     <button
                         onClick={() =>
-                            navigate("/worker/edit-profile")
+                            navigate("/worker/rejected")
                         }
                         className="mt-6 w-full rounded-xl bg-indigo-600 px-5 py-3.5 text-sm font-semibold text-white hover:bg-indigo-700 cursor-pointer"
                     >
