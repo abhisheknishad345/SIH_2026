@@ -3,6 +3,7 @@ import { MessageCircle, Send, RefreshCw, UserRound, ArrowLeft } from "lucide-rea
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
+import AdminSidebar from "../components/AdminSidebar";
 
 export default function CooperativeChat() {
   const { user } = useAuth();
@@ -85,7 +86,7 @@ export default function CooperativeChat() {
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
       {isAdmin ? (
-        <aside className="hidden lg:block"><div className="fixed inset-y-0 left-0 w-64"><div className="h-full"><div className="flex h-20 items-center border-b border-slate-700 bg-slate-900 px-6 text-xl font-bold text-indigo-400">TechConnect</div><div className="bg-slate-900 p-5 text-sm text-slate-300">Cooperative Admin</div></div></div></aside>
+        <AdminSidebar />
       ) : (
         <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r border-slate-200 bg-white">
           <div className="border-b border-slate-200 p-6"><h1 className="text-2xl font-extrabold text-emerald-700">TechConnect</h1><p className="text-sm text-slate-500">Worker Portal</p></div>
