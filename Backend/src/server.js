@@ -16,6 +16,7 @@ const superAdminBootstrapRoutes = require("./routes/super-admin-bootstrap.routes
 const cooperativeAdminRoutes = require("./routes/cooperative-admin.routes");
 const communityServiceRoutes = require("./routes/communityService.routes");
 const serviceRoutes = require("./routes/service.routes");
+const chatRoutes = require("./routes/chat.routes");
 
 const dns = require('dns');
 dns.setDefaultResultOrder('ipv4first');
@@ -50,6 +51,7 @@ app.use("/super-admin/bootstrap", superAdminBootstrapRoutes);
 app.use("/cooperative-admins", cooperativeAdminRoutes);
 app.use("/community-services", communityServiceRoutes);
 app.use("/services", serviceRoutes);
+app.use("/chats", chatRoutes);
 
 
 const PORT = process.env.PORT || 5000;
