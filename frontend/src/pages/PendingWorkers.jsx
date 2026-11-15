@@ -11,6 +11,8 @@ function PendingWorkers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState("");
+  const [rejectingWorker, setRejectingWorker] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState("");
 
   const fetchPendingWorkers = async () => {
     try {
@@ -57,29 +59,29 @@ function PendingWorkers() {
     }
   };
 
-  const handleReject = async (workerId) => {
-    if (!workerId) {
-      setError("Invalid worker.");
+  const handleReject = async () => {
+    if (!rejectingWorker) return;
+
+    const reason = rejectionReason.trim();
+    if (!reason) {
+      setError("Please enter a rejection reason.");
       return;
     }
 
-    const confirmed = window.confirm(
-      "Are you sure you want to reject this worker profile?"
-    );
-
-    if (!confirmed) return;
-
     try {
-      setActionLoading(workerId);
+      setActionLoading(rejectingWorker._id);
+      setError("");
 
-      await api.put(`/workers/${workerId}/reject`);
-
-      setWorkers((prev) =>
-        prev.filter(
-          (worker) => worker._id !== workerId
-        )
+      await api.put(
+        `/workers/${rejectingWorker._id}/reject`,
+        { reason }
       );
 
+      setWorkers((prev) =>
+        prev.filter((worker) => worker._id !== rejectingWorker._id)
+      );
+      setRejectingWorker(null);
+      setRejectionReason("");
     } catch (err) {
       setError(
         err.response?.data?.message ||
@@ -313,7 +315,11 @@ function PendingWorkers() {
                   <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
 
                     <button
-                      onClick={() => handleReject(worker._id)}
+                      onClick={() => {
+                        setError("");
+                        setRejectingWorker(worker);
+                        setRejectionReason("");
+                      }}
                       disabled={busy}
                       className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-md font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
                     >
@@ -338,6 +344,60 @@ function PendingWorkers() {
         )}
 
       </div>
+
+      {rejectingWorker && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+            <h2 className="text-xl font-bold text-gray-900">
+              Reject Worker Profile
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Enter a clear reason for rejecting {rejectingWorker.userId?.fullName || "this worker"}.
+              The worker will be able to see this feedback.
+            </p>
+
+            <label className="mt-5 block text-sm font-semibold text-gray-800" htmlFor="rejection-reason">
+              Rejection reason <span className="text-red-600">*</span>
+            </label>
+            <textarea
+              id="rejection-reason"
+              value={rejectionReason}
+              onChange={(event) => setRejectionReason(event.target.value)}
+              maxLength={1000}
+              rows={5}
+              placeholder="e.g. Please upload a valid skill certificate and correct your service location."
+              className="mt-2 w-full resize-y rounded-xl border border-gray-300 p-3 text-sm text-gray-900 outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100"
+            />
+            <p className="mt-1 text-right text-xs text-gray-500">
+              {rejectionReason.length}/1000
+            </p>
+
+            <div className="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setRejectingWorker(null);
+                  setRejectionReason("");
+                  setError("");
+                }}
+                disabled={Boolean(actionLoading)}
+                className="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleReject}
+                disabled={Boolean(actionLoading) || !rejectionReason.trim()}
+                className="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {actionLoading ? "Rejecting..." : "Confirm Rejection"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       </main>
 
     </div>
