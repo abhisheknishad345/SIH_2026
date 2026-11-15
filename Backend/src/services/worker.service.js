@@ -250,6 +250,7 @@ const resubmitWorkerProfile = async (userId) => {
     }
 
     worker.verificationStatus = "pending";
+    worker.rejectionReason = "";
 
     await worker.save();
 
@@ -472,13 +473,14 @@ const verifyWorker = async ({ adminId, workerId }) => {
 
     worker.isVerified = true;
     worker.verificationStatus = "approved";
+    worker.rejectionReason = "";
 
     await worker.save();
 
     return worker;
 };
 
-const rejectWorker = async ({ adminId, workerId }) => {
+const rejectWorker = async ({ adminId, workerId, reason }) => {
 
     if (!mongoose.Types.ObjectId.isValid(workerId)) {
         throw new Error("Invalid worker ID");
@@ -510,8 +512,17 @@ const rejectWorker = async ({ adminId, workerId }) => {
         throw new Error("Worker is already rejected");
     }
 
+    if (typeof reason !== "string" || !reason.trim()) {
+        throw new Error("Rejection reason is required");
+    }
+
+    if (reason.trim().length > 1000) {
+        throw new Error("Rejection reason cannot exceed 1000 characters");
+    }
+
     worker.isVerified = false;
     worker.verificationStatus = "rejected";
+    worker.rejectionReason = reason.trim();
 
     await worker.save();
 
