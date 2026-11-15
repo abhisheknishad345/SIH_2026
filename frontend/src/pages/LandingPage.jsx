@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import {
     ArrowRight,
     ArrowUpRight,
-    CheckCircle2,
     ChevronDown,
     Clock3,
     MapPin,
