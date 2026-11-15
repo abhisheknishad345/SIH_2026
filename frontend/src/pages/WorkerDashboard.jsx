@@ -115,7 +115,7 @@ export default function WorkerDashboard() {
         }
 
         if (worker.verificationStatus === "rejected") {
-          navigate("/worker/edit-profile", {
+          navigate("/worker/rejected", {
             replace: true,
           });
           return;
