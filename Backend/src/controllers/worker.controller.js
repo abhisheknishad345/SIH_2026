@@ -184,10 +184,12 @@ const rejectWorker = async (req, res) => {
     try {
 
         const { workerId } = req.params;
+        const { reason } = req.body;
 
         const worker = await workerService.rejectWorker({
             adminId: req.user._id,
-            workerId
+            workerId,
+            reason
         });
 
         res.status(200).json({
