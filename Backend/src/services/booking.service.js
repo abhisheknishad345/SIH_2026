@@ -4,6 +4,64 @@ const Worker = require("../models/Worker");
 const Service = require("../models/Service");
 const mongoose = require("mongoose");
 
+const validateWorkerWorkingHours = (worker, bookingStart, duration) => {
+    if (
+        !(bookingStart instanceof Date) ||
+        Number.isNaN(bookingStart.getTime()) ||
+        !Number.isFinite(Number(duration)) ||
+        Number(duration) <= 0
+    ) {
+        throw new Error("Invalid booking date or duration");
+    }
+
+    const bookingEnd = new Date(
+        bookingStart.getTime() + Number(duration) * 60 * 1000
+    );
+
+    const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Kolkata",
+        weekday: "long",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23"
+    });
+
+    const getDateParts = (date) => {
+        const parts = formatter.formatToParts(date);
+        return Object.fromEntries(
+            parts.map(({ type, value }) => [type, value])
+        );
+    };
+
+    const startParts = getDateParts(bookingStart);
+    const endParts = getDateParts(bookingEnd);
+
+    // A booking must start and finish on the same working day.
+    if (startParts.weekday !== endParts.weekday) {
+        throw new Error("Booking must be within the worker's working day");
+    }
+
+    const workingDay = (worker.workingHours || []).find(
+        (item) => item.day === startParts.weekday
+    );
+
+    if (!workingDay || !workingDay.isWorking) {
+        throw new Error(`Worker is not working on ${startParts.weekday}`);
+    }
+
+    const bookingStartTime = `${startParts.hour}:${startParts.minute}`;
+    const bookingEndTime = `${endParts.hour}:${endParts.minute}`;
+
+    if (
+        bookingStartTime < workingDay.startTime ||
+        bookingEndTime > workingDay.endTime
+    ) {
+        throw new Error(
+            `Worker is available on ${startParts.weekday} only between ${workingDay.startTime} and ${workingDay.endTime}`
+        );
+    }
+};
+
 const createBooking = async ({
     customerId,
     workerId,
@@ -33,6 +91,9 @@ const createBooking = async ({
     if (!worker.isAvailable) {
         throw new Error("Worker is currently unavailable");
     }
+
+    // Check the selected date and complete booking duration against worker working hours.
+    validateWorkerWorkingHours(worker, new Date(scheduledAt), duration);
 
     // 4. Check service exists
     const service = await Service.findOne({
