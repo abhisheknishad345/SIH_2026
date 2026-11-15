@@ -381,7 +381,7 @@ function PendingWorkers() {
                   setError("");
                 }}
                 disabled={Boolean(actionLoading)}
-                className="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+                className="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-60 cursor-pointer"
               >
                 Cancel
               </button>
@@ -389,7 +389,7 @@ function PendingWorkers() {
                 type="button"
                 onClick={handleReject}
                 disabled={Boolean(actionLoading) || !rejectionReason.trim()}
-                className="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
               >
                 {actionLoading ? "Rejecting..." : "Confirm Rejection"}
               </button>

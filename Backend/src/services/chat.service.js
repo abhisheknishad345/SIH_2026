@@ -23,13 +23,22 @@ const getWorkerAndAdmin = async (user, workerId) => {
       throw new Error("You can only access your own cooperative chat");
     }
 
-    admin = await CooperativeAdmin.findOne({
+    const admins = await CooperativeAdmin.find({
       cooperativeId: worker.cooperativeId,
       isActive: true
-    });
+    });  
+
+    // Ignore stale admin records whose linked User account no longer exists.
+    for (const candidate of admins) {
+      const linkedUser = await User.findById(candidate.userId).select("_id");
+      if (linkedUser) {
+        admin = candidate;
+        break;
+      }
+    }
 
     if (!admin) {
-      throw new Error("No active cooperative admin is available");
+      throw new Error("No active cooperative admin with a valid user account is linked to your cooperative. Please contact the super admin.");
     }
   } else if (user.role === "cooperative_admin") {
     admin = await CooperativeAdmin.findOne({
@@ -66,6 +75,11 @@ const getChatContacts = async (user) => {
   if (user.role === "worker") {
     const { worker, admin } = await getWorkerAndAdmin(user);
     const adminUser = await User.findById(admin.userId).select("fullName email");
+
+    // Guard against orphaned CooperativeAdmin records instead of throwing a null _id error.
+    if (!adminUser) {
+      throw new Error("Your cooperative admin record is not linked to a valid user account. Please contact the super admin.");
+    }
 
     return [{
       workerId: worker._id,

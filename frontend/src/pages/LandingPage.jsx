@@ -57,7 +57,7 @@ function LandingPage() {
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#080b0a] text-zinc-100 selection:bg-lime-300 selection:text-black">
-      <div className="pointer-events-none fixed inset-0 -z-0 opacity-[0.12]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px)", backgroundSize: "64px 64px" }} />
+      <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.12]" style={{ backgroundImage: "linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px)", backgroundSize: "64px 64px" }} />
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#080b0a]/90 backdrop-blur-xl">
         <nav className="relative mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
           <Link to="/" className="flex items-center gap-3">
@@ -96,7 +96,7 @@ function LandingPage() {
             <form onSubmit={handleSearch} className="mt-9 max-w-2xl rounded-2xl border border-white/10 bg-[#111714] p-2 shadow-2xl shadow-black/40 sm:flex sm:items-center">
               <label className="flex min-w-0 flex-1 items-center gap-3 px-3 py-3">
                 <Wrench size={18} className="shrink-0 text-lime-300" />
-                <select value={service} onChange={(e) => setService(e.target.value)} aria-label="Select a service" className="w-full min-w-0 bg-transparent text-sm text-zinc-200 outline-none [color-scheme:dark]">
+                <select value={service} onChange={(e) => setService(e.target.value)} aria-label="Select a service" className="w-full min-w-0 bg-transparent text-sm text-zinc-200 outline-none scheme:dark">
                   <option value="">What do you need?</option>
                   {SERVICES.map((item) => <option key={item.title} value={item.title}>{item.title}</option>)}
                 </select>
@@ -115,23 +115,23 @@ function LandingPage() {
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-[560px]">
-            <div className="absolute -inset-8 rounded-full bg-lime-300/[0.08] blur-3xl" />
-            <div className="relative rounded-[2rem] border border-white/10 bg-[#111714] p-4 shadow-2xl shadow-black/50 sm:p-5">
+          <div className="relative mx-auto w-full max-w-140">
+            <div className="absolute -inset-8 rounded-full bg-lime-300/8 blur-3xl" />
+            <div className="relative rounded-4xl border border-white/10 bg-[#111714] p-4 shadow-2xl shadow-black/50 sm:p-5">
               <div className="flex items-center justify-between border-b border-white/10 px-1 pb-4">
                 <div><p className="text-sm font-semibold text-white">Local professionals</p><p className="mt-1 text-xs text-zinc-500">A preview of what you can discover</p></div>
                 <span className="flex items-center gap-1.5 rounded-full border border-lime-300/20 bg-lime-300/10 px-3 py-1.5 text-[11px] font-semibold text-lime-200"><span className="h-1.5 w-1.5 rounded-full bg-lime-300" /> Discover</span>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="relative col-span-2 h-48 overflow-hidden rounded-2xl sm:h-56">
-                  <img src="https://images.unsplash.com/photo-1621905236667-5b7f5e7b1a2c?w=1200&auto=format&fit=crop&q=85" alt="Technician working on a home repair" className="h-full w-full object-cover opacity-75" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent" />
+                  <img src="https://images.unsplash.com/photo-1676210134188-4c05dd172f89?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D" alt="Technician working on a home repair" className="h-full w-full object-cover opacity-75" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/10 to-transparent" />
                   <div className="absolute bottom-4 left-4"><p className="text-xs font-medium text-lime-200">HELP AROUND THE CORNER</p><p className="mt-1 text-xl font-bold text-white">Skilled hands. Peace of mind.</p></div>
                 </div>
                 <div className="rounded-xl border border-white/10 bg-[#171f1a] p-4"><div className="flex items-center gap-2 text-lime-300"><ShieldCheck size={17} /><span className="text-xs font-semibold">Verified profiles</span></div><p className="mt-2 text-xs leading-5 text-zinc-400">Worker profiles reviewed before approval.</p></div>
                 <div className="rounded-xl border border-white/10 bg-[#171f1a] p-4"><div className="flex items-center gap-2 text-lime-300"><Clock3 size={17} /><span className="text-xs font-semibold">Better booking</span></div><p className="mt-2 text-xs leading-5 text-zinc-400">Choose a time that fits working hours.</p></div>
               </div>
-              <div className="mt-3 flex items-center justify-between rounded-xl border border-lime-300/15 bg-lime-300/[0.06] px-4 py-3">
+              <div className="mt-3 flex items-center justify-between rounded-xl border border-lime-300/15 bg-lime-300/6 px-4 py-3">
                 <div className="flex items-center gap-3"><div className="grid h-9 w-9 place-items-center rounded-lg bg-lime-300 text-black"><LocateFixed size={17} /></div><div><p className="text-xs font-semibold text-white">Start with your location</p><p className="mt-0.5 text-[11px] text-zinc-500">Discover services in your area</p></div></div>
                 <ArrowUpRight size={18} className="text-lime-300" />
               </div>
@@ -163,7 +163,7 @@ function LandingPage() {
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[.22em] text-lime-300">MEET THE PROFESSIONALS</p><h2 className="mt-4 text-3xl font-bold text-white sm:text-5xl">Good work starts with good people.</h2></div><p className="max-w-md text-sm leading-7 text-zinc-400">Explore technician profiles, their services and customer feedback before you send a request.</p></div>
           <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {TECHNICIANS.map((person) => <div key={person.name} className="overflow-hidden rounded-2xl border border-white/10 bg-[#111714]"><div className="relative h-52 overflow-hidden"><img src={person.image} alt={person.name} className="h-full w-full object-cover transition duration-500 hover:scale-105" /><div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" /><span className="absolute bottom-3 left-4 rounded-full border border-white/15 bg-black/40 px-3 py-1 text-[11px] text-white backdrop-blur">{person.trade}</span></div><div className="p-5"><div className="flex items-start justify-between gap-3"><div><h3 className="font-semibold text-white">{person.name}</h3><p className="mt-1 text-xs text-zinc-500">{person.area}</p></div><span className="flex items-center gap-1 rounded-lg bg-amber-300/10 px-2 py-1 text-xs font-semibold text-amber-200"><Star size={13} fill="currentColor" /> {person.rating}</span></div><div className="mt-4 flex flex-wrap gap-2">{person.skills.map((skill) => <span key={skill} className="rounded-full border border-white/10 px-3 py-1 text-[11px] text-zinc-400">{skill}</span>)}</div><button onClick={goSignup} className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg border border-white/15 py-3 text-sm font-semibold text-zinc-200 transition hover:border-lime-300/40 hover:bg-lime-300/5 hover:text-lime-200">Explore technicians <ArrowUpRight size={15} /></button></div></div>)}
+            {TECHNICIANS.map((person) => <div key={person.name} className="overflow-hidden rounded-2xl border border-white/10 bg-[#111714]"><div className="relative h-52 overflow-hidden"><img src={person.image} alt={person.name} className="h-full w-full object-cover transition duration-500 hover:scale-105" /><div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" /><span className="absolute bottom-3 left-4 rounded-full border border-white/15 bg-black/40 px-3 py-1 text-[11px] text-white backdrop-blur">{person.trade}</span></div><div className="p-5"><div className="flex items-start justify-between gap-3"><div><h3 className="font-semibold text-white">{person.name}</h3><p className="mt-1 text-xs text-zinc-500">{person.area}</p></div><span className="flex items-center gap-1 rounded-lg bg-amber-300/10 px-2 py-1 text-xs font-semibold text-amber-200"><Star size={13} fill="currentColor" /> {person.rating}</span></div><div className="mt-4 flex flex-wrap gap-2">{person.skills.map((skill) => <span key={skill} className="rounded-full border border-white/10 px-3 py-1 text-[11px] text-zinc-400">{skill}</span>)}</div><button onClick={goSignup} className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg border border-white/15 py-3 text-sm font-semibold text-zinc-200 transition hover:border-lime-300/40 hover:bg-lime-300/5 hover:text-lime-200">Explore technicians <ArrowUpRight size={15} /></button></div></div>)}
           </div>
           <p className="mt-4 text-center text-[10px] text-zinc-600">Sample profile cards for design preview · Live listings appear after searching</p>
         </div>

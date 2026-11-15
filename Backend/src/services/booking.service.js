@@ -361,7 +361,7 @@ const updateBookingStatus = async ({
             }
         },
         {
-            new: true
+           returnDocument: 'after'
         }
     );
 

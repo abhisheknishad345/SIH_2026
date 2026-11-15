@@ -4,7 +4,7 @@
 
 TechConnect is a web-based service discovery and booking platform designed to help customers find verified local technicians and service professionals. It supports cooperative-based worker management, service discovery, booking workflows, and customer feedback.
 
-> Academic minor project — SIH 2026.
+> Academic minor project — Minor Project 2026.
 
 ## Overview
 
