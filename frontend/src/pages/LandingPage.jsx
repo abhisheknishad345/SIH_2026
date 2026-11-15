@@ -133,7 +133,7 @@ function LandingPage() {
                         <Link to="/login" className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-indigo-700">
                             Log in
                         </Link>
-                        <Link to="/signup" className="inline-flex items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700">
+                        <Link to="/signup" className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700">
                             Get started <ArrowUpRight size={16} />
                         </Link>
                     </div>
@@ -159,7 +159,7 @@ function LandingPage() {
                             ))}
                             <div className="flex gap-3 border-t border-slate-200 pt-4">
                                 <Link to="/login" onClick={() => setMenuOpen(false)} className="flex-1 rounded-lg border border-slate-200 py-2.5 text-center text-sm">Log in</Link>
-                                <Link to="/signup" onClick={() => setMenuOpen(false)} className="flex-1 rounded-lg bg-indigo-500 py-2.5 text-center text-sm font-semibold">Get started</Link>
+                                <Link to="/signup" onClick={() => setMenuOpen(false)} className="flex-1 rounded-lg bg-indigo-600 py-2.5 text-center text-sm font-semibold text-white">Get started</Link>
                             </div>
                         </div>
                     </div>
@@ -175,7 +175,7 @@ function LandingPage() {
                             <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
                             Your neighbourhood service network
                         </div>
-                        <h1 className="max-w-2xl text-4xl font-semibold leading-[1.12] tracking-[-0.045em] text-white sm:text-5xl lg:text-6xl">
+                        <h1 className="max-w-2xl text-4xl font-semibold leading-[1.12] tracking-[-0.045em] text-slate-900 sm:text-5xl lg:text-6xl">
                             Skilled help, <span className="text-indigo-600">closer</span> to home.
                         </h1>
                         <p className="mt-6 max-w-xl text-base leading-8 text-slate-500 sm:text-lg">
@@ -205,7 +205,7 @@ function LandingPage() {
                                     className="w-full min-w-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-500"
                                 />
                             </label>
-                            <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-400">
+                            <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700">
                                 <Search size={17} /> Find help
                             </button>
                         </form>
@@ -223,7 +223,7 @@ function LandingPage() {
                         <div className="relative rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-200/70 sm:p-6">
                             <div className="flex items-center justify-between border-b border-slate-200 pb-5">
                                 <div>
-                                    <p className="text-sm font-semibold text-white">Nearby technicians</p>
+                                    <p className="text-sm font-semibold text-slate-900">Nearby technicians</p>
                                     <p className="mt-1 text-xs text-slate-500">A simple way to find local help</p>
                                 </div>
                                 <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700">Discover</span>
