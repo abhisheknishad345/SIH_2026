@@ -84,6 +84,13 @@ category: {
             default: "pending"
         },
 
+        rejectionReason: {
+            type: String,
+            trim: true,
+            maxlength: 1000,
+            default: ""
+        },
+
         isAvailable: {
             type: Boolean,
             default: true
