@@ -97,6 +97,19 @@ const WorkerProfileEdit = () => {
 
     return (
         <div className="mx-auto max-w-4xl space-y-5 p-4 ">
+            {worker.verificationStatus === "rejected" && (
+                <div className="rounded-2xl border border-red-200 bg-red-50 p-5">
+                    <h2 className="text-lg font-bold text-red-800">
+                        Profile Rejected
+                    </h2>
+                    <p className="mt-2 text-sm leading-6 text-red-700">
+                        The cooperative admin reviewed your profile and requested these changes:
+                    </p>
+                    <p className="mt-3 whitespace-pre-wrap rounded-xl bg-white/70 p-3 text-sm leading-6 text-red-800">
+                        {worker.rejectionReason || "No specific reason was provided. Please review your profile details before resubmitting."}
+                    </p>
+                </div>
+            )}
             {success && (
                 <p className="rounded bg-green-100 p-3 text-green-700">
                     {success}
