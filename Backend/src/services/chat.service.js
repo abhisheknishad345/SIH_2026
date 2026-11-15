@@ -139,4 +139,4 @@ const sendMessage = async (user, workerId, content) => {
   });
 };
 
-module.exports = { getChatContacts, getMessages, sendMessage };
+module.exports = { getChatContacts, getMessages, sendMessage, getWorkerAndAdmin };
