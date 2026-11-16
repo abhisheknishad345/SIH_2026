@@ -30,6 +30,7 @@ function MyBookings() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [cancellingId, setCancellingId] = useState(null);
+    const [payingId, setPayingId] = useState(null);
     const [error, setError] = useState("");
 
     // Fetch customer bookings
@@ -90,6 +91,25 @@ function MyBookings() {
         }
     };
 
+    // Demo payment confirmation (no real money is transferred).
+    const confirmDemoPayment = async (bookingId) => {
+        const confirmed = window.confirm(
+            "Confirm demo payment? This is a simulation only; no real money will be transferred."
+        );
+        if (!confirmed) return;
+
+        try {
+            setError("");
+            setPayingId(bookingId);
+            await api.put(`/bookings/${bookingId}/pay`);
+            await fetchBookings(true);
+        } catch (err) {
+            setError(err.response?.data?.message || "Unable to confirm demo payment.");
+        } finally {
+            setPayingId(null);
+        }
+    };
+
     // Status configuration
     const getStatusConfig = (status) => {
         const configs = {
@@ -98,6 +118,12 @@ function MyBookings() {
                 icon: CalendarClock,
                 className: "bg-amber-50 text-amber-700 border-amber-200",
                 dot: "bg-amber-500",
+            },
+            in_progress: {
+                label: "In Progress",
+                icon: Clock3,
+                className: "bg-blue-50 text-blue-700 border-blue-200",
+                dot: "bg-blue-500",
             },
             accepted: {
                 label: "Accepted",
@@ -549,6 +575,27 @@ function MyBookings() {
 
                                     </div>
 
+                                    {/* Payment status */}
+                                    {booking.status !== "pending" && booking.status !== "rejected" && booking.status !== "cancelled" && (
+                                        <div className="mx-5 mb-5 flex flex-wrap items-center gap-2 rounded-2xl bg-slate-50 p-4 sm:mx-7">
+                                            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Payment Status</span>
+                                            <span className={`rounded-full px-3 py-1 text-xs font-bold ${
+                                                booking.paymentStatus === "paid"
+                                                    ? "bg-emerald-100 text-emerald-700"
+                                                    : booking.paymentStatus === "awaiting"
+                                                        ? "bg-amber-100 text-amber-700"
+                                                        : "bg-slate-200 text-slate-600"
+                                            }`}>
+                                                {booking.paymentStatus === "paid" ? "Paid" : booking.paymentStatus === "awaiting" ? "Awaiting Payment" : "Not Due"}
+                                            </span>
+                                            {booking.paidAt && (
+                                                <span className="text-xs text-slate-500">
+                                                    Paid on {formatDate(booking.paidAt)}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+
                                     {/* Address */}
                                     {booking.address && (
                                         <div className="mx-5 mb-5 flex items-start gap-3 rounded-2xl bg-slate-50 p-4 sm:mx-7">
@@ -604,10 +651,43 @@ function MyBookings() {
                                         </div>
                                     )}
 
+                                    {booking.status === "in_progress" && !booking.serviceCompletedAt && (
+                                        <div className="flex items-center gap-2 border-t border-blue-100 bg-blue-50/60 px-5 py-4 text-xs font-medium text-blue-700 sm:px-7">
+                                            <CheckCircle2 size={16} />
+                                            The technician is working on your service.
+                                        </div>
+                                    )}
+
+                                    {booking.status === "in_progress" && booking.serviceCompletedAt && booking.paymentStatus === "awaiting" && (
+                                        <div className="border-t border-amber-100 bg-amber-50/70 px-5 py-4 sm:px-7">
+                                            <p className="text-xs font-medium text-amber-800">
+                                                The technician marked the service as done. Confirm the demo payment to continue.
+                                            </p>
+                                            <p className="mt-1 text-xs text-amber-700">
+                                                Demo only — no real money will be transferred.
+                                            </p>
+                                            <button
+                                                type="button"
+                                                onClick={() => confirmDemoPayment(booking._id)}
+                                                disabled={payingId === booking._id}
+                                                className="mt-3 inline-flex cursor-pointer items-center justify-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                            >
+                                                {payingId === booking._id ? "Confirming..." : `Confirm Demo Payment · ₹${booking.price ?? 0}`}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {booking.status === "in_progress" && booking.serviceCompletedAt && booking.paymentStatus === "paid" && (
+                                        <div className="flex items-center gap-2 border-t border-emerald-100 bg-emerald-50/60 px-5 py-4 text-xs font-medium text-emerald-700 sm:px-7">
+                                            <CheckCircle2 size={16} />
+                                            Demo payment confirmed. The technician can now mark this booking completed.
+                                        </div>
+                                    )}
+
                                     {booking.status === "accepted" && (
                                         <div className="flex items-center gap-2 border-t border-blue-100 bg-blue-50/60 px-5 py-4 text-xs font-medium text-blue-700 sm:px-7">
                                             <CheckCircle2 size={16} />
-                                            Your booking has been accepted by the technician.
+                                            This booking was accepted under the previous workflow.
                                         </div>
                                     )}
 
