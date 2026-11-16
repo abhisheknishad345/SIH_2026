@@ -39,6 +39,7 @@ const getWorkerBookings = async (req, res, next) => {
         const allowedStatuses = [
             "pending",
             "accepted",
+            "in_progress",
             "rejected",
             "cancelled",
             "completed"
