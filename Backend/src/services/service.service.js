@@ -11,7 +11,8 @@ const createService = async ({
     description,
     category,
     price,
-    priceType
+    priceType,
+    estimatedDurationMinutes
 }) => {
 
     const admin = await CooperativeAdmin.findOne({
@@ -44,6 +45,9 @@ const createService = async ({
     if (price !== undefined && price !== null) {
         serviceData.price = price;
         serviceData.priceType = priceType;
+        if (priceType === "fixed") {
+            serviceData.estimatedDurationMinutes = estimatedDurationMinutes;
+        }
     }
 
     const service = await Service.create(serviceData);
