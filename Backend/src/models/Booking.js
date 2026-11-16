@@ -42,6 +42,10 @@ const bookingSchema = new mongoose.Schema(
             required: true,
             min: 1
         },
+        priceType: {
+            type: String,
+            enum: ["per_hour", "per_day", "fixed"]
+        },
 
         address: {
             type: String,
