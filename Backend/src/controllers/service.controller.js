@@ -12,7 +12,8 @@ const createService = async (req, res) => {
             description,
             category,
             price,
-            priceType
+            priceType,
+            estimatedDurationMinutes
         } = req.body;
 
         const service = await serviceService.createService({
@@ -21,7 +22,8 @@ const createService = async (req, res) => {
             description,
             category,
             price,
-            priceType
+            priceType,
+            estimatedDurationMinutes
         });
 
         res.status(201).json({
