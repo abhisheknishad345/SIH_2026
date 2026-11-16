@@ -66,28 +66,32 @@ function WorkerBookings() {
   }, [fetchBookings]);
 
   // Update booking status
-  const updateBookingStatus = async (bookingId, status) => {
-    try {
-      setActionLoading(bookingId);
-      setError("");
+  
+const updateBookingStatus = async (bookingId, status) => {
+  try {
+    setActionLoading(bookingId);
+    setError("");
 
+    if (status === "completed") {
+      await api.put(`/bookings/${bookingId}/complete`);
+    } else {
       await api.put(`/bookings/${bookingId}/status`, {
         status,
       });
-
-      // Refresh bookings after status update
-      await fetchBookings(false);
-    } catch (err) {
-      console.error("Update booking status error:", err);
-
-      setError(
-        err.response?.data?.message ||
-        `Unable to ${status} booking.`
-      );
-    } finally {
-      setActionLoading(null);
     }
-  };
+
+    await fetchBookings(false);
+  } catch (err) {
+    console.error("Update booking status error:", err);
+
+    setError(
+      err.response?.data?.message ||
+      `Unable to ${status} booking.`
+    );
+  } finally {
+    setActionLoading(null);
+  }
+};
 
   // Filter bookings
   const filteredBookings = useMemo(() => {
