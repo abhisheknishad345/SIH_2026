@@ -166,7 +166,7 @@ if (!skill) {
 const existingBookings = await Booking.find({
         workerId,
         status: {
-        $in: ["pending", "accepted"]
+        $in: ["pending", "accepted", "in_progress"]
         },
         scheduledAt: {
             $lt: newBookingEnd
@@ -248,7 +248,7 @@ const getWorkerBookings = async ({
         filter.status = status;
     } else {
         filter.status = {
-            $in: ["pending", "accepted"],
+            $in: ["pending", "accepted", "in_progress"],
         };
     }
 } else if (status) {
@@ -315,26 +315,9 @@ const updateBookingStatus = async ({
         );
     }
 
-    // Pending booking can only be accepted or rejected
-    if (booking.status === "pending") {
-        if (status !== "accepted" && status !== "rejected") {
-            throw new Error(
-                "Pending booking can only be accepted or rejected"
-            );
-        }
-    }
-
-    // Accepted booking can only be completed
-    else if (booking.status === "accepted") {
-        if (status !== "completed") {
-            throw new Error(
-                "Accepted booking can only be completed"
-            );
-        }
-    } else {
-        throw new Error(
-            `Booking cannot be updated from ${booking.status} status`
-        );
+    // Generic status updates are only for accepting or rejecting pending requests.
+    if (booking.status !== "pending" || !["accepted", "rejected"].includes(status)) {
+        throw new Error("Only pending bookings can be accepted or rejected");
     }
 
     // Manual rejection: only reject selected booking
@@ -408,7 +391,7 @@ const updateBookingStatus = async ({
         // Find existing accepted bookings
         const existingAcceptedBookings = await Booking.find({
             workerId,
-            status: "accepted",
+            status: { $in: ["accepted", "in_progress"] },
             _id: {
                 $ne: currentBooking._id
             },
@@ -485,7 +468,8 @@ const updateBookingStatus = async ({
         }
 
         // Accept selected booking
-        currentBooking.status = "accepted";
+        currentBooking.status = "in_progress";
+        currentBooking.paymentStatus = "awaiting";
 
         await currentBooking.save();
 
@@ -627,11 +611,16 @@ const completeBooking = async ({
         );
     }
 
-    // Sirf accepted booking complete ho sakti hai
-    if (booking.status !== "accepted") {
-        throw new Error(
-            "Only accepted bookings can be completed"
-        );
+    if (booking.status !== "in_progress") {
+        throw new Error("Only in-progress bookings can be completed");
+    }
+
+    if (!booking.serviceCompletedAt) {
+        throw new Error("Mark the service as done before completing the booking");
+    }
+
+    if (booking.paymentStatus !== "paid") {
+        throw new Error("Customer payment is pending");
     }
 
     booking.status = "completed";
@@ -644,6 +633,51 @@ const completeBooking = async ({
     };
 };
 
+
+const markServiceDone = async ({ bookingId, workerId }) => {
+    const booking = await Booking.findOne({ _id: bookingId, workerId });
+
+    if (!booking) throw new Error("Booking not found or access denied");
+    if (booking.status !== "in_progress") {
+        throw new Error("Only in-progress bookings can be marked as service done");
+    }
+    if (booking.serviceCompletedAt) {
+        return { message: "Service was already marked as done", booking };
+    }
+
+    booking.serviceCompletedAt = new Date();
+    await booking.save();
+
+    return { message: "Service marked as done. Waiting for customer payment.", booking };
+};
+
+const confirmDemoPayment = async ({ bookingId, customerId }) => {
+    const booking = await Booking.findOne({ _id: bookingId, customerId });
+
+    if (!booking) throw new Error("Booking not found or access denied");
+    if (booking.status !== "in_progress") {
+        throw new Error("Payment is available only for in-progress bookings");
+    }
+    if (!booking.serviceCompletedAt) {
+        throw new Error("The worker must mark the service as done first");
+    }
+    if (booking.paymentStatus === "paid") {
+        return { message: "Demo payment was already confirmed", booking };
+    }
+    if (booking.paymentStatus !== "awaiting") {
+        throw new Error("This booking is not awaiting payment");
+    }
+
+    booking.paymentStatus = "paid";
+    booking.paymentMethod = "demo";
+    booking.paidAt = new Date();
+    await booking.save();
+
+    return {
+        message: "Demo payment confirmed successfully. No real money was transferred.",
+        booking
+    };
+};
 
 const getWorkerDashboard = async (workerId) => {
     const result = await Booking.aggregate([
@@ -673,7 +707,7 @@ const getWorkerDashboard = async (workerId) => {
                 activeBookings: {
                     $sum: {
                         $cond: [
-                            { $eq: ["$status", "accepted"] },
+                            { $in: ["$status", ["accepted", "in_progress"]] },
                             1,
                             0
                         ]
@@ -838,5 +872,5 @@ const getWorkerEarnings = async (workerId) => {
 
 module.exports = {
     createBooking, getWorkerBookings, updateBookingStatus, getCustomerBookings, cancelBooking
-    , completeBooking, getWorkerDashboard, getWorkerEarnings
+    , completeBooking, markServiceDone, confirmDemoPayment, getWorkerDashboard, getWorkerEarnings
 };
