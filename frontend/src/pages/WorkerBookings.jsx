@@ -6,7 +6,8 @@ import {ArrowLeft, RefreshCw} from 'lucide-react'
 const filters = [
   { label: "All", value: "all" },
   { label: "Pending", value: "pending" },
-  { label: "Accepted", value: "accepted" },
+  { label: "In Progress", value: "in_progress" },
+  { label: "Accepted (Legacy)", value: "accepted" },
   { label: "Completed", value: "completed" },
   { label: "Rejected", value: "rejected" },
   { label: "Cancelled", value: "cancelled" },
@@ -93,6 +94,19 @@ const updateBookingStatus = async (bookingId, status) => {
   }
 };
 
+  const markServiceDone = async (bookingId) => {
+    try {
+      setActionLoading(bookingId);
+      setError("");
+      await api.put(`/bookings/${bookingId}/service-done`);
+      await fetchBookings(false);
+    } catch (err) {
+      setError(err.response?.data?.message || "Unable to mark service as done.");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   // Filter bookings
   const filteredBookings = useMemo(() => {
     if (activeFilter === "all") {
@@ -108,7 +122,6 @@ const updateBookingStatus = async (bookingId, status) => {
         const types = {
             per_hour: "Per Hour",
             per_day: "Per Day",
-            per_visit: "Per Visit",
             fixed: "Fixed Price",
         };
 
@@ -147,6 +160,7 @@ const updateBookingStatus = async (bookingId, status) => {
         return "bg-yellow-100 text-yellow-700";
 
       case "accepted":
+      case "in_progress":
         return "bg-blue-100 text-blue-700";
 
       case "completed":
@@ -327,7 +341,7 @@ const updateBookingStatus = async (bookingId, status) => {
                         text-xs font-semibold capitalize
                         ${getStatusClass(booking.status)}`}
                     >
-                      {booking.status}
+                      {booking.status === "in_progress" ? "In Progress" : booking.status === "accepted" ? "Accepted (Legacy)" : booking.status}
                     </span>
                   </div>
 
@@ -371,7 +385,11 @@ const updateBookingStatus = async (bookingId, status) => {
                       </p>
 
                       <p className="font-semibold text-gray-800 mt-1">
-                        {formatDuration(booking.duration)}
+                        {booking.priceType === "per_day" || booking.serviceId?.priceType === "per_day"
+                          ? `${booking.quantity} ${booking.quantity === 1 ? "Day" : "Days"}`
+                          : booking.priceType === "per_hour" || booking.serviceId?.priceType === "per_hour"
+                            ? `${booking.quantity} ${booking.quantity === 1 ? "Hour" : "Hours"}`
+                            : formatDuration(booking.duration)}
                       </p>
                     </div>
 
@@ -442,25 +460,54 @@ const updateBookingStatus = async (bookingId, status) => {
                     </div>
                   )}
 
-                  {/* Accepted action */}
-                  {booking.status === "accepted" && (
+                  {/* Payment status */}
+                  <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+                    <span className="font-semibold text-gray-700">Payment:</span>
+                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                      booking.paymentStatus === "paid"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : booking.paymentStatus === "awaiting"
+                          ? "bg-amber-100 text-amber-700"
+                          : "bg-gray-100 text-gray-600"
+                    }`}>
+                      {booking.paymentStatus === "paid"
+                        ? "Paid"
+                        : booking.paymentStatus === "awaiting"
+                          ? "Awaiting Payment"
+                          : "Not Due"}
+                    </span>
+                  </div>
+
+                  {booking.status === "in_progress" && !booking.serviceCompletedAt && (
                     <button
                       disabled={isUpdating}
-                      onClick={() =>
-                        updateBookingStatus(
-                          booking._id,
-                          "completed"
-                        )
-                      }
-                      className="w-full mt-5 py-3 bg-indigo-600
-                                 text-white font-semibold rounded-xl
-                                 hover:bg-indigo-700 cursor-pointer
-                                 disabled:opacity-60"
+                      onClick={() => markServiceDone(booking._id)}
+                      className="w-full mt-5 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 cursor-pointer disabled:opacity-60"
                     >
-                      {isUpdating
-                        ? "Updating..."
-                        : "Mark Completed"}
+                      {isUpdating ? "Updating..." : "Mark Service Done"}
                     </button>
+                  )}
+
+                  {booking.status === "in_progress" && booking.serviceCompletedAt && booking.paymentStatus !== "paid" && (
+                    <p className="mt-4 rounded-xl bg-amber-50 p-3 text-sm font-medium text-amber-700">
+                      Service marked done. Waiting for customer to complete demo payment.
+                    </p>
+                  )}
+
+                  {booking.status === "in_progress" && booking.paymentStatus === "paid" && (
+                    <button
+                      disabled={isUpdating}
+                      onClick={() => updateBookingStatus(booking._id, "completed")}
+                      className="w-full mt-5 py-3 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 cursor-pointer disabled:opacity-60"
+                    >
+                      {isUpdating ? "Updating..." : "Mark Completed"}
+                    </button>
+                  )}
+
+                  {booking.status === "accepted" && (
+                    <p className="mt-4 rounded-xl bg-blue-50 p-3 text-sm text-blue-700">
+                      Legacy accepted booking. Please refresh or contact support before completion.
+                    </p>
                   )}
                 </article>
               );

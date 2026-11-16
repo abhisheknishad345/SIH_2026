@@ -4,7 +4,6 @@ const validateBooking = ({
     workerId,
     serviceId,
     scheduledAt,
-    duration,
     address,
     location,
     skillName,
@@ -58,20 +57,6 @@ const validateBooking = ({
         throw new Error("Invalid scheduled date and time");
     }
 
-    if (bookingDate <= new Date()) {
-        throw new Error(
-            "Booking time must be in the future"
-        );
-    }
-
-    if (
-        typeof duration !== "number" ||
-        !Number.isInteger(duration) ||
-        duration <= 0
-    ) {
-        throw new Error("Duration must be a positive number in minutes");
-    }
-
     if (
         typeof address !== "string" ||
         !address.trim()
@@ -121,11 +106,11 @@ const validateBooking = ({
 };
 
 const validateBookingStatus = ({ status }) => {
-    const allowedStatuses = ["accepted", "rejected", "completed"];
+    const allowedStatuses = ["accepted", "rejected"];
 
     if (!allowedStatuses.includes(status)) {
         throw new Error(
-            "Status must be accepted, rejected, or completed"
+            "Status must be accepted or rejected"
         );
     }
 };

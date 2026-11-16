@@ -42,6 +42,10 @@ const bookingSchema = new mongoose.Schema(
             required: true,
             min: 1
         },
+        priceType: {
+            type: String,
+            enum: ["per_hour", "per_day", "fixed"]
+        },
 
         address: {
             type: String,
@@ -80,6 +84,28 @@ const bookingSchema = new mongoose.Schema(
                 "completed"
             ],
             default: "pending"
+        },
+
+        paymentStatus: {
+            type: String,
+            enum: ["not_due", "awaiting", "paid"],
+            default: "not_due"
+        },
+
+        paymentMethod: {
+            type: String,
+            enum: ["demo", null],
+            default: null
+        },
+
+        serviceCompletedAt: {
+            type: Date,
+            default: null
+        },
+
+        paidAt: {
+            type: Date,
+            default: null
         }
     },
     {
