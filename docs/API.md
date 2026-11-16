@@ -96,7 +96,7 @@ Profile fields include `phone`, `address`, and `location`.
 | GET | `/bookings/worker` | Worker | Get worker bookings |
 | PUT | `/bookings/:bookingId/status` | Worker | Update booking status |
 | PUT | `/bookings/:bookingId/cancel` | Customer | Cancel a booking |
-| PUT | `/bookings/:bookingId/complete` | Worker | Mark a booking complete |
+| PUT | `/bookings/:bookingId/service-done` | Worker | Mark service as done and request customer payment |\n| PUT | `/bookings/:bookingId/pay` | Customer | Confirm simulated demo payment (no real money transfer) |\n| PUT | `/bookings/:bookingId/complete` | Worker | Complete a booking after demo payment is confirmed |
 | GET | `/bookings/customer` | Customer | Get customer bookings |
 | GET | `/bookings/worker/dashboard` | Worker | Get worker dashboard statistics |
 | GET | `/bookings/worker/earnings` | Worker | Get worker earnings |
@@ -118,7 +118,7 @@ Create booking request fields:
 The exact accepted `location` structure is defined by the backend booking validator/model. `duration` is expressed in minutes.
 
 Worker booking query parameters:
-- `status` — optional status filter (`pending`, `accepted`, `rejected`, `cancelled`, `completed`).
+- `status` — optional status filter (`pending`, `accepted` (legacy), `in_progress`, `rejected`, `cancelled`, `completed`).
 - `upcoming` — optional boolean string; use `true` for upcoming bookings.
 - `page` — optional page number (default `1`).
 - `limit` — optional page size (default `10`, maximum `50`).
@@ -128,7 +128,7 @@ Status update request body:
 { "status": "accepted" }
 ```
 
-Use the status values and transitions enforced by the backend service.
+The generic status endpoint accepts only `{ "status": "accepted" }` or `{ "status": "rejected" }`. Accepting a booking changes its status to `in_progress` and its `paymentStatus` to `awaiting`.\n\nWorker service/payment flow:\n1. Worker calls `PUT /bookings/:bookingId/service-done` after finishing the service.\n2. Customer calls `PUT /bookings/:bookingId/pay` to confirm the demo payment. No gateway or real money transfer is involved. The server uses the booking price stored in the database; the client does not submit an amount.\n3. Worker calls `PUT /bookings/:bookingId/complete`; the server allows completion only after service completion and `paymentStatus: paid`.\n\nBooking payment fields: `paymentStatus` (`not_due`, `awaiting`, `paid`), `paymentMethod` (`demo` when confirmed), `serviceCompletedAt`, and `paidAt`.
 
 ## Services — `/services`
 
