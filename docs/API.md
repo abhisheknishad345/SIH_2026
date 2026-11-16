@@ -96,7 +96,9 @@ Profile fields include `phone`, `address`, and `location`.
 | GET | `/bookings/worker` | Worker | Get worker bookings |
 | PUT | `/bookings/:bookingId/status` | Worker | Update booking status |
 | PUT | `/bookings/:bookingId/cancel` | Customer | Cancel a booking |
-| PUT | `/bookings/:bookingId/service-done` | Worker | Mark service as done and request customer payment |\n| PUT | `/bookings/:bookingId/pay` | Customer | Confirm simulated demo payment (no real money transfer) |\n| PUT | `/bookings/:bookingId/complete` | Worker | Complete a booking after demo payment is confirmed |
+| PUT | `/bookings/:bookingId/service-done` | Worker | Mark service as done and request customer payment |
+| PUT | `/bookings/:bookingId/pay` | Customer | Confirm simulated demo payment (no real money transfer) |
+| PUT | `/bookings/:bookingId/complete` | Worker | Complete a booking after demo payment is confirmed |
 | GET | `/bookings/customer` | Customer | Get customer bookings |
 | GET | `/bookings/worker/dashboard` | Worker | Get worker dashboard statistics |
 | GET | `/bookings/worker/earnings` | Worker | Get worker earnings |
@@ -128,7 +130,14 @@ Status update request body:
 { "status": "accepted" }
 ```
 
-The generic status endpoint accepts only `{ "status": "accepted" }` or `{ "status": "rejected" }`. Accepting a booking changes its status to `in_progress` and its `paymentStatus` to `awaiting`.\n\nWorker service/payment flow:\n1. Worker calls `PUT /bookings/:bookingId/service-done` after finishing the service.\n2. Customer calls `PUT /bookings/:bookingId/pay` to confirm the demo payment. No gateway or real money transfer is involved. The server uses the booking price stored in the database; the client does not submit an amount.\n3. Worker calls `PUT /bookings/:bookingId/complete`; the server allows completion only after service completion and `paymentStatus: paid`.\n\nBooking payment fields: `paymentStatus` (`not_due`, `awaiting`, `paid`), `paymentMethod` (`demo` when confirmed), `serviceCompletedAt`, and `paidAt`.
+The generic status endpoint accepts only `{ "status": "accepted" }` or `{ "status": "rejected" }`. Accepting a booking changes its status to `in_progress` and its `paymentStatus` to `awaiting`.
+
+Worker service/payment flow:
+1. Worker calls `PUT /bookings/:bookingId/service-done` after finishing the service.
+2. Customer calls `PUT /bookings/:bookingId/pay` to confirm the demo payment. No gateway or real money transfer is involved. The server uses the booking price stored in the database; the client does not submit an amount.
+3. Worker calls `PUT /bookings/:bookingId/complete`; the server allows completion only after service completion and `paymentStatus: paid`.
+
+Booking payment fields: `paymentStatus` (`not_due`, `awaiting`, `paid`), `paymentMethod` (`demo` when confirmed), `serviceCompletedAt`, and `paidAt`.
 
 ## Services — `/services`
 
