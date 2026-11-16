@@ -474,7 +474,9 @@ function Booking() {
                                                 id="quantity"
                                                 type="number"
                                                 name="quantity"
-                                                min="1"
+                                                 min="1"
+                                                 max={service?.priceType === "per_hour" ? "24" : "30"}
+                                                 step="1"
                                                 value={formData.quantity}
                                                 onChange={handleChange}
                                                 placeholder="Enter quantity"
@@ -492,7 +494,7 @@ function Booking() {
                                 {/* Schedule */}
                                 <div>
                                     <label className="mb-2 block text-sm font-semibold text-slate-700">
-                                        Schedule Date & Time
+                                        {service?.priceType === "per_day" ? "Schedule Start Date" : "Schedule Date & Time"}
                                     </label>
 
                                     <div className="relative">
@@ -546,7 +548,7 @@ function Booking() {
 
                                     <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
                                         <Info size={14} />
-                                        Choose your preferred service date and time.
+                                        {service?.priceType === "per_day" ? "Choose the first day of your booking. The worker will be reserved for all selected calendar days." : "Choose your preferred service date and time."}
                                     </p>
                                 </div>
 
