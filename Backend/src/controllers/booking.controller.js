@@ -14,7 +14,6 @@ const createBooking = async (req, res) => {
                 workerId: req.body.workerId,
                 serviceId: req.body.serviceId,
                 scheduledAt: req.body.scheduledAt,
-                duration: req.body.duration,
                 address: req.body.address,
                 location: req.body.location,
                 skillName: req.body.skillName,
