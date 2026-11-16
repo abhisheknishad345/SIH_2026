@@ -90,6 +90,21 @@ const createBooking = async ({
         throw new Error("Service not found");
     }
 
+    const bookingStartDate = new Date(scheduledAt);
+    const indiaDateFormatter = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+    });
+    if (service.priceType === "per_day") {
+        if (indiaDateFormatter.format(bookingStartDate) < indiaDateFormatter.format(new Date())) {
+            throw new Error("Booking date must be today or in the future");
+        }
+    } else if (bookingStartDate <= new Date()) {
+        throw new Error("Booking time must be in the future");
+    }
+
     if (
         worker.cooperativeId.toString() !==
         service.cooperativeId.toString()
