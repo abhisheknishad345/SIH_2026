@@ -652,26 +652,48 @@ const markServiceDone = async ({ bookingId, workerId }) => {
 };
 
 const confirmDemoPayment = async ({ bookingId, customerId }) => {
-    const booking = await Booking.findOne({ _id: bookingId, customerId });
+    const existingBooking = await Booking.findOne({ _id: bookingId, customerId });
 
-    if (!booking) throw new Error("Booking not found or access denied");
-    if (booking.status !== "in_progress") {
+    if (!existingBooking) throw new Error("Booking not found or access denied");
+    if (existingBooking.status !== "in_progress") {
         throw new Error("Payment is available only for in-progress bookings");
     }
-    if (!booking.serviceCompletedAt) {
+    if (!existingBooking.serviceCompletedAt) {
         throw new Error("The worker must mark the service as done first");
     }
-    if (booking.paymentStatus === "paid") {
-        return { message: "Demo payment was already confirmed", booking };
+    if (existingBooking.paymentStatus === "paid") {
+        return { message: "Demo payment was already confirmed", booking: existingBooking };
     }
-    if (booking.paymentStatus !== "awaiting") {
+    if (existingBooking.paymentStatus !== "awaiting") {
         throw new Error("This booking is not awaiting payment");
     }
 
-    booking.paymentStatus = "paid";
-    booking.paymentMethod = "demo";
-    booking.paidAt = new Date();
-    await booking.save();
+    // Atomic update prevents two simultaneous confirmations from recording payment twice.
+    const booking = await Booking.findOneAndUpdate(
+        {
+            _id: bookingId,
+            customerId,
+            status: "in_progress",
+            serviceCompletedAt: { $ne: null },
+            paymentStatus: "awaiting"
+        },
+        {
+            $set: {
+                paymentStatus: "paid",
+                paymentMethod: "demo",
+                paidAt: new Date()
+            }
+        },
+        { new: true, runValidators: true }
+    );
+
+    if (!booking) {
+        const latestBooking = await Booking.findOne({ _id: bookingId, customerId });
+        if (latestBooking?.paymentStatus === "paid") {
+            return { message: "Demo payment was already confirmed", booking: latestBooking };
+        }
+        throw new Error("Payment status changed. Please refresh and try again.");
+    }
 
     return {
         message: "Demo payment confirmed successfully. No real money was transferred.",
