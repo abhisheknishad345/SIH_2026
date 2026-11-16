@@ -57,12 +57,6 @@ const validateBooking = ({
         throw new Error("Invalid scheduled date and time");
     }
 
-    if (bookingDate <= new Date()) {
-        throw new Error(
-            "Booking time must be in the future"
-        );
-    }
-
     if (
         typeof address !== "string" ||
         !address.trim()
