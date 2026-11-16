@@ -203,7 +203,7 @@ export default function WorkerDashboard() {
     {
       title: "Active Bookings",
       value: dashboard?.activeBookings ?? 0,
-      subtitle: "Currently accepted",
+      subtitle: "Currently in progress",
       icon: CalendarDays,
       color: "bg-violet-50 text-violet-600",
     },
