@@ -109,7 +109,6 @@ Create booking request fields:
   "workerId": "WORKER_USER_ID",
   "serviceId": "SERVICE_ID",
   "scheduledAt": "2026-11-20T10:00:00+05:30",
-  "duration": 60,
   "address": "Service address",
   "location": {},
   "skillName": "Example skill",
@@ -117,7 +116,7 @@ Create booking request fields:
 }
 ```
 
-The exact accepted `location` structure is defined by the backend booking validator/model. `duration` is expressed in minutes.
+The exact accepted `location` structure is defined by the backend booking validator/model. The customer sends `quantity` for `per_hour` (hours) or `per_day` (calendar days); the backend calculates and stores duration in minutes. Fixed-price services use the admin-configured `estimatedDurationMinutes`.
 
 Worker booking query parameters:
 - `status` — optional status filter (`pending`, `accepted` (legacy), `in_progress`, `rejected`, `cancelled`, `completed`).
@@ -148,7 +147,7 @@ Booking payment fields: `paymentStatus` (`not_due`, `awaiting`, `paid`), `paymen
 | GET | `/services/categories` | Worker | Get service categories |
 | GET | `/services/:serviceId/workers` | Customer | Find workers for a service |
 
-Create service fields include `name`, `description`, `category`, `price`, and `priceType`.
+Create service fields include `name`, `description`, `category`, `price`, and `priceType` (`per_hour`, `per_day`, or `fixed`). Fixed-price services must also provide a positive `estimatedDurationMinutes`.
 
 List active services query parameters:
 - `cooperativeId` — optional cooperative filter.
