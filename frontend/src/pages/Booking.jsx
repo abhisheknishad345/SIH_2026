@@ -484,7 +484,7 @@ function Booking() {
                                         </div>
 
                                         <p className="mt-2 text-xs text-slate-400">
-                                            Enter the required number of {service?.priceType === "per_hour" ? "hours" : service?.priceType === "per_day" ? "days" : "visits"}.
+                                            Enter the required number of {service?.priceType === "per_hour" ? "hours" : service?.priceType === "per_day" ? "days" : "hours"}.
                                         </p>
                                     </div>
                                 )}
