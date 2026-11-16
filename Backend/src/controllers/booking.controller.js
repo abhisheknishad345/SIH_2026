@@ -215,6 +215,41 @@ const completeBooking = async (req, res) => {
 };
 
 
+const markServiceDone = async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+            return res.status(400).json({ message: "Invalid booking ID" });
+        }
+
+        const result = await bookingService.markServiceDone({
+            bookingId,
+            workerId: req.user._id
+        });
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+const confirmDemoPayment = async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+            return res.status(400).json({ message: "Invalid booking ID" });
+        }
+
+        const result = await bookingService.confirmDemoPayment({
+            bookingId,
+            customerId: req.user._id
+        });
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+
 
 
 module.exports = {
