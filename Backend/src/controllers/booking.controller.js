@@ -257,5 +257,5 @@ module.exports = {
     createBooking, getWorkerBookings, updateBookingStatus, 
     getWorkerEarningsController,
     getWorkerDashboardController,
-    getCustomerBookings, cancelBooking, completeBooking, 
+    getCustomerBookings, cancelBooking, completeBooking, markServiceDone, confirmDemoPayment,
 };
