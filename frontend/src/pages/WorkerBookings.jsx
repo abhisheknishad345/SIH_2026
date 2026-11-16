@@ -342,7 +342,7 @@ const updateBookingStatus = async (bookingId, status) => {
                         text-xs font-semibold capitalize
                         ${getStatusClass(booking.status)}`}
                     >
-                      {booking.status}
+                      {booking.status === "in_progress" ? "In Progress" : booking.status === "accepted" ? "Accepted (Legacy)" : booking.status}
                     </span>
                   </div>
 
