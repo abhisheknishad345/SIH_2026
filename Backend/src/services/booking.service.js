@@ -4,19 +4,11 @@ const Worker = require("../models/Worker");
 const Service = require("../models/Service");
 const mongoose = require("mongoose");
 
-const validateWorkerWorkingHours = (worker, bookingStart, duration) => {
-    if (
-        !(bookingStart instanceof Date) ||
-        Number.isNaN(bookingStart.getTime()) ||
-        !Number.isFinite(Number(duration)) ||
-        Number(duration) <= 0
-    ) {
+const validateWorkerWorkingHours = (worker, bookingStart, duration, priceType) => {
+    if (!(bookingStart instanceof Date) || Number.isNaN(bookingStart.getTime()) ||
+        !Number.isFinite(Number(duration)) || Number(duration) <= 0) {
         throw new Error("Invalid booking date or duration");
     }
-
-    const bookingEnd = new Date(
-        bookingStart.getTime() + Number(duration) * 60 * 1000
-    );
 
     const formatter = new Intl.DateTimeFormat("en-US", {
         timeZone: "Asia/Kolkata",
@@ -25,40 +17,37 @@ const validateWorkerWorkingHours = (worker, bookingStart, duration) => {
         minute: "2-digit",
         hourCycle: "h23"
     });
+    const getDateParts = (date) => Object.fromEntries(
+        formatter.formatToParts(date).map(({ type, value }) => [type, value])
+    );
 
-    const getDateParts = (date) => {
-        const parts = formatter.formatToParts(date);
-        return Object.fromEntries(
-            parts.map(({ type, value }) => [type, value])
-        );
-    };
+    // Per-day bookings reserve every selected calendar day.
+    if (priceType === "per_day") {
+        const days = Number(duration) / (24 * 60);
+        for (let index = 0; index < days; index += 1) {
+            const parts = getDateParts(new Date(bookingStart.getTime() + index * 86400000));
+            const workingDay = (worker.workingHours || []).find(item => item.day === parts.weekday);
+            if (!workingDay || !workingDay.isWorking) {
+                throw new Error(`Worker is not available on ${parts.weekday}`);
+            }
+        }
+        return;
+    }
 
+    const bookingEnd = new Date(bookingStart.getTime() + Number(duration) * 60000);
     const startParts = getDateParts(bookingStart);
     const endParts = getDateParts(bookingEnd);
-
-    // A booking must start and finish on the same working day.
     if (startParts.weekday !== endParts.weekday) {
         throw new Error("Booking must be within the worker's working day");
     }
-
-    const workingDay = (worker.workingHours || []).find(
-        (item) => item.day === startParts.weekday
-    );
-
+    const workingDay = (worker.workingHours || []).find(item => item.day === startParts.weekday);
     if (!workingDay || !workingDay.isWorking) {
         throw new Error(`Worker is not working on ${startParts.weekday}`);
     }
-
-    const bookingStartTime = `${startParts.hour}:${startParts.minute}`;
-    const bookingEndTime = `${endParts.hour}:${endParts.minute}`;
-
-    if (
-        bookingStartTime < workingDay.startTime ||
-        bookingEndTime > workingDay.endTime
-    ) {
-        throw new Error(
-            `Worker is available on ${startParts.weekday} only between ${workingDay.startTime} and ${workingDay.endTime}`
-        );
+    const startTime = `${startParts.hour}:${startParts.minute}`;
+    const endTime = `${endParts.hour}:${endParts.minute}`;
+    if (startTime < workingDay.startTime || endTime > workingDay.endTime) {
+        throw new Error(`Worker is available on ${startParts.weekday} only between ${workingDay.startTime} and ${workingDay.endTime}`);
     }
 };
 
@@ -68,7 +57,6 @@ const createBooking = async ({
     serviceId,
     quantity,
     scheduledAt,
-    duration,
     address,
     location
 }) => {
@@ -91,9 +79,6 @@ const createBooking = async ({
     if (!worker.isAvailable) {
         throw new Error("Worker is currently unavailable");
     }
-
-    // Check the selected date and complete booking duration against worker working hours.
-    validateWorkerWorkingHours(worker, new Date(scheduledAt), duration);
 
     // 4. Check service exists
     const service = await Service.findOne({
@@ -128,34 +113,40 @@ if (!skill) {
 }
 
 
-    // 6. Calculate price on backend
+    // Calculate the final price and reserved duration on the server.
     let price;
+    let bookingDuration;
 
     switch (service.priceType) {
-
         case "per_hour":
+            if (!Number.isInteger(quantity) || quantity < 1 || quantity > 24) {
+                throw new Error("Please select between 1 and 24 hours");
+            }
             price = service.price * quantity;
+            bookingDuration = quantity * 60;
             break;
-
         case "per_day":
+            if (!Number.isInteger(quantity) || quantity < 1 || quantity > 30) {
+                throw new Error("Please select between 1 and 30 days");
+            }
             price = service.price * quantity;
+            bookingDuration = quantity * 24 * 60;
             break;
-
-        case "per_visit":
-            price = service.price * quantity;
-            break;
-
         case "fixed":
             price = service.price;
+            bookingDuration = Number(service.estimatedDurationMinutes);
+            if (!Number.isInteger(bookingDuration) || bookingDuration <= 0) {
+                throw new Error("This fixed-price service has no valid estimated duration. Please contact the cooperative admin.");
+            }
             break;
-
         default:
             throw new Error("Invalid service price type");
     }
 
     const newBookingStart = new Date(scheduledAt);
+    validateWorkerWorkingHours(worker, newBookingStart, bookingDuration, service.priceType);
     const newBookingEnd = new Date(
-        newBookingStart.getTime() + duration * 60 * 1000
+        newBookingStart.getTime() + bookingDuration * 60 * 1000
     );
 
 //     console.log("Worker ID:", workerId);
@@ -212,7 +203,8 @@ const existingBookings = await Booking.find({
         skillName: skill.name,
         quantity,
         scheduledAt,
-        duration,
+        duration: bookingDuration,
+        priceType: service.priceType,
         address,
         location,
         price
@@ -415,57 +407,17 @@ const updateBookingStatus = async ({
             );
         }
 
-        // Check working hours
-        const formatter = new Intl.DateTimeFormat("en-US", {
-            timeZone: "Asia/Kolkata",
-            weekday: "long",
-            hour: "2-digit",
-            minute: "2-digit",
-            hourCycle: "h23"
-        });
-
-        const getDateParts = (date) => {
-            const parts = formatter.formatToParts(date);
-
-            return Object.fromEntries(
-                parts.map(({ type, value }) => [
-                    type,
-                    value
-                ])
-            );
-        };
-
-        const startParts = getDateParts(bookingStart);
-        const endParts = getDateParts(bookingEnd);
-
-        const bookingDay = startParts.weekday;
-
-        const bookingStartTime =
-            `${startParts.hour}:${startParts.minute}`;
-
-        const bookingEndTime =
-            `${endParts.hour}:${endParts.minute}`;
-
-        const workingDay = worker.workingHours.find(
-            (item) => item.day === bookingDay
+        // Validate the full reserved range using the saved pricing type.
+        const linkedService = currentBooking.priceType
+            ? null
+            : await Service.findById(currentBooking.serviceId);
+        const bookingPriceType = currentBooking.priceType || linkedService?.priceType;
+        validateWorkerWorkingHours(
+            worker,
+            bookingStart,
+            currentBooking.duration,
+            bookingPriceType
         );
-
-        if (!workingDay || !workingDay.isWorking) {
-            throw new Error(
-                `Worker is not working on ${bookingDay}`
-            );
-        }
-
-        // Reject bookings outside working hours
-        if (
-            bookingStartTime < workingDay.startTime ||
-            bookingEndTime > workingDay.endTime ||
-            startParts.weekday !== endParts.weekday
-        ) {
-            throw new Error(
-                "Booking is outside worker working hours"
-            );
-        }
 
         // Accept selected booking
         currentBooking.status = "in_progress";
@@ -543,7 +495,7 @@ const getCustomerBookings = async (customerId) => {
         customerId
     })
         .populate("workerId", "fullName email")
-        .populate("serviceId", "name category")
+        .populate("serviceId", "name category priceType")
         .sort({ createdAt: -1 });
 
     return {
