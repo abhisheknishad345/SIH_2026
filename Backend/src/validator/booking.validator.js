@@ -4,7 +4,6 @@ const validateBooking = ({
     workerId,
     serviceId,
     scheduledAt,
-    duration,
     address,
     location,
     skillName,
@@ -62,14 +61,6 @@ const validateBooking = ({
         throw new Error(
             "Booking time must be in the future"
         );
-    }
-
-    if (
-        typeof duration !== "number" ||
-        !Number.isInteger(duration) ||
-        duration <= 0
-    ) {
-        throw new Error("Duration must be a positive number in minutes");
     }
 
     if (
