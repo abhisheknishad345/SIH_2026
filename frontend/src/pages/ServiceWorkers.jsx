@@ -7,6 +7,7 @@ import {
   Phone,
   ArrowRight,
   MapPin,
+  Building2,
   Briefcase,
   HardHat,
   Loader2,
@@ -260,6 +261,23 @@ function ServiceWorkers() {
                     </div>
                   </div>
                 </div>
+
+                {(worker.shopName || worker.shopAddress) && (
+                  <div className="mt-3 space-y-1.5 rounded-xl bg-slate-50 px-3 py-2.5">
+                    {worker.shopName && (
+                      <p className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                        <Building2 size={14} className="shrink-0 text-indigo-500" />
+                        <span className="break-words">{worker.shopName}</span>
+                      </p>
+                    )}
+                    {worker.shopAddress && (
+                      <p className="flex items-start gap-2 text-xs text-slate-500">
+                        <MapPin size={14} className="mt-0.5 shrink-0 text-indigo-500" />
+                        <span className="break-words">{worker.shopAddress}</span>
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 {/* Experience + distance */}
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-sm text-slate-600">
