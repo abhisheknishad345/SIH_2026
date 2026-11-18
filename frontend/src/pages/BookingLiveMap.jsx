@@ -197,8 +197,8 @@ export default function BookingLiveMap() {
       <main className="mx-auto max-w-7xl p-3 sm:p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-white p-3">
           <div className="flex flex-wrap items-center gap-3 text-sm">
-            <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-blue-600" /> Worker location</span>
-            <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-green-600" /> Customer home</span>
+            <span className="flex items-center gap-2 text-black"><span className="h-3 w-3 rounded-full bg-blue-600" /> Worker location</span>
+            <span className="flex items-center gap-2 text-black"><span className="h-3 w-3 rounded-full bg-green-600" /> Customer home</span>
           </div>
           {isWorker && (
             <button onClick={() => setFollowMode(value => !value)} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
@@ -209,7 +209,7 @@ export default function BookingLiveMap() {
 
         {error && <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">{error}</div>}
 
-        <div className="h-[68vh] min-h-[420px] overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
+        <div className="h-[72vh] min-h-105 overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
           <MapContainer center={center} zoom={13} scrollWheelZoom className="h-full w-full">
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

@@ -608,44 +608,6 @@ function MyBookings() {
 
                                     </div>
 
-                                    {/* Rating: available only after the booking is completed */}
-                                    {booking.status === "completed" && (
-                                        <div className="mx-5 mb-5 rounded-2xl border border-amber-200 bg-amber-50/60 p-4 sm:mx-7">
-                                            {booking.rating ? (
-                                                <div>
-                                                    <div className="flex flex-wrap items-center justify-between gap-2">
-                                                        <div className="flex items-center gap-1 text-amber-500">
-                                                            {Array.from({ length: 5 }, (_, index) => (
-                                                                <Star key={index} size={17} className={index < booking.rating.rating ? "fill-amber-400 text-amber-400" : "text-slate-300"} />
-                                                            ))}
-                                                            <span className="ml-1 text-sm font-bold text-slate-800">{booking.rating.rating}/5</span>
-                                                        </div>
-                                                        <span className="text-xs text-slate-500">
-                                                            Rated on {formatDate(booking.rating.createdAt)}
-                                                        </span>
-                                                    </div>
-                                                    {booking.rating.review && (
-                                                        <p className="mt-2 text-sm leading-6 text-slate-700">{booking.rating.review}</p>
-                                                    )}
-                                                    <p className="mt-2 text-xs font-semibold text-slate-500">Your review for {booking.workerId?.fullName || "the worker"}</p>
-                                                </div>
-                                            ) : (
-                                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                                    <div>
-                                                        <p className="font-bold text-slate-800">How was your experience?</p>
-                                                        <p className="mt-1 text-xs text-slate-500">This booking is completed. Share your rating for the worker.</p>
-                                                    </div>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => { setRatingBooking(booking); setRatingValue(5); setReviewText(""); }}
-                                                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-amber-600"
-                                                    >
-                                                        <Star size={16} className="fill-white" /> Rate service
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
 
                                     {/* Payment status */}
                                     {booking.status !== "pending" && booking.status !== "rejected" && booking.status !== "cancelled" && (
@@ -690,7 +652,46 @@ function MyBookings() {
                                         </div>
                                     )}
 
-                                    {(["accepted", "in_progress", "completed"].includes(booking.status)) && (
+                                     {/* Rating: available only after the booking is completed */}
+                                    {booking.status === "completed" && (
+                                        <div className="mx-5 mb-5 rounded-2xl border border-amber-200 bg-amber-50/60 p-4 sm:mx-7">
+                                            {booking.rating ? (
+                                                <div>
+                                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                                        <div className="flex items-center gap-1 text-amber-500">
+                                                            {Array.from({ length: 5 }, (_, index) => (
+                                                                <Star key={index} size={17} className={index < booking.rating.rating ? "fill-amber-400 text-amber-400" : "text-slate-300"} />
+                                                            ))}
+                                                            <span className="ml-1 text-sm font-bold text-slate-800">{booking.rating.rating}/5</span>
+                                                        </div>
+                                                        <span className="text-xs text-slate-500">
+                                                            Rated on {formatDate(booking.rating.createdAt)}
+                                                        </span>
+                                                    </div>
+                                                    {booking.rating.review && (
+                                                        <p className="mt-2 text-sm leading-6 text-slate-700">{booking.rating.review}</p>
+                                                    )}
+                                                    <p className="mt-2 text-xs font-semibold text-slate-500">Your review for {booking.workerId?.fullName || "the worker"}</p>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                                    <div>
+                                                        <p className="font-bold text-slate-800">How was your experience?</p>
+                                                        <p className="mt-1 text-xs text-slate-500">This booking is completed. Share your rating for the worker.</p>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { setRatingBooking(booking); setRatingValue(5); setReviewText(""); }}
+                                                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-amber-600 cursor-pointer"
+                                                    >
+                                                        <Star size={16} className="fill-white" /> Rate service
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {(["accepted", "in_progress"].includes(booking.status)) && (
                                         <div className="border-t border-indigo-100 bg-indigo-50/60 px-5 py-3 sm:px-7">
                                             <button
                                                 type="button"
@@ -824,7 +825,7 @@ function MyBookings() {
                 </footer>
 
                 {ratingBooking && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+                    <div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
                         <form onSubmit={submitRating} className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
                             <div className="flex items-start justify-between gap-3">
                                 <div>
@@ -832,7 +833,7 @@ function MyBookings() {
                                     <h2 className="mt-1 text-xl font-extrabold text-slate-900">Rate {ratingBooking.workerId?.fullName || "your worker"}</h2>
                                     <p className="mt-1 text-xs text-slate-500">{ratingBooking.serviceId?.name || "Completed service"}</p>
                                 </div>
-                                <button type="button" onClick={() => setRatingBooking(null)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100" aria-label="Close rating form"><XCircle size={20} /></button>
+                                <button type="button" onClick={() => setRatingBooking(null)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 cursor-pointer" aria-label="Close rating form"><XCircle size={20} /></button>
                             </div>
                             <div className="mt-6">
                                 <p className="mb-3 text-sm font-semibold text-slate-700">Your rating</p>
@@ -850,8 +851,8 @@ function MyBookings() {
                                 <textarea id="rating-review" value={reviewText} onChange={event => setReviewText(event.target.value)} maxLength={500} rows={4} placeholder="Tell others about your experience..." className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-100" />
                                 <p className="mt-1 text-right text-xs text-slate-400">{reviewText.length}/500</p>
                             </div>
-                            <button type="submit" disabled={submittingRating} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 text-sm font-bold text-white transition hover:bg-amber-600 disabled:opacity-60">
-                                <Send size={16} /> {submittingRating ? "Submitting..." : "Submit rating"}
+                            <button type="submit" disabled={submittingRating} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 text-sm font-bold text-white transition hover:bg-amber-600 disabled:opacity-60 cursor-pointer">
+                                <Send size={16} /> {submittingRating ? "Submitting..." : "Submit"}
                             </button>
                         </form>
                     </div>
