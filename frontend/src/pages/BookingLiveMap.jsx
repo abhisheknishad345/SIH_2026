@@ -6,53 +6,52 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-routing-machine";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
-import { ArrowLeft, LocateFixed, MapPin, Navigation, Users } from "lucide-react";
+import { ArrowLeft, LocateFixed, MapPin, Users } from "lucide-react";
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_DEV_URL;
 
-const myIcon = L.divIcon({
+const workerIcon = L.divIcon({
   className: "booking-live-marker",
-  html: '<div style="width:18px;height:18px;border:4px solid white;border-radius:50%;background:#2563eb;box-shadow:0 1px 8px #334155"></div>',
-  iconSize: [18, 18],
-  iconAnchor: [9, 9]
+  html: '<div style="width:20px;height:20px;border:4px solid white;border-radius:50%;background:#2563eb;box-shadow:0 1px 8px #334155"></div>',
+  iconSize: [20, 20],
+  iconAnchor: [10, 10]
 });
 
-const peerIcon = L.divIcon({
-  className: "booking-live-marker",
-  html: '<div style="width:18px;height:18px;border:4px solid white;border-radius:50%;background:#16a34a;box-shadow:0 1px 8px #334155"></div>',
-  iconSize: [18, 18],
-  iconAnchor: [9, 9]
+const homeIcon = L.divIcon({
+  className: "booking-home-marker",
+  html: '<div style="width:34px;height:34px;display:flex;align-items:center;justify-content:center;border:3px solid white;border-radius:50%;background:#16a34a;color:white;font-size:17px;box-shadow:0 1px 8px #334155">⌂</div>',
+  iconSize: [34, 34],
+  iconAnchor: [17, 17]
 });
 
-function DynamicRouting({ start, end }) {
+function DynamicRouting({ worker, customer }) {
   const map = useMap();
   const controlRef = useRef(null);
-  const lastRouteRef = useRef(null);
+  const lastWorkerRef = useRef(null);
 
   useEffect(() => {
-    if (!start || !end) return;
-    const startPoint = L.latLng(start.latitude, start.longitude);
-    const endPoint = L.latLng(end.latitude, end.longitude);
-    const shouldRefresh = !lastRouteRef.current ||
-      map.distance(lastRouteRef.current.start, startPoint) > 40 ||
-      map.distance(lastRouteRef.current.end, endPoint) > 40;
-    if (!shouldRefresh) return;
+    if (!worker || !customer) return;
+    const start = L.latLng(worker.latitude, worker.longitude);
+    const end = L.latLng(customer.latitude, customer.longitude);
+    const shouldUpdate = !lastWorkerRef.current ||
+      map.distance(lastWorkerRef.current, start) > 35;
+    if (!shouldUpdate) return;
 
     if (!controlRef.current) {
       controlRef.current = L.Routing.control({
-        waypoints: [startPoint, endPoint],
+        waypoints: [start, end],
         routeWhileDragging: false,
         show: false,
         addWaypoints: false,
         draggableWaypoints: false,
         createMarker: () => null,
-        lineOptions: { styles: [{ color: "#2563eb", opacity: 0.85, weight: 6 }] }
+        lineOptions: { styles: [{ color: "#2563eb", opacity: 0.9, weight: 6 }] }
       }).addTo(map);
     } else {
-      controlRef.current.setWaypoints([startPoint, endPoint]);
+      controlRef.current.setWaypoints([start, end]);
     }
-    lastRouteRef.current = { start: startPoint, end: endPoint };
-  }, [map, start, end]);
+    lastWorkerRef.current = start;
+  }, [map, worker, customer]);
 
   useEffect(() => () => {
     if (controlRef.current) map.removeControl(controlRef.current);
@@ -62,40 +61,44 @@ function DynamicRouting({ start, end }) {
   return null;
 }
 
-function MapViewport({ me, peer, followMode }) {
+function MapViewport({ worker, customer, followMode, isWorker }) {
   const map = useMap();
   useEffect(() => {
-    if (followMode && me) map.panTo([me.latitude, me.longitude], { animate: true });
-  }, [map, me, followMode]);
-  useEffect(() => {
-    if (me && peer) {
-      map.fitBounds([
-        [me.latitude, me.longitude],
-        [peer.latitude, peer.longitude]
-      ], { padding: [55, 55], maxZoom: 16 });
-    } else if (me) {
-      map.setView([me.latitude, me.longitude], 16);
+    if (followMode && isWorker && worker) {
+      map.panTo([worker.latitude, worker.longitude], { animate: true });
     }
-  }, [map, me, peer]);
+  }, [map, worker, followMode, isWorker]);
+
+  useEffect(() => {
+    if (worker && customer) {
+      map.fitBounds([
+        [worker.latitude, worker.longitude],
+        [customer.latitude, customer.longitude]
+      ], { padding: [55, 55], maxZoom: 16 });
+    } else if (worker) {
+      map.setView([worker.latitude, worker.longitude], 15);
+    } else if (customer) {
+      map.setView([customer.latitude, customer.longitude], 15);
+    }
+  }, [map, worker, customer]);
+
   return null;
 }
 
 export default function BookingLiveMap() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
-  const socketRef = useRef(null);
   const watchIdRef = useRef(null);
-  const [myPosition, setMyPosition] = useState(null);
-  const [peerPosition, setPeerPosition] = useState(null);
+  const socketRef = useRef(null);
+  const [role, setRole] = useState(null);
+  const [customerLocation, setCustomerLocation] = useState(null);
+  const [workerInitialLocation, setWorkerInitialLocation] = useState(null);
+  const [workerLiveLocation, setWorkerLiveLocation] = useState(null);
   const [followMode, setFollowMode] = useState(false);
-  const [status, setStatus] = useState("Connecting...");
+  const [status, setStatus] = useState("Connecting to booking...");
   const [error, setError] = useState("");
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      setError("Your browser does not support location sharing.");
-      return;
-    }
 
+  useEffect(() => {
     const socket = io(SOCKET_URL, {
       withCredentials: true,
       transports: ["websocket", "polling"]
@@ -105,46 +108,74 @@ export default function BookingLiveMap() {
     socket.on("connect", () => {
       socket.emit("booking-map:join", { bookingId }, response => {
         if (!response?.success) {
-          setError(response?.message || "Unable to join live map.");
           setStatus("Live map unavailable");
+          setError(response?.message || "Unable to access this booking map.");
           return;
         }
-        setStatus("Connected — sharing your location");
-        if (response.peerLocation) setPeerPosition(response.peerLocation);
-        watchIdRef.current = navigator.geolocation.watchPosition(
-          position => {
-            const location = { latitude: position.coords.latitude, longitude: position.coords.longitude };
-            setMyPosition(location);
-            setStatus("Live location active");
-            socket.emit("booking-map:location", { bookingId, ...location }, result => {
-              if (result && !result.success) setError(result.message);
-            });
-          },
-          geoError => setError(geoError.code === 1
-            ? "Location permission denied. Allow location access in your browser."
-            : "Unable to get your location. Check GPS and try again."),
-          { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
-        );
+
+        setRole(response.role);
+        setCustomerLocation(response.customerLocation || null);
+        setWorkerInitialLocation(response.workerInitialLocation || null);
+        setWorkerLiveLocation(response.workerLiveLocation || null);
+        setStatus(response.role === "worker"
+          ? "Your live location will be shared with the customer"
+          : "Waiting for the worker's live location");
+
+        // Only the assigned worker shares device GPS. The customer uses
+        // the saved booking address as a fixed destination.
+        if (response.role === "worker") {
+          if (!navigator.geolocation) {
+            setError("Your browser does not support GPS location.");
+            return;
+          }
+
+          watchIdRef.current = navigator.geolocation.watchPosition(
+            position => {
+              const location = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+              };
+              setWorkerLiveLocation(location);
+              setStatus("Your live location is being shared");
+              socket.emit("booking-map:location", { bookingId, ...location }, result => {
+                if (result && !result.success) setError(result.message);
+              });
+            },
+            geoError => setError(geoError.code === 1
+              ? "Allow location permission so the customer can track your arrival."
+              : "Unable to get GPS location. Check your device location settings."),
+            { enableHighAccuracy: true, maximumAge: 4000, timeout: 20000 }
+          );
+        }
       });
     });
-    socket.on("connect_error", err => setError(err.message || "Live map connection failed."));
-    socket.on("booking-map:peer-location", location => setPeerPosition(location));
+
+    socket.on("connect_error", err => {
+      setStatus("Connection failed");
+      setError(err.message || "Live map connection failed.");
+    });
+    socket.on("booking-map:worker-location", location => {
+      setWorkerLiveLocation(location);
+      setStatus("Worker location is updating live");
+    });
 
     return () => {
-      if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
+      if (watchIdRef.current !== null && navigator.geolocation) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
       socket.emit("booking-map:leave");
       socket.disconnect();
       socketRef.current = null;
     };
   }, [bookingId]);
 
-  const center = myPosition
-    ? [myPosition.latitude, myPosition.longitude]
-    : [28.6139, 77.2090];
-
-  if (error && !myPosition && status === "Live map unavailable") {
-    return <div className="min-h-screen p-6 text-center"><p className="text-rose-600">{error}</p><button onClick={() => navigate(-1)} className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-white">Go Back</button></div>;
-  }
+  const workerLocation = workerLiveLocation || workerInitialLocation;
+  const isWorker = role === "worker";
+  const center = workerLocation
+    ? [workerLocation.latitude, workerLocation.longitude]
+    : customerLocation
+      ? [customerLocation.latitude, customerLocation.longitude]
+      : [28.6139, 77.2090];
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -158,15 +189,17 @@ export default function BookingLiveMap() {
         </div>
       </header>
 
-      <div className="mx-auto max-w-7xl p-3 sm:p-5">
+      <main className="mx-auto max-w-7xl p-3 sm:p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-white p-3">
-          <div className="flex items-center gap-3 text-sm">
-            <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-blue-600" /> You</span>
-            <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-green-600" /> Other participant</span>
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-blue-600" /> Worker location</span>
+            <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-green-600" /> Customer home</span>
           </div>
-          <button onClick={() => setFollowMode(value => !value)} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
-            <LocateFixed size={16} /> {followMode ? "Stop Following" : "Follow Me"}
-          </button>
+          {isWorker && (
+            <button onClick={() => setFollowMode(value => !value)} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
+              <LocateFixed size={16} /> {followMode ? "Stop Following" : "Follow Me"}
+            </button>
+          )}
         </div>
 
         {error && <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">{error}</div>}
@@ -177,18 +210,35 @@ export default function BookingLiveMap() {
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            {myPosition && <Marker position={[myPosition.latitude, myPosition.longitude]} icon={myIcon}><Popup>You are here</Popup></Marker>}
-            {peerPosition && <Marker position={[peerPosition.latitude, peerPosition.longitude]} icon={peerIcon}><Popup>Other participant</Popup></Marker>}
-            <MapViewport me={myPosition} peer={peerPosition} followMode={followMode} />
-            {myPosition && peerPosition && <DynamicRouting start={myPosition} end={peerPosition} />}
+            {workerLocation && (
+              <Marker position={[workerLocation.latitude, workerLocation.longitude]} icon={workerIcon}>
+                <Popup>{workerLiveLocation ? "Worker's current location" : "Worker's saved starting location"}</Popup>
+              </Marker>
+            )}
+            {customerLocation && (
+              <Marker position={[customerLocation.latitude, customerLocation.longitude]} icon={homeIcon}>
+                <Popup>Customer's saved service location</Popup>
+              </Marker>
+            )}
+            <MapViewport worker={workerLocation} customer={customerLocation} followMode={followMode} isWorker={isWorker} />
+            {workerLocation && customerLocation && (
+              <DynamicRouting worker={workerLocation} customer={customerLocation} />
+            )}
           </MapContainer>
         </div>
 
         <div className="mt-3 flex items-center gap-2 text-sm text-slate-500">
           <Users size={16} />
-          {peerPosition ? "Both participants are sharing live location." : "Waiting for the other participant to share location..."}
+          {workerLiveLocation
+            ? "Worker's live location is available on both maps."
+            : "Showing the worker's saved location until live GPS starts."}
         </div>
-      </div>
+        {!customerLocation && (
+          <p className="mt-2 text-sm text-rose-600">
+            Customer saved location is missing for this booking. A route cannot be shown.
+          </p>
+        )}
+      </main>
     </div>
   );
 }
