@@ -621,7 +621,7 @@ function MyBookings() {
                                         </div>
                                     )}
 
-                                    {(booking.status === "in_progress" || booking.status === "completed") && (
+                                    {(["accepted", "in_progress", "completed"].includes(booking.status)) && (
                                         <div className="border-t border-indigo-100 bg-indigo-50/60 px-5 py-3 sm:px-7">
                                             <button
                                                 type="button"
