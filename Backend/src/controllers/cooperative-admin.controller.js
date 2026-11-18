@@ -63,6 +63,24 @@ const createBootstrapAdmin = async (req, res) => {
     }
 };
 
+const getAdminServices = async (req, res) => {
+    try {
+        const services = await cooperativeAdminService.getAdminServices(req.user._id);
+        return res.status(200).json({ success: true, services });
+    } catch (error) {
+        return res.status(400).json({ success: false, message: error.message });
+    }
+};
+
+const getAdminBookings = async (req, res) => {
+    try {
+        const bookings = await cooperativeAdminService.getAdminBookings(req.user._id);
+        return res.status(200).json({ success: true, bookings });
+    } catch (error) {
+        return res.status(400).json({ success: false, message: error.message });
+    }
+};
+
 const getDashboardStats = async (req, res) => {
     try {
         const stats = await cooperativeAdminService.getDashboardStats(
@@ -87,5 +105,7 @@ const getDashboardStats = async (req, res) => {
 module.exports = {
     createCooperativeAdmin,
     createBootstrapAdmin,
-    getDashboardStats
+    getDashboardStats,
+    getAdminServices,
+    getAdminBookings
 };
