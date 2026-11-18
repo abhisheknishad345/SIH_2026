@@ -337,7 +337,8 @@ const updateBookingStatus = async ({
             worker,
             bookingStart,
             currentBooking.duration,
-            bookingPriceType
+            bookingPriceType,
+            currentBooking.quantity
         );
 
         // Accept selected booking
@@ -508,6 +509,28 @@ const completeBooking = async ({
     };
 };
 
+
+const updateNegotiatedPrice = async ({ bookingId, workerId, price }) => {
+    if (!Number.isFinite(price) || price <= 0) {
+        throw new Error("Enter a valid amount greater than zero");
+    }
+    const booking = await Booking.findOne({ _id: bookingId, workerId });
+    if (!booking) throw new Error("Booking not found or access denied");
+    if (booking.priceType !== "negotiable") {
+        throw new Error("Price updates are available only for negotiable bookings");
+    }
+    if (!["in_progress", "accepted"].includes(booking.status)) {
+        throw new Error("Price can be updated only after the booking is accepted");
+    }
+    if (booking.paymentStatus === "paid" || booking.serviceCompletedAt) {
+        throw new Error("Price cannot be changed after service completion or payment");
+    }
+    booking.price = Math.round(price * 100) / 100;
+    booking.pricingStatus = "agreed";
+    booking.paymentStatus = "not_due";
+    await booking.save();
+    return { message: "Negotiated price saved successfully", booking };
+};
 
 const markServiceDone = async ({ bookingId, workerId }) => {
     const booking = await Booking.findOne({ _id: bookingId, workerId });
