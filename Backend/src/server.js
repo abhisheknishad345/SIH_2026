@@ -9,6 +9,7 @@ const User = require("./models/User");
 const ChatMessage = require("./models/ChatMessage");
 const chatService = require("./services/chat.service");
 const bookingChatService = require("./services/bookingChat.service");
+const bookingService = require("./services/booking.service");
 const app = express();
 
 require("dotenv").config();
@@ -133,6 +134,28 @@ io.on("connection", socket => {
       socket.activeBookingRoom = room;
       socket.activeBookingId = booking._id.toString();
       acknowledge({ success: true });
+    } catch (error) {
+      acknowledge({ success: false, message: error.message });
+    }
+  });
+
+  socket.on("booking-chat:update-price", async (payload = {}, acknowledge = () => {}) => {
+    try {
+      const bookingId = String(payload.bookingId || "");
+      if (!socket.activeBookingId || socket.activeBookingId !== bookingId || socket.user.role !== "worker") {
+        return acknowledge({ success: false, message: "Only the assigned worker can update this booking price" });
+      }
+      const result = await bookingService.updateNegotiatedPrice({
+        bookingId,
+        workerId: socket.user._id,
+        price: Number(payload.price)
+      });
+      io.to(socket.activeBookingRoom).emit("booking-chat:price", {
+        bookingId,
+        price: result.booking.price,
+        pricingStatus: result.booking.pricingStatus
+      });
+      acknowledge({ success: true, booking: result.booking });
     } catch (error) {
       acknowledge({ success: false, message: error.message });
     }
