@@ -798,5 +798,5 @@ const getWorkerEarnings = async (workerId) => {
 
 module.exports = {
     createBooking, getWorkerBookings, updateBookingStatus, getCustomerBookings, cancelBooking
-    , completeBooking, markServiceDone, confirmDemoPayment, getWorkerDashboard, getWorkerEarnings
+    , completeBooking, markServiceDone, confirmDemoPayment, updateNegotiatedPrice, getWorkerDashboard, getWorkerEarnings
 };
