@@ -345,6 +345,18 @@ const updateBookingStatus = async (bookingId, status) => {
                     </span>
                   </div>
 
+                  {(booking.status === "in_progress" || booking.status === "completed") && (
+                    <div className="mt-4">
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/bookings/${booking._id}/chat`)}
+                        className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100"
+                      >
+                        Chat with Customer
+                      </button>
+                    </div>
+                  )}
+
                   {/* Booking details */}
                   <div className="grid grid-cols-1 sm:grid-cols-2
                                   lg:grid-cols-2 gap-4 mt-5 text-sm">
