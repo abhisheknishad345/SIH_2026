@@ -63,6 +63,7 @@ function DynamicRouting({ worker, customer }) {
 
 function MapViewport({ worker, customer, followMode, isWorker }) {
   const map = useMap();
+  const initialViewSetRef = useRef(false);
   useEffect(() => {
     if (followMode && isWorker && worker) {
       map.panTo([worker.latitude, worker.longitude], { animate: true });
@@ -70,15 +71,19 @@ function MapViewport({ worker, customer, followMode, isWorker }) {
   }, [map, worker, followMode, isWorker]);
 
   useEffect(() => {
+    if (initialViewSetRef.current) return;
     if (worker && customer) {
       map.fitBounds([
         [worker.latitude, worker.longitude],
         [customer.latitude, customer.longitude]
       ], { padding: [55, 55], maxZoom: 16 });
+      initialViewSetRef.current = true;
     } else if (worker) {
       map.setView([worker.latitude, worker.longitude], 15);
+      initialViewSetRef.current = true;
     } else if (customer) {
       map.setView([customer.latitude, customer.longitude], 15);
+      initialViewSetRef.current = true;
     }
   }, [map, worker, customer]);
 
