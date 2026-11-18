@@ -48,7 +48,8 @@ category: {
                     priceType: {
                         type: String,
                         enum: ["fixed", "per_hour", "per_day", "negotiable"],
-                        required: true
+                        required: true,
+                        default: "negotiable"
                     },
 
                     price: {
