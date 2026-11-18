@@ -123,6 +123,7 @@ const updateBookingStatus = async (bookingId, status) => {
             per_hour: "Per Hour",
             per_day: "Per Day",
             fixed: "Fixed Price",
+            negotiable: "Negotiable",
         };
 
         return types[priceType] || "Fixed Price";
@@ -397,9 +398,9 @@ const updateBookingStatus = async (bookingId, status) => {
                       </p>
 
                       <p className="font-semibold text-gray-800 mt-1">
-                        {booking.priceType === "per_day" || booking.serviceId?.priceType === "per_day"
+                        {booking.priceType === "per_day"
                           ? `${booking.quantity} ${booking.quantity === 1 ? "Day" : "Days"}`
-                          : booking.priceType === "per_hour" || booking.serviceId?.priceType === "per_hour"
+                          : booking.priceType === "per_hour"
                             ? `${booking.quantity} ${booking.quantity === 1 ? "Hour" : "Hours"}`
                             : formatDuration(booking.duration)}
                       </p>
@@ -412,11 +413,11 @@ const updateBookingStatus = async (bookingId, status) => {
 
   <div className="flex flex-wrap items-center gap-2 mt-1">
     <p className="font-bold text-gray-900 text-lg">
-      ₹{booking.price ?? 0}
+      {booking.price != null ? `₹${Number(booking.price).toLocaleString("en-IN")}` : "Awaiting final price"}
     </p>
 
     <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
-      {getPriceType(booking.serviceId?.priceType)}
+      {getPriceType(booking.priceType)}
     </span>
   </div>
 </div>
