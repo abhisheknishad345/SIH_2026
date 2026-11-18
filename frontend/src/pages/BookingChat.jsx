@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
-import { ArrowLeft, Send, MessageCircle, LoaderCircle } from "lucide-react";
+import { ArrowLeft, Send, MessageCircle, LoaderCircle, IndianRupee } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 
@@ -12,6 +12,9 @@ export default function BookingChat() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
+  const [booking, setBooking] = useState(null);
+  const [priceDraft, setPriceDraft] = useState("");
+  const [priceSaving, setPriceSaving] = useState(false);
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -21,8 +24,13 @@ export default function BookingChat() {
 
   const fetchMessages = useCallback(async () => {
     try {
-      const response = await api.get(`/bookings/${bookingId}/chat/messages`);
+      const [response, bookingResponse] = await Promise.all([
+        api.get(`/bookings/${bookingId}/chat/messages`),
+        api.get(`/bookings/${bookingId}/chat/booking`)
+      ]);
       setMessages(response.data.messages || []);
+      setBooking(bookingResponse.data.booking);
+      setPriceDraft(bookingResponse.data.booking?.price ?? "");
       setError("");
     } catch (err) {
       setError(err.response?.data?.message || "Unable to load this booking chat.");
@@ -54,6 +62,16 @@ export default function BookingChat() {
 
     socket.on("connect", joinRoom);
     socket.on("connect_error", err => setError(err.message || "Chat connection failed."));
+    socket.on("booking-chat:price", update => {
+      if (String(update.bookingId) !== String(bookingId)) return;
+      setBooking(current => current ? {
+        ...current,
+        price: update.price,
+        pricingStatus: update.pricingStatus
+      } : current);
+      setPriceDraft(String(update.price));
+    });
+
     socket.on("booking-chat:message", message => {
       const incomingBookingId = String(message.bookingId?._id || message.bookingId);
       if (incomingBookingId !== String(bookingId)) return;
@@ -66,6 +84,7 @@ export default function BookingChat() {
 
     return () => {
       socket.off("connect", joinRoom);
+      socket.off("booking-chat:price");
       socket.disconnect();
       socketRef.current = null;
     };
@@ -74,6 +93,34 @@ export default function BookingChat() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const handlePriceUpdate = event => {
+    event.preventDefault();
+    const price = Number(priceDraft);
+    const socket = socketRef.current;
+    if (!Number.isFinite(price) || price <= 0) {
+      setError("Enter a valid amount greater than zero.");
+      return;
+    }
+    if (!socket?.connected) {
+      setError("Chat server se connection nahi hai. Please try again.");
+      return;
+    }
+    setPriceSaving(true);
+    setError("");
+    socket.emit("booking-chat:update-price", { bookingId, price }, response => {
+      setPriceSaving(false);
+      if (!response?.success) {
+        setError(response?.message || "Price could not be updated.");
+        return;
+      }
+      setBooking(current => current ? {
+        ...current,
+        price: response.booking.price,
+        pricingStatus: response.booking.pricingStatus
+      } : current);
+    });
+  };
 
   const handleSend = event => {
     event.preventDefault();
@@ -112,6 +159,46 @@ export default function BookingChat() {
             <p className="truncate text-xs text-slate-500">Discuss service details and negotiate the final amount</p>
           </div>
         </header>
+
+        {booking && (
+          <section className="border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  {booking.priceType === "negotiable" ? "Negotiated booking amount" : "Booking amount"}
+                </p>
+                <p className="mt-1 flex items-center gap-1 text-xl font-bold text-slate-900">
+                  {booking.price != null ? <><IndianRupee size={18} />{Number(booking.price).toLocaleString("en-IN")}</> : "Not finalized yet"}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {booking.priceType === "negotiable"
+                    ? booking.pricingStatus === "agreed" ? "Worker has saved the final amount." : "Waiting for the worker to set the final amount."
+                    : "Price is based on the worker's selected rate."}
+                </p>
+              </div>
+              {booking.priceType === "negotiable" && user?.role === "worker" && (
+                <form onSubmit={handlePriceUpdate} className="flex w-full gap-2 sm:w-auto">
+                  <div className="relative min-w-0 flex-1 sm:w-44">
+                    <IndianRupee size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={priceDraft}
+                      onChange={event => setPriceDraft(event.target.value)}
+                      placeholder="Final amount"
+                      className="w-full rounded-lg border border-slate-300 py-2 pl-8 pr-3 text-sm outline-none focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+                  <button type="submit" disabled={priceSaving} className="shrink-0 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                    {priceSaving ? "Saving..." : "Save price"}
+                  </button>
+                </form>
+              )}
+            </div>
+          </section>
+        )}
 
         <main className="flex-1 space-y-3 overflow-y-auto bg-slate-50 p-4 sm:p-6">
           {loading && (
