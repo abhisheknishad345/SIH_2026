@@ -7,7 +7,6 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-routing-machine";
 import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import { ArrowLeft, LocateFixed, MapPin, Navigation, Users } from "lucide-react";
-import api from "../services/api";
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_DEV_URL;
 
@@ -77,7 +76,7 @@ function MapViewport({ me, peer, followMode }) {
     } else if (me) {
       map.setView([me.latitude, me.longitude], 16);
     }
-  }, [map]);
+  }, [map, me, peer]);
   return null;
 }
 
@@ -91,24 +90,7 @@ export default function BookingLiveMap() {
   const [followMode, setFollowMode] = useState(false);
   const [status, setStatus] = useState("Connecting...");
   const [error, setError] = useState("");
-  const [booking, setBooking] = useState(null);
-
   useEffect(() => {
-    let active = true;
-    api.get("/bookings/" + bookingId).then(response => {
-      const data = response.data?.booking || response.data?.data?.booking || response.data;
-      if (active) {
-        setBooking(data);
-        if (data?.status !== "in_progress") setError("Live location is available only for in-progress bookings.");
-      }
-    }).catch(err => {
-      if (active) setError(err.response?.data?.message || "Unable to verify this booking.");
-    });
-    return () => { active = false; };
-  }, [bookingId]);
-
-  useEffect(() => {
-    if (!booking || booking.status !== "in_progress") return;
     if (!navigator.geolocation) {
       setError("Your browser does not support location sharing.");
       return;
@@ -124,38 +106,29 @@ export default function BookingLiveMap() {
       socket.emit("booking-map:join", { bookingId }, response => {
         if (!response?.success) {
           setError(response?.message || "Unable to join live map.");
+          setStatus("Live map unavailable");
           return;
         }
         setStatus("Connected — sharing your location");
         if (response.peerLocation) setPeerPosition(response.peerLocation);
+        watchIdRef.current = navigator.geolocation.watchPosition(
+          position => {
+            const location = { latitude: position.coords.latitude, longitude: position.coords.longitude };
+            setMyPosition(location);
+            setStatus("Live location active");
+            socket.emit("booking-map:location", { bookingId, ...location }, result => {
+              if (result && !result.success) setError(result.message);
+            });
+          },
+          geoError => setError(geoError.code === 1
+            ? "Location permission denied. Allow location access in your browser."
+            : "Unable to get your location. Check GPS and try again."),
+          { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
+        );
       });
     });
     socket.on("connect_error", err => setError(err.message || "Live map connection failed."));
     socket.on("booking-map:peer-location", location => setPeerPosition(location));
-
-    watchIdRef.current = navigator.geolocation.watchPosition(
-      position => {
-        const location = {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude
-        };
-        setMyPosition(location);
-        setStatus("Live location active");
-        if (socket.connected) {
-          socket.emit("booking-map:location", { bookingId, ...location }, response => {
-            if (response && !response.success) setError(response.message);
-          });
-        }
-      },
-      geoError => {
-        setError(
-          geoError.code === 1
-            ? "Location permission denied. Allow location access in your browser."
-            : "Unable to get your location. Check GPS and try again."
-        );
-      },
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 }
-    );
 
     return () => {
       if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
@@ -163,13 +136,13 @@ export default function BookingLiveMap() {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [booking, bookingId]);
+  }, [bookingId]);
 
   const center = myPosition
     ? [myPosition.latitude, myPosition.longitude]
     : [28.6139, 77.2090];
 
-  if (error && !booking) {
+  if (error && !myPosition && status === "Live map unavailable") {
     return <div className="min-h-screen p-6 text-center"><p className="text-rose-600">{error}</p><button onClick={() => navigate(-1)} className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-white">Go Back</button></div>;
   }
 
@@ -189,7 +162,7 @@ export default function BookingLiveMap() {
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-white p-3">
           <div className="flex items-center gap-3 text-sm">
             <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-blue-600" /> You</span>
-            <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-green-600" /> {booking?.customerId?.fullName || booking?.workerId?.fullName || "Other participant"}</span>
+            <span className="flex items-center gap-2"><span className="h-3 w-3 rounded-full bg-green-600" /> Other participant</span>
           </div>
           <button onClick={() => setFollowMode(value => !value)} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700">
             <LocateFixed size={16} /> {followMode ? "Stop Following" : "Follow Me"}
