@@ -2,7 +2,7 @@ const express = require("express");
 
 const {createBooking, getWorkerBookings, updateBookingStatus,
     getCustomerBookings, cancelBooking, completeBooking, getWorkerDashboardController,
-    getWorkerEarningsController, markServiceDone, confirmDemoPayment,
+    getWorkerEarningsController, markServiceDone, confirmDemoPayment, updateNegotiatedPrice,
  } = require("../controllers/booking.controller");
 
 const authMiddleware = require("../middlewares/auth.middleware");
@@ -87,6 +87,13 @@ router.get(
 
 const bookingChatController = require("../controllers/bookingChat.controller");
 const bookingChatRoles = roleMiddleware(["customer", "worker"]);
+
+router.put(
+    "/:bookingId/chat/price",
+    authMiddleware,
+    roleMiddleware(["worker"]),
+    updateNegotiatedPrice
+);
 
 router.get(
     "/:bookingId/chat/messages",
