@@ -443,6 +443,30 @@ const WorkerProfile = () => {
                                     </span>
                                 </div>
                             </div>
+
+                            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3.5 sm:col-span-2">
+                                <span className="mb-2 block text-[11px] font-medium text-slate-500">
+                                    Shop Details
+                                </span>
+                                {worker.shopName || worker.shopAddress ? (
+                                    <div className="space-y-2">
+                                        {worker.shopName && (
+                                            <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                                                <Building2 size={16} className="shrink-0 text-indigo-600" />
+                                                <span className="wrap-break-words">{worker.shopName}</span>
+                                            </div>
+                                        )}
+                                        {worker.shopAddress && (
+                                            <div className="flex items-start gap-2 text-sm text-slate-700">
+                                                <MapPin size={16} className="mt-0.5 shrink-0 text-indigo-600" />
+                                                <span className="wrap-break-words">{worker.shopAddress}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-slate-400">No shop details added</p>
+                                )}
+                            </div>
                         </div>
                     </Card>
 

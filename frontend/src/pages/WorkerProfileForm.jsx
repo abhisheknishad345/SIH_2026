@@ -121,6 +121,8 @@ const WorkerProfileForm = ({
     const [formData, setFormData] = useState({
         cooperativeId: "",
         category: "",
+        shopName: "",
+        shopAddress: "",
         skills: [{ ...emptySkill }],
         certifications: [""],
         workingHours: [],
@@ -149,6 +151,8 @@ const WorkerProfileForm = ({
 
 
             category: initialData.category ?? prev.category,
+            shopName: initialData.shopName ?? prev.shopName,
+            shopAddress: initialData.shopAddress ?? prev.shopAddress,
 
             skills:
                 initialData.skills?.length > 0
@@ -187,6 +191,8 @@ const WorkerProfileForm = ({
         initialData?._id,
         initialData?.cooperativeId,
         initialData?.category,
+        initialData?.shopName,
+        initialData?.shopAddress,
         initialData?.skills,
         initialData?.certifications,
         initialData?.workingHours,
@@ -517,6 +523,8 @@ const WorkerProfileForm = ({
         const payload = {
             cooperativeId: formData.cooperativeId,
             category: formData.category.trim(),
+            shopName: formData.shopName.trim(),
+            shopAddress: formData.shopAddress.trim(),
 
             skills: validSkills.map((skill) => ({
                 serviceId: skill.serviceId,
@@ -948,6 +956,43 @@ const WorkerProfileForm = ({
                     )}
                 </section>
 
+
+                {/* Optional Shop Details */}
+                <section className={sectionClass}>
+                    <SectionHeader
+                        icon={Building2}
+                        title="Shop Details"
+                        subtitle="Add your shop information if you have a physical shop (optional)"
+                    />
+
+                    <div className="grid grid-cols-1 gap-4">
+                        <div>
+                            <label className={labelClass}>Shop Name <span className="font-normal text-slate-400">(Optional)</span></label>
+                            <input
+                                type="text"
+                                maxLength={100}
+                                value={formData.shopName}
+                                onChange={(e) => setFormData((prev) => ({ ...prev, shopName: e.target.value }))}
+                                placeholder="e.g. Sharma Electrical Works"
+                                className={inputClass}
+                            />
+                            <p className="mt-1 text-xs text-slate-400">Maximum 100 characters</p>
+                        </div>
+
+                        <div>
+                            <label className={labelClass}>Shop Address <span className="font-normal text-slate-400">(Optional)</span></label>
+                            <textarea
+                                rows={3}
+                                maxLength={300}
+                                value={formData.shopAddress}
+                                onChange={(e) => setFormData((prev) => ({ ...prev, shopAddress: e.target.value }))}
+                                placeholder="Enter your shop's complete address"
+                                className={inputClass}
+                            />
+                            <p className="mt-1 text-xs text-slate-400">Maximum 300 characters</p>
+                        </div>
+                    </div>
+                </section>
 
                 {/* Certifications */}
                 <section className={sectionClass}>

@@ -22,6 +22,20 @@ category: {
     trim: true
 },
 
+        shopName: {
+            type: String,
+            trim: true,
+            maxlength: 100,
+            default: ""
+        },
+
+        shopAddress: {
+            type: String,
+            trim: true,
+            maxlength: 300,
+            default: ""
+        },
+
 
 
         skills: {

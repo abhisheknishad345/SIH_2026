@@ -206,8 +206,14 @@ const getServiceWorkers = async ({ serviceId }) => {
             userId: worker.userId._id,
             fullName: worker.userId.fullName,
             category: worker.category,
+            shopName: worker.shopName || "",
+            shopAddress: worker.shopAddress || "",
             skill: matchedSkill,
-            skills: [matchedSkill],
+            skills: worker.skills,
+            certifications: worker.certifications || [],
+            workingHours: worker.workingHours || [],
+            isVerified: worker.isVerified,
+            isAvailable: worker.isAvailable,
             averageRating: rating?.averageRating || 0,
             totalRatings: rating?.totalRatings || 0
         };

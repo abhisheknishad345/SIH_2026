@@ -11,6 +11,8 @@ const createWorkerProfile = async (req, res) => {
             userId: req.user._id,
             cooperativeId: req.body.cooperativeId,
             category: req.body.category,
+            shopName: req.body.shopName,
+            shopAddress: req.body.shopAddress,
             skills: req.body.skills,
             certifications: req.body.certifications,
             location: req.body.location,

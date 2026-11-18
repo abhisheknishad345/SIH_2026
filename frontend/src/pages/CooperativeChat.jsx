@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
-import { MessageCircle, Send, RefreshCw, UserRound, ArrowLeft } from "lucide-react";
+import { MessageCircle, Send, RefreshCw, UserRound, ArrowLeft, SendHorizonal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
@@ -163,7 +163,7 @@ export default function CooperativeChat() {
         <aside className="hidden lg:flex fixed inset-y-0 left-0 w-64 flex-col border-r border-slate-200 bg-white">
           <div className="border-b border-slate-200 p-6"><h1 className="text-2xl font-extrabold text-emerald-700">TechConnect</h1><p className="text-sm text-slate-500">Worker Portal</p></div>
           <div className="p-5 text-sm font-semibold text-emerald-700">Workspace</div>
-          <button onClick={() => navigate("/worker/dashboard")} className="mx-3 flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-slate-600 hover:bg-slate-100"><ArrowLeft size={18}/> Back to Dashboard</button>
+          <button onClick={() => navigate("/worker/dashboard")} className="mx-3 flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm text-slate-600 hover:bg-slate-100 cursor-pointer"><ArrowLeft size={18}/> Back</button>
         </aside>
       )}
 
@@ -197,13 +197,13 @@ export default function CooperativeChat() {
                 {messages.length === 0 ? <div className="flex h-full min-h-40 flex-col items-center justify-center text-center"><MessageCircle size={34} className="text-slate-300"/><p className="mt-3 text-sm font-medium text-slate-600">No messages yet</p><p className="mt-1 text-xs text-slate-500">Start the conversation.</p></div> : messages.map(message => {
                   const senderId = message.senderId?._id || message.senderId;
                   const own = String(senderId) === String(user?._id);
-                  return <div key={message._id} className={`flex ${own ? "justify-end" : "justify-start"}`}><div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm sm:max-w-[70%] ${own ? "rounded-br-sm bg-emerald-600 text-white" : "rounded-bl-sm border border-slate-200 bg-white text-slate-800"}`}><p className="whitespace-pre-wrap break-words text-sm">{message.content}</p><p className={`mt-1 text-right text-[10px] ${own ? "text-emerald-100" : "text-slate-400"}`}>{new Date(message.createdAt).toLocaleString([], { dateStyle: "short", timeStyle: "short" })}</p></div></div>;
+                  return <div key={message._id} className={`flex ${own ? "justify-end" : "justify-start"}`}><div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm sm:max-w-[70%] ${own ? "rounded-br-sm bg-emerald-600 text-white" : "rounded-bl-sm border border-slate-200 bg-white text-slate-800"}`}><p className="whitespace-pre-wrap wrap-break-words text-sm">{message.content}</p><p className={`mt-1 text-right text-[10px] ${own ? "text-emerald-100" : "text-slate-400"}`}>{new Date(message.createdAt).toLocaleString([], { dateStyle: "short", timeStyle: "short" })}</p></div></div>;
                 })}
                 <div ref={bottomRef}/>
               </div>
               <form onSubmit={handleSend} className="flex items-end gap-2 border-t border-slate-100 bg-white p-3 sm:p-4">
                 <textarea value={draft} onChange={event => setDraft(event.target.value)} maxLength={2000} rows={1} placeholder="Write a message..." className="max-h-32 min-h-11 flex-1 resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"/>
-                <button type="submit" disabled={!draft.trim() || sending} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50" aria-label="Send message"><Send size={18}/></button>
+                <button type="submit" disabled={!draft.trim() || sending} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50" aria-label="Send message"><SendHorizonal size={18}/></button>
               </form>
             </> : <div className="flex flex-1 flex-col items-center justify-center p-8 text-center"><MessageCircle size={42} className="text-slate-300"/><h2 className="mt-4 font-semibold">Select a conversation</h2><p className="mt-1 text-sm text-slate-500">Choose a contact to start chatting.</p></div>}
           </section>

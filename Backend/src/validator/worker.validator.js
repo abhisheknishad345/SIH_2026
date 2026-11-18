@@ -45,10 +45,18 @@ const validateWorkerProfile = ({
     skills,
     certifications,
     location,
-    workingHours
+    workingHours,
+    shopName,
+    shopAddress
 }) => {
 
-    console.log(workingHours);
+    if (shopName !== undefined && (typeof shopName !== "string" || shopName.length > 100)) {
+        throw new Error("Shop name must be a string of at most 100 characters");
+    }
+
+    if (shopAddress !== undefined && (typeof shopAddress !== "string" || shopAddress.length > 300)) {
+        throw new Error("Shop address must be a string of at most 300 characters");
+    }
 
     
 
@@ -125,8 +133,18 @@ const validateWorkerProfileUpdate = ({
     skills,
     certifications,
     location,
-    isAvailable
+    isAvailable,
+    shopName,
+    shopAddress
 }) => {
+
+    if (shopName !== undefined && (typeof shopName !== "string" || shopName.length > 100)) {
+        throw new Error("Shop name must be a string of at most 100 characters");
+    }
+
+    if (shopAddress !== undefined && (typeof shopAddress !== "string" || shopAddress.length > 300)) {
+        throw new Error("Shop address must be a string of at most 300 characters");
+    }
 
     if (skills !== undefined) {
 
