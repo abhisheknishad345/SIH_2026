@@ -476,7 +476,7 @@ function Booking() {
                                                 type="number"
                                                 name="quantity"
                                                  min="1"
-                                                 max={priceType === "per_day" ? "30" : "12"}
+                                                 max={priceType === "per_day" ? "30" : "8"}
                                                  step="1"
                                                 value={formData.quantity}
                                                 onChange={handleChange}
