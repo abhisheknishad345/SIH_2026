@@ -209,7 +209,10 @@ const getServiceWorkers = async ({ serviceId }) => {
             shopName: worker.shopName || "",
             shopAddress: worker.shopAddress || "",
             skill: matchedSkill,
-            skills: [matchedSkill],
+            skills: worker.skills,
+            certifications: worker.certifications || [],
+            isVerified: worker.isVerified,
+            isAvailable: worker.isAvailable,
             averageRating: rating?.averageRating || 0,
             totalRatings: rating?.totalRatings || 0
         };
