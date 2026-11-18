@@ -355,6 +355,8 @@ const getNearbyWorkers = async ({
             userId: worker.userId._id,
             fullName: worker.userId.fullName,
             category: worker.category,
+            shopName: worker.shopName || "",
+            shopAddress: worker.shopAddress || "",
             skills: worker.skills,
             averageRating: rating?.averageRating || 0,
             totalRatings: rating?.totalRatings || 0,
