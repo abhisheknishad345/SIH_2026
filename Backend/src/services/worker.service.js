@@ -14,7 +14,9 @@ const createWorkerProfile = async ({
     skills,
     certifications,
     location,
-    workingHours
+    workingHours,
+    shopName = "",
+    shopAddress = ""
 }) => {
     const existingWorker = await Worker.findOne({ userId });
     console.log("Worker User ID:", userId);
@@ -83,6 +85,8 @@ const createWorkerProfile = async ({
         userId,
         cooperativeId,
         category,
+        shopName: shopName.trim(),
+        shopAddress: shopAddress.trim(),
         skills: workerSkills,
         certifications,
         location,
@@ -135,6 +139,8 @@ const updateWorkerProfile = async (userId, updateData) => {
 
     const allowedFields = [
         "category",
+        "shopName",
+        "shopAddress",
         "skills",
         "certifications",
         "workingHours",
@@ -211,7 +217,7 @@ const updateWorkerProfile = async (userId, updateData) => {
 
         if (updateData[field] !== undefined) {
             worker[field] =
-                field === "category"
+                ["category", "shopName", "shopAddress"].includes(field)
                     ? updateData[field].trim()
                     : updateData[field];
         }
