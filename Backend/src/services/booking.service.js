@@ -67,8 +67,8 @@ const createBooking = async ({
     if (indiaDate.format(start) < indiaDate.format(new Date())) {
         throw new Error("Booking date must be today or in the future");
     }
-    if (priceType !== "per_day" && start <= new Date()) {
-        throw new Error("Booking time must be in the future");
+    if (start <= new Date()) {
+        throw new Error("Booking date and time must be in the future");
     }
 
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > (priceType === "per_day" ? 30 : 12)) {
