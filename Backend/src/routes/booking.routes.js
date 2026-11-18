@@ -96,6 +96,13 @@ router.put(
 );
 
 router.get(
+    "/:bookingId/chat/booking",
+    authMiddleware,
+    bookingChatRoles,
+    bookingChatController.getBookingSummary
+);
+
+router.get(
     "/:bookingId/chat/messages",
     authMiddleware,
     bookingChatRoles,
