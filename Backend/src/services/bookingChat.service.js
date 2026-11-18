@@ -26,6 +26,20 @@ const getAccessibleBooking = async (user, bookingId) => {
   return booking;
 };
 
+const getBookingSummary = async (user, bookingId) => {
+  const booking = await getAccessibleBooking(user, bookingId);
+  return {
+    _id: booking._id,
+    price: booking.price,
+    priceType: booking.priceType,
+    pricingStatus: booking.pricingStatus,
+    quantity: booking.quantity,
+    status: booking.status,
+    paymentStatus: booking.paymentStatus,
+    serviceCompletedAt: booking.serviceCompletedAt
+  };
+};
+
 const getMessages = async (user, bookingId) => {
   const booking = await getAccessibleBooking(user, bookingId);
   return BookingChatMessage.find({ bookingId: booking._id })
@@ -55,4 +69,4 @@ const sendMessage = async (user, bookingId, content) => {
     .populate("senderId", "fullName role");
 };
 
-module.exports = { getAccessibleBooking, getMessages, sendMessage };
+module.exports = { getAccessibleBooking, getBookingSummary, getMessages, sendMessage };
