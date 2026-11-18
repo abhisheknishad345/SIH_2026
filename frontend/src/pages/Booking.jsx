@@ -536,6 +536,7 @@ function Booking() {
                                             dateFormat="dd MMM yyyy, h:mm aa"
                                             minDate={new Date()}
                                             filterTime={(time) =>
+                                                time.toDateString() !== new Date().toDateString() ||
                                                 time.getTime() > Date.now()
                                             }
                                             placeholderText="Select date and time"
