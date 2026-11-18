@@ -15,7 +15,9 @@ import CustomerCreateProfile from "./pages/CustomerCreateProfile";
 import CustomerEditProfile from "./pages/CustomerEditProfile";
 import WorkerProfileEdit from "./pages/WorkerProfileEdit";
 import CustomerProfile from "./pages/CustomerProfile";
-import AdminDashboard from "./pages/AdminDashboard"
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminServices from "./pages/AdminServices";
+import AdminBookings from "./pages/AdminBookings";
 import HandleError from "./pages/Error";
 import LandingPage from "./pages/LandingPage";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -73,6 +75,8 @@ function App() {
           <Route path="/worker/chat" element={<CooperativeChat />} />
           <Route path="/cooperative-admin/chat" element={<CooperativeChat />} />
           <Route path="/cooperative-admin" element={<AdminDashboard />} />
+          <Route path="/cooperative-admin/services" element={<AdminServices />} />
+          <Route path="/cooperative-admin/bookings" element={<AdminBookings />} />
           <Route path="/admin" element={<SuperAdminDashboard />} />
 
           <Route
