@@ -66,7 +66,9 @@ const createWorkerProfile = async ({
         return {
             serviceId: service._id,
             name: service.name,
-            experience: skill.experience
+            experience: skill.experience,
+            priceType: skill.priceType,
+            price: skill.priceType === "negotiable" ? null : skill.price
         };
     });
 
@@ -103,23 +105,17 @@ const getWorkerProfile = async (userId) => {
             "cooperativeId",
             "name registrationNumber contactEmail contactPhone address"
         )
-        .populate(
-            "skills.serviceId",
-            "price priceType"
-        );
+;
 
     if (!worker) {
         throw new Error("Worker profile not found");
     }
 
-    // Add admin-defined service pricing to each skill
     const workerData = worker.toObject();
-
     workerData.skills = workerData.skills.map(skill => ({
         ...skill,
         serviceId: skill.serviceId?._id || skill.serviceId,
-        price: skill.serviceId?.price ?? 0,
-        priceType: skill.serviceId?.priceType ?? ""
+        price: skill.price ?? null
     }));
 
     return {
@@ -204,7 +200,9 @@ const updateWorkerProfile = async (userId, updateData) => {
             return {
                 serviceId: service._id,
                 name: service.name,
-                experience: skill.experience
+                experience: skill.experience,
+                priceType: skill.priceType,
+                price: skill.priceType === "negotiable" ? null : skill.price
             };
         });
     }
