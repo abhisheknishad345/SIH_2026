@@ -17,6 +17,8 @@ import {
   Wrench,
   Award,
   Store,
+  CalendarDays,
+  Clock3,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -318,8 +320,8 @@ function ServiceWorkers() {
                                     : "border-slate-200 bg-slate-50 text-slate-600")
                                 }
                               >
-                                {skill.name || "Service"}
-                                {isMatched ? " · Selected service" : ""}
+                                <span>{skill.name || "Service"}{isMatched ? " · Selected" : ""}</span>
+                                <span className="ml-1 font-bold">({getPriceLabel(skill)})</span>
                               </span>
                             );
                           })}
@@ -369,6 +371,31 @@ function ServiceWorkers() {
                         </p>
                       )}
                     </section>
+
+                    {worker.workingHours?.some((day) => day.isWorking) && (
+                      <section>
+                        <div className="mb-2.5 flex items-center gap-2 text-sm font-extrabold text-slate-800">
+                          <CalendarDays size={16} className="text-indigo-600" />
+                          Working hours
+                        </div>
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                          {worker.workingHours
+                            .filter((day) => day.isWorking)
+                            .map((day) => (
+                              <div
+                                key={day.day}
+                                className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs"
+                              >
+                                <span className="font-semibold text-slate-700">{day.day}</span>
+                                <span className="inline-flex items-center gap-1 text-slate-500">
+                                  <Clock3 size={12} />
+                                  {day.startTime} – {day.endTime}
+                                </span>
+                              </div>
+                            ))}
+                        </div>
+                      </section>
+                    )}
 
                     {certifications.length > 0 && (
                       <section>
