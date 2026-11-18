@@ -31,117 +31,55 @@ import ApprovedWorkers from "./pages/ApprovedWorkers";
 import RejectedWorkers from "./pages/RejectedWorkers";
 import CooperativeChat from "./pages/CooperativeChat";
 import BookingChat from "./pages/BookingChat";
-
+import Body from "./components/Body";
 
 function App() {
   return (
-
     <AuthProvider>
-
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<Login />} />
+          {/* Public routes */}
           <Route path="/" element={<LandingPage />} />
-          <Route path="*" element={<HandleError />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route
-            path="/customer"
-            element={
-              <CustomerProfileGuard>
-                <CustomerDashboard />
-              </CustomerProfileGuard>
-            }
-          />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
-          <Route
-            path="/customer/edit-profile"
-            element={
-              <CustomerProfileGuard>
+          {/* Customer routes */}
+          <Route path="/customer" element={<Body allowedRoles={["customer"]}><CustomerProfileGuard><CustomerDashboard /></CustomerProfileGuard></Body>} />
+          <Route path="/customer/edit-profile" element={<Body allowedRoles={["customer"]}><CustomerProfileGuard><CustomerEditProfile /></CustomerProfileGuard></Body>} />
+          <Route path="/customer/create-profile" element={<Body allowedRoles={["customer"]}><CustomerCreateProfile /></Body>} />
+          <Route path="/customer/profile" element={<Body allowedRoles={["customer"]}><CustomerProfile /></Body>} />
+          <Route path="/customer/bookings" element={<Body allowedRoles={["customer"]}><CustomerProfileGuard><MyBookings /></CustomerProfileGuard></Body>} />
+          <Route path="/booking" element={<Body allowedRoles={["customer"]}><CustomerProfileGuard><Booking /></CustomerProfileGuard></Body>} />
+          <Route path="/services/:serviceId/workers" element={<Body allowedRoles={["customer"]}><CustomerProfileGuard><ServiceWorkers /></CustomerProfileGuard></Body>} />
 
-                <CustomerEditProfile />
-              </CustomerProfileGuard>
-            }
+          {/* Worker routes */}
+          <Route path="/worker/dashboard" element={<Body allowedRoles={["worker"]}><WorkerDashboard /></Body>} />
+          <Route path="/worker/bookings" element={<Body allowedRoles={["worker"]}><WorkerBookings /></Body>} />
+          <Route path="/worker/profile" element={<Body allowedRoles={["worker"]}><WorkerProfile /></Body>} />
+          <Route path="/worker/create-profile" element={<Body allowedRoles={["worker"]}><WorkerCreateProfile /></Body>} />
+          <Route path="/worker/rejected" element={<Body allowedRoles={["worker"]}><RejectWorker /></Body>} />
+          <Route path="/worker/profile-pending" element={<Body allowedRoles={["worker"]}><WorkerProfilePending /></Body>} />
+          <Route path="/worker/edit-profile" element={<Body allowedRoles={["worker"]}><WorkerProfileEdit /></Body>} />
+          <Route path="/worker/chat" element={<Body allowedRoles={["worker"]}><CooperativeChat /></Body>} />
+          <Route path="/bookings/:bookingId/chat" element={<Body allowedRoles={["customer", "worker"]}><BookingChat /></Body>} />
 
-          />
+          {/* Cooperative admin routes */}
+          <Route path="/cooperative-admin" element={<Body allowedRoles={["cooperative_admin"]}><AdminDashboard /></Body>} />
+          <Route path="/cooperative-admin/services" element={<Body allowedRoles={["cooperative_admin"]}><AdminServices /></Body>} />
+          <Route path="/cooperative-admin/bookings" element={<Body allowedRoles={["cooperative_admin"]}><AdminBookings /></Body>} />
+          <Route path="/cooperative-admin/chat" element={<Body allowedRoles={["cooperative_admin"]}><CooperativeChat /></Body>} />
+          <Route path="/cooperative-admin/workers/pending" element={<Body allowedRoles={["cooperative_admin"]}><PendingWorkers /></Body>} />
+          <Route path="/cooperative-admin/workers/approved" element={<Body allowedRoles={["cooperative_admin"]}><ApprovedWorkers /></Body>} />
+          <Route path="/cooperative-admin/workers/rejected" element={<Body allowedRoles={["cooperative_admin"]}><RejectedWorkers /></Body>} />
 
-          <Route
-            path="/customer/create-profile"
-            element={<CustomerCreateProfile />}
-          />
-          <Route path="/worker/dashboard" element={<WorkerDashboard />} />
-          <Route path="/worker/bookings" element={<WorkerBookings />} />
-          <Route path="/bookings/:bookingId/chat" element={<BookingChat />} />
-          <Route path="/worker/chat" element={<CooperativeChat />} />
-          <Route path="/cooperative-admin/chat" element={<CooperativeChat />} />
-          <Route path="/cooperative-admin" element={<AdminDashboard />} />
-          <Route path="/cooperative-admin/services" element={<AdminServices />} />
-          <Route path="/cooperative-admin/bookings" element={<AdminBookings />} />
-          <Route path="/admin" element={<SuperAdminDashboard />} />
+          {/* Super admin routes */}
+          <Route path="/admin" element={<Body allowedRoles={["super_admin"]}><SuperAdminDashboard /></Body>} />
 
-          <Route
-            path="/booking"
-            element={
-              <CustomerProfileGuard>
-                <Booking />
-              </CustomerProfileGuard>
-            }
-          />
-
-          <Route path="/worker/profile" element={<WorkerProfile />} />
-          <Route path="/worker/create-profile" element={<WorkerCreateProfile />} />
-          <Route path="/worker/rejected" element={<RejectWorker />} />
-          <Route path="/worker/profile-pending" element={<WorkerProfilePending />} />
-
-          <Route
-            path="/customer/profile"
-            element={<CustomerProfile />}
-          />
-
-          <Route
-            path="/cooperative-admin/workers/pending"
-            element={<PendingWorkers />}
-          />
-          <Route
-            path="/cooperative-admin/workers/approved"
-            element={<ApprovedWorkers />}
-          />
-
-          <Route
-            path="/cooperative-admin/workers/rejected"
-            element={<RejectedWorkers />}
-          />
-          <Route
-            path="/worker/edit-profile"
-            element={<WorkerProfileEdit />}
-          />
-
-          <Route
-            path="/customer/bookings"
-            element={
-              <CustomerProfileGuard>
-                <MyBookings />
-              </CustomerProfileGuard>
-            }
-          />
-          <Route
-            path="/services/:serviceId/workers"
-            element={
-              <CustomerProfileGuard>
-                <ServiceWorkers />
-              </CustomerProfileGuard>
-            }
-          />
-
-          <Route
-            path="/forgot-password"
-            element={<ForgotPassword />}
-          />
-
-          <Route
-            path="/reset-password"
-            element={<ResetPassword />}
-          />
+          {/* Unknown manually entered URLs also require authentication */}
+          <Route path="*" element={<Body><HandleError /></Body>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
