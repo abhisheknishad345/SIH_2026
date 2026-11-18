@@ -167,24 +167,24 @@ const getDashboardStats = async (adminId) => {
         cooperativeId
     }).distinct("_id");
 
+    const bookingScope = { serviceId: { $in: serviceIds } };
+
     const [
         totalBookings,
         pendingBookings,
+        acceptedBookings,
+        inProgressBookings,
+        rejectedBookings,
+        cancelledBookings,
         completedBookings
     ] = await Promise.all([
-        Booking.countDocuments({
-            serviceId: { $in: serviceIds }
-        }),
-
-        Booking.countDocuments({
-            serviceId: { $in: serviceIds },
-            status: "pending"
-        }),
-
-        Booking.countDocuments({
-            serviceId: { $in: serviceIds },
-            status: "completed"
-        })
+        Booking.countDocuments(bookingScope),
+        Booking.countDocuments({ ...bookingScope, status: "pending" }),
+        Booking.countDocuments({ ...bookingScope, status: "accepted" }),
+        Booking.countDocuments({ ...bookingScope, status: "in_progress" }),
+        Booking.countDocuments({ ...bookingScope, status: "rejected" }),
+        Booking.countDocuments({ ...bookingScope, status: "cancelled" }),
+        Booking.countDocuments({ ...bookingScope, status: "completed" })
     ]);
 
     return {
@@ -203,6 +203,10 @@ const getDashboardStats = async (adminId) => {
         bookings: {
             total: totalBookings,
             pending: pendingBookings,
+            accepted: acceptedBookings,
+            inProgress: inProgressBookings,
+            rejected: rejectedBookings,
+            cancelled: cancelledBookings,
             completed: completedBookings
         }
     };
