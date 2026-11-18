@@ -118,6 +118,28 @@ const createCooperativeAdmin = async ({
     };
 };
 
+const getAdminServices = async (adminId) => {
+    const admin = await CooperativeAdmin.findOne({ userId: adminId, isActive: true });
+    if (!admin) throw new Error("Cooperative admin not found");
+
+    return Service.find({ cooperativeId: admin.cooperativeId })
+        .sort({ createdAt: -1 })
+        .lean();
+};
+
+const getAdminBookings = async (adminId) => {
+    const admin = await CooperativeAdmin.findOne({ userId: adminId, isActive: true });
+    if (!admin) throw new Error("Cooperative admin not found");
+
+    const serviceIds = await Service.find({ cooperativeId: admin.cooperativeId }).distinct("_id");
+    return Booking.find({ serviceId: { $in: serviceIds } })
+        .populate("customerId", "fullName email")
+        .populate("workerId", "fullName email")
+        .populate("serviceId", "name category")
+        .sort({ createdAt: -1 })
+        .lean();
+};
+
 const getDashboardStats = async (adminId) => {
     const admin = await CooperativeAdmin.findOne({
         userId: adminId,
@@ -214,5 +236,7 @@ const getDashboardStats = async (adminId) => {
 
 module.exports = {
     createCooperativeAdmin,
-    getDashboardStats
+    getDashboardStats,
+    getAdminServices,
+    getAdminBookings
 };
