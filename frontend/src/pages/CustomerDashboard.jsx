@@ -464,17 +464,7 @@ function CustomerDashboard() {
                                             </div>
 
                                             {/* Price */}
-                                            <div className="shrink-0 rounded-xl bg-slate-50 px-3 py-2 text-right">
-
-                                                <p className="text-lg font-bold text-slate-900">
-                                                    ₹{service.price ?? 0}
-                                                </p>
-
-                                                <p className="mt-0.5 text-[11px] font-medium text-slate-500">
-                                                    {getPriceType(service.priceType)}
-                                                </p>
-
-                                            </div>
+                                            
 
                                         </div>
 

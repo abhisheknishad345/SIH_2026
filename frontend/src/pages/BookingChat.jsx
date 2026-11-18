@@ -179,7 +179,7 @@ export default function BookingChat() {
               {booking.priceType === "negotiable" && user?.role === "worker" && !booking.serviceCompletedAt && booking.status !== "completed" && (
                 <form onSubmit={handlePriceUpdate} className="flex w-full gap-2 sm:w-auto">
                   <div className="relative min-w-0 flex-1 sm:w-44">
-                    <IndianRupee size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <IndianRupee size={16} className="text-black absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
                       type="number"
                       min="0.01"
@@ -187,7 +187,7 @@ export default function BookingChat() {
                       value={priceDraft}
                       onChange={event => setPriceDraft(event.target.value)}
                       placeholder="Final amount"
-                      className="w-full rounded-lg border border-slate-300 py-2 pl-8 pr-3 text-sm outline-none focus:border-indigo-500"
+                      className="w-full text-black rounded-lg border border-slate-300 py-2 pl-8 pr-3 text-sm outline-none focus:border-indigo-500"
                       required
                     />
                   </div>
@@ -222,7 +222,7 @@ export default function BookingChat() {
                   <p className={`mb-1 text-[11px] font-semibold ${ownMessage ? "text-indigo-100" : "text-indigo-600"}`}>
                     {ownMessage ? "You" : message.senderId?.fullName || "Participant"}
                   </p>
-                  <p className="whitespace-pre-wrap break-words text-sm">{message.content}</p>
+                  <p className="whitespace-pre-wrap wrap-break-words text-sm">{message.content}</p>
                   <p className={`mt-1 text-right text-[10px] ${ownMessage ? "text-indigo-100" : "text-slate-400"}`}>
                     {new Date(message.createdAt).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" })}
                   </p>
@@ -248,7 +248,7 @@ export default function BookingChat() {
             rows={1}
             maxLength={2000}
             placeholder="Write a message..."
-            className="max-h-32 min-h-11 flex-1 resize-y rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+            className="max-h-32 min-h-11 flex-1 text-black resize-y rounded-xl border border-slate-300 px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
           />
           <button type="submit" disabled={!draft.trim() || sending} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50" aria-label="Send message">
             {sending ? <LoaderCircle size={18} className="animate-spin" /> : <Send size={18} />}
