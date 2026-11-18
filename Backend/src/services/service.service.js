@@ -155,8 +155,8 @@ const updateService = async (
     };
 };
 
-const getServiceWorkers = async ({ serviceId }) => {
 
+const getServiceWorkers = async ({ serviceId, latitude, longitude, radiusKm }) => {
     if (!mongoose.Types.ObjectId.isValid(serviceId)) {
         throw new Error("Invalid service ID");
     }
@@ -170,6 +170,10 @@ const getServiceWorkers = async ({ serviceId }) => {
         throw new Error("Service not found or inactive");
     }
 
+    const hasLocation =
+        latitude !== undefined &&
+        longitude !== undefined;
+
     const workers = await Worker.find({
         cooperativeId: service.cooperativeId,
         "skills.serviceId": service._id,
@@ -177,8 +181,85 @@ const getServiceWorkers = async ({ serviceId }) => {
         isAvailable: true
     }).populate("userId", "fullName email");
 
-    const workerIds = workers.map(worker => worker.userId._id);
+    // Haversine formula: distance between two GPS coordinates
+    const calculateDistance = (lat1, lon1, lat2, lon2) => {
+        const toRadians = (degree) => degree * (Math.PI / 180);
+        const earthRadiusKm = 6371;
 
+        const dLat = toRadians(lat2 - lat1);
+        const dLon = toRadians(lon2 - lon1);
+
+        const a =
+            Math.sin(dLat / 2) ** 2 +
+            Math.cos(toRadians(lat1)) *
+            Math.cos(toRadians(lat2)) *
+            Math.sin(dLon / 2) ** 2;
+
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return earthRadiusKm * c;
+    };
+
+    let workerResults = workers.map(worker => {
+        const rating = null;
+
+        const matchedSkill = worker.skills.find(
+            skill => skill.serviceId.toString() === service._id.toString()
+        );
+
+        let distanceKm = null;
+
+        if (
+            hasLocation &&
+            worker.location?.coordinates?.length === 2
+        ) {
+            const [workerLongitude, workerLatitude] =
+                worker.location.coordinates;
+
+            distanceKm = calculateDistance(
+                Number(latitude),
+                Number(longitude),
+                workerLatitude,
+                workerLongitude
+            );
+        }
+
+        return {
+            workerId: worker._id,
+            userId: worker.userId?._id,
+            fullName: worker.userId?.fullName || "Worker",
+            category: worker.category,
+            shopName: worker.shopName || "",
+            shopAddress: worker.shopAddress || "",
+            skill: matchedSkill,
+            skills: worker.skills,
+            certifications: worker.certifications || [],
+            workingHours: worker.workingHours || [],
+            isVerified: worker.isVerified,
+            isAvailable: worker.isAvailable,
+            distanceKm
+        };
+    });
+
+    // Apply radius filter only when customer selects 1 KM or 2 KM
+    if (hasLocation && radiusKm !== undefined) {
+        workerResults = workerResults.filter(
+            worker =>
+                worker.distanceKm !== null &&
+                worker.distanceKm <= Number(radiusKm)
+        );
+    }
+
+    // Nearest workers first when customer location is available
+    if (hasLocation) {
+        workerResults.sort((a, b) => {
+            if (a.distanceKm === null) return 1;
+            if (b.distanceKm === null) return -1;
+            return a.distanceKm - b.distanceKm;
+        });
+    }
+
+    const workerIds = workers.map(worker => worker.userId?._id).filter(Boolean);
     const ratingSummaries = await getWorkerRatingSummary(workerIds);
 
     const ratingMap = new Map(
@@ -191,35 +272,16 @@ const getServiceWorkers = async ({ serviceId }) => {
         ])
     );
 
-    return workers.map(worker => {
-
-        const rating = ratingMap.get(
-            worker.userId._id.toString()
-        );
-
-        const matchedSkill = worker.skills.find(
-            skill => skill.serviceId.toString() === service._id.toString()
-        );
+    return workerResults.map(worker => {
+        const rating = ratingMap.get(worker.userId?.toString());
 
         return {
-            workerId: worker._id,
-            userId: worker.userId._id,
-            fullName: worker.userId.fullName,
-            category: worker.category,
-            shopName: worker.shopName || "",
-            shopAddress: worker.shopAddress || "",
-            skill: matchedSkill,
-            skills: worker.skills,
-            certifications: worker.certifications || [],
-            workingHours: worker.workingHours || [],
-            isVerified: worker.isVerified,
-            isAvailable: worker.isAvailable,
+            ...worker,
             averageRating: rating?.averageRating || 0,
             totalRatings: rating?.totalRatings || 0
         };
     });
-
-}
+};
 
 
 

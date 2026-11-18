@@ -240,16 +240,16 @@ function AdminDashboard() {
               {serviceError && <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700"><AlertCircle size={17} className="mt-0.5 shrink-0" />{serviceError}</div>}
               <div>
                 <label className="mb-1.5 block text-sm font-semibold text-slate-700">Service Name <span className="text-red-500">*</span></label>
-                <input required minLength={2} maxLength={100} value={serviceForm.name} onChange={(e) => setServiceForm((p) => ({ ...p, name: e.target.value }))} placeholder="e.g. Electrical Repair" className="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
+                <input required minLength={2} maxLength={100} value={serviceForm.name} onChange={(e) => setServiceForm((p) => ({ ...p, name: e.target.value }))} placeholder="e.g. Electrical Repair" className="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 text-black" />
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-semibold text-slate-700">Category <span className="text-red-500">*</span></label>
-                <input required minLength={2} maxLength={100} value={serviceForm.category} onChange={(e) => setServiceForm((p) => ({ ...p, category: e.target.value }))} placeholder="e.g. Electrical" className="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
+                <input required minLength={2} maxLength={100} value={serviceForm.category} onChange={(e) => setServiceForm((p) => ({ ...p, category: e.target.value }))} placeholder="e.g. Electrical" className="w-full rounded-xl border border-slate-300 px-3.5 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 text-black" />
                 <p className="mt-1 text-xs text-slate-400">Workers use this category to find and select relevant services.</p>
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-semibold text-slate-700">Description <span className="font-normal text-slate-400">(Optional)</span></label>
-                <textarea rows={3} maxLength={500} value={serviceForm.description} onChange={(e) => setServiceForm((p) => ({ ...p, description: e.target.value }))} placeholder="Briefly describe this service..." className="w-full resize-y rounded-xl border border-slate-300 px-3.5 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
+                <textarea rows={3} maxLength={500} value={serviceForm.description} onChange={(e) => setServiceForm((p) => ({ ...p, description: e.target.value }))} placeholder="Briefly describe this service..." className="w-full resize-y rounded-xl border border-slate-300 px-3.5 py-3 text-sm outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 text-black" />
               </div>
               <div className="flex flex-col-reverse gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
                 <button type="button" onClick={() => setShowServiceForm(false)} className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>

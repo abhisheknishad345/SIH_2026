@@ -80,28 +80,67 @@ const getActiveServices = async (req, res) => {
 
 
 const getServiceWorkers = async (req, res) => {
-
     try {
-
         const { serviceId } = req.params;
+        const { latitude, longitude, radiusKm } = req.query;
+
+        let parsedLatitude;
+        let parsedLongitude;
+        let parsedRadius;
+
+        if (latitude !== undefined || longitude !== undefined) {
+            parsedLatitude = Number(latitude);
+            parsedLongitude = Number(longitude);
+
+            if (
+                !Number.isFinite(parsedLatitude) ||
+                !Number.isFinite(parsedLongitude) ||
+                parsedLatitude < -90 ||
+                parsedLatitude > 90 ||
+                parsedLongitude < -180 ||
+                parsedLongitude > 180
+            ) {
+                return res.status(400).json({
+                    message: "Invalid customer location"
+                });
+            }
+        }
+
+        if (radiusKm !== undefined) {
+            parsedRadius = Number(radiusKm);
+
+            if (![1, 2, 4, 6, 8, 10, 50, 100].includes(parsedRadius)) {
+                return res.status(400).json({
+                    message: "Radius must between 1 or 100 KM"
+                });
+            }
+
+            if (parsedLatitude === undefined || parsedLongitude === undefined) {
+                return res.status(400).json({
+                    message: "Customer location is required for radius filter"
+                });
+            }
+        }
 
         const workers = await serviceService.getServiceWorkers({
-            serviceId
+            serviceId,
+            latitude: parsedLatitude,
+            longitude: parsedLongitude,
+            radiusKm: parsedRadius
         });
 
-        res.status(200).json({
+        return res.status(200).json({
             message: "Service workers fetched successfully",
             workers
         });
 
     } catch (error) {
-
-        res.status(400).json({
+        return res.status(400).json({
             message: error.message
         });
-
     }
 };
+
 
 
 
