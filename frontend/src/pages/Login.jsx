@@ -216,90 +216,57 @@ function Login() {
   };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-[#070b1a] flex items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
-      {/* Background glow */}
+    <main className="min-h-screen bg-[#080b0a] text-zinc-100 lg:grid lg:grid-cols-2">
+      {/* Left: login form */}
+      <section className="relative flex min-h-screen flex-col justify-center px-5 py-8 sm:px-10 lg:px-14 xl:px-20">
+        <div className="pointer-events-none absolute -left-32 top-10 h-80 w-80 rounded-full bg-lime-300/10 blur-3xl" />
+        <div className="relative mx-auto w-full max-w-md">
+          <Link to="/" className="mb-10 inline-flex items-center gap-3">
+            <span className="grid h-11 w-11 place-items-center rounded-xl bg-lime-300 text-black shadow-lg shadow-lime-300/10">
+              <SettingsIcon size={23} />
+            </span>
+            <span className="text-xl font-bold tracking-tight text-white">
+              Tech<span className="text-lime-300">Connect</span>
+            </span>
+          </Link>
 
-    
-
-      <div className="pointer-events-none absolute -top-32 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-indigo-600/20 blur-3xl sm:h-96 sm:w-96 lg:h-120 lg:w-120" />
-      <div className="pointer-events-none absolute -bottom-32 right-0 h-64 w-64 rounded-full bg-blue-700/10 blur-3xl sm:h-80 sm:w-80" />
-
-      <div className="relative z-10 flex w-full max-w-sm flex-col items-center sm:max-w-md lg:max-w-md">
-        {/* Logo + heading */}
-        <div className="mb-6 flex flex-col items-center text-center sm:mb-8">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-400/20 bg-indigo-500/15 text-indigo-300 shadow-lg shadow-indigo-900/40 sm:h-16 sm:w-16">
-            <SettingsIcon />
+          <div className="mb-8">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[.22em] text-lime-300">WELCOME BACK</p>
+            <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Sign in to your account</h1>
+            <p className="mt-3 text-sm leading-6 text-zinc-400">
+              Access your cooperative portal and stay connected with your community.
+            </p>
           </div>
 
-          <h1 className="text-2xl font-bold text-indigo-300 sm:text-3xl lg:text-4xl">
-            TechConnect
-          </h1>
-
-          <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.2em] text-indigo-200/70 sm:text-xs">
-            Cooperative Services Platform
-          </p>
-        </div>
-
-        {/* Card */}
-        <div className="w-full rounded-2xl border border-white/10 bg-white/4 p-5 shadow-2xl shadow-black/40 backdrop-blur-md sm:p-7 lg:p-8">
-          <h2 className="text-lg font-bold text-white sm:text-xl">
-            Welcome Back
-          </h2>
-
-          <p className="mt-1 mb-5 text-xs text-gray-400 sm:mb-6 sm:text-sm">
-            Sign in to securely access your cooperative portal
-          </p>
-
           {error && (
-            <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-md text-red-300">
+            <div role="alert" className="mb-5 rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-            {/* Email */}
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label
-                htmlFor="email"
-                className="mb-2 block text-xs font-semibold text-gray-200 sm:text-sm"
-              >
-                Email Address
-              </label>
-
+              <label htmlFor="email" className="mb-2 block text-sm font-medium text-zinc-200">Email address</label>
               <div className="relative">
-                <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                  <AtIcon />
-                </span>
-
+                <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-zinc-500"><AtIcon /></span>
                 <input
                   id="email"
                   type="email"
                   name="email"
-                  placeholder="name@cooperative.com"
+                  placeholder="name@example.com"
                   value={formData.email}
                   onChange={handleChange}
                   autoComplete="email"
-                  className="w-full rounded-xl border border-white/5 bg-white/6 py-3 pl-12 pr-4 text-sm text-white placeholder-gray-500
-                             focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 sm:py-3.5 sm:text-base"
                   required
+                  className="w-full rounded-xl border border-white/10 bg-[#151b17] py-3.5 pl-12 pr-4 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-lime-300/60 focus:ring-2 focus:ring-lime-300/10"
                 />
               </div>
             </div>
 
-            {/* Password */}
             <div>
-              <label
-                htmlFor="password"
-                className="mb-2 block text-xs font-semibold text-gray-200 sm:text-sm"
-              >
-                Password
-              </label>
-
+              <label htmlFor="password" className="mb-2 block text-sm font-medium text-zinc-200">Password</label>
               <div className="relative">
-                <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
-                  <LockIcon />
-                </span>
-
+                <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-zinc-500"><LockIcon /></span>
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -308,109 +275,122 @@ function Login() {
                   value={formData.password}
                   onChange={handleChange}
                   autoComplete="current-password"
-                  className="w-full rounded-xl border border-white/5 bg-white/6 py-3 pl-12 pr-12 text-sm text-white placeholder-gray-500
-                             focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/60 sm:py-3.5 sm:text-base"
                   required
+                  className="w-full rounded-xl border border-white/10 bg-[#151b17] py-3.5 pl-12 pr-12 text-sm text-white outline-none transition placeholder:text-zinc-600 focus:border-lime-300/60 focus:ring-2 focus:ring-lime-300/10"
                 />
-
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 transition hover:text-white cursor-pointer"
+                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-zinc-500 transition hover:text-lime-300"
                 >
                   {showPassword ? <EyeOffIcon /> : <EyeIcon />}
                 </button>
               </div>
             </div>
 
-            {/* Remember me + Forgot password */}
             <div className="flex items-center justify-between gap-3">
-              <label className="flex cursor-pointer items-center gap-2 text-xs text-gray-300 sm:text-sm">
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-zinc-400">
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 cursor-pointer rounded border-white/20 bg-white/10 accent-indigo-500"
+                  className="h-4 w-4 cursor-pointer rounded border-white/20 bg-[#151b17] accent-lime-300"
                 />
                 Remember me
               </label>
-
-              <Link
-                to="/forgot-password"
-                className="text-xs font-semibold text-blue-400 transition hover:text-blue-300 sm:text-sm"
-              >
-                Forgot Password?
+              <Link to="/forgot-password" className="text-sm font-semibold text-lime-300 transition hover:text-lime-200">
+                Forgot password?
               </Link>
             </div>
 
-            {/* Login button */}
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white
-                         shadow-lg shadow-indigo-900/40 transition hover:bg-indigo-500 sm:py-3.5 sm:text-base
-                         disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-lime-300 py-3.5 text-sm font-bold text-black shadow-lg shadow-lime-300/10 transition hover:bg-lime-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loading ? (
-                "Logging in..."
-              ) : (
-                <>
-                  Login <ArrowRightIcon />
-                </>
-              )}
+              {loading ? "Signing in..." : <>Sign in <ArrowRightIcon /></>}
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="my-5 flex items-center gap-3 sm:my-6">
+          <div className="my-7 flex items-center gap-4">
             <div className="h-px flex-1 bg-white/10" />
-            <span className="text-[10px] font-medium uppercase tracking-widest text-gray-500">
-              Or continue with
-            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-[.18em] text-zinc-600">Or continue with</span>
             <div className="h-px flex-1 bg-white/10" />
           </div>
 
-          {/* Social buttons (design only) */}
           <div className="grid grid-cols-2 gap-3">
-            <button
-            
-              type="button"
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/6 py-3 text-sm font-medium text-white transition hover:bg-white/10"
-            >
-              <AppleIcon />
-              Apple
+            <button type="button" className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-medium text-zinc-200 transition hover:bg-white/10">
+              <AppleIcon /> Apple
             </button>
-
-            <button
-              type="button"
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/6 py-3 text-sm font-medium text-white transition hover:bg-white/10"
-            >
-              <GoogleIcon />
-              Google
+            <button type="button" className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-medium text-zinc-200 transition hover:bg-white/10">
+              <GoogleIcon /> Google
             </button>
           </div>
-        </div>
 
-        {/* Footer */}
-        <p className="mt-6 text-center text-xs text-gray-400 sm:mt-8 sm:text-sm">
-          Don't have an account?{" "}
-          <Link
-            to="/signup"
-            className="font-semibold text-blue-400 transition hover:text-blue-300 hover:underline"
-          >
-            Sign up
-          </Link>
-        </p>
-
-        <div className="mt-4 flex items-center gap-2 rounded-full border border-white/10 bg-white/4 px-3 py-1.5 text-[14px] text-gray-300 sm:text-md">
-          <span className="text-emerald-400">
-            <ShieldIcon />
-          </span>
-          256-bit SSL Secured &bull; Cooperative Network
+          <p className="mt-8 text-center text-sm text-zinc-500">
+            Don't have an account?{" "}
+            <Link to="/signup" className="font-semibold text-lime-300 transition hover:text-lime-200">Create account</Link>
+          </p>
+          <div className="mt-6 flex items-center justify-center gap-2 text-xs text-zinc-600">
+            <span className="text-lime-300"><ShieldIcon /></span>
+            Secure access · Cooperative Network
+          </div>
+          <Link to="/" className="mt-6 block text-center text-xs text-zinc-600 transition hover:text-lime-300">← Back to home</Link>
         </div>
-      </div>
-    </div>
+      </section>
+
+      {/* Right: landing-page style visual panel */}
+      <section className="relative hidden min-h-screen overflow-hidden border-l border-white/10 bg-[#0d120f] p-5 lg:flex lg:items-center lg:justify-center xl:p-8">
+        <div className="pointer-events-none absolute -right-24 top-10 h-96 w-96 rounded-full bg-lime-300/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-28 -left-20 h-96 w-96 rounded-full bg-emerald-500/10 blur-3xl" />
+
+        <div className="relative w-full max-w-2xl">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[.22em] text-lime-300">LOCAL PROFESSIONALS</p>
+              <h2 className="mt-2 text-2xl font-bold text-white xl:text-3xl">Good help, right around the corner.</h2>
+              <p className="mt-2 text-sm text-zinc-400">Discover skilled people in your community.</p>
+            </div>
+            <Link to="/signup" className="inline-flex shrink-0 items-center gap-2 rounded-full border border-lime-300/20 bg-lime-300/10 px-4 py-2.5 text-xs font-semibold text-lime-200 transition hover:bg-lime-300/20">
+              Get started <ArrowRightIcon />
+            </Link>
+          </div>
+
+          <div className="group relative h-[430px] overflow-hidden rounded-3xl border border-white/10 bg-[#151d18] shadow-2xl shadow-black/40 xl:h-[520px]">
+            <img
+              src="https://images.unsplash.com/photo-1676210134188-4c05dd172f89?w=1200&auto=format&fit=crop&q=85"
+              alt="A skilled technician working on a home repair"
+              className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#080b0a] via-black/25 to-black/5" />
+            <div className="absolute left-6 top-6 flex items-center gap-2 rounded-full border border-white/15 bg-black/30 px-3 py-2 text-xs font-medium text-white backdrop-blur-md">
+              <span className="h-2 w-2 rounded-full bg-lime-300" /> Connecting local skills
+            </div>
+            <div className="absolute inset-x-0 bottom-0 p-7 xl:p-9">
+              <p className="text-xs font-bold uppercase tracking-[.22em] text-lime-300">HELP AROUND THE CORNER</p>
+              <h3 className="mt-3 max-w-lg text-3xl font-bold leading-tight text-white xl:text-4xl">Skilled hands. Peace of mind.</h3>
+              <p className="mt-4 max-w-md text-sm leading-6 text-zinc-200/80">
+                Find trusted local professionals, explore their skills and book services with confidence.
+              </p>
+              <div className="mt-7 grid grid-cols-3 gap-3">
+                <div className="rounded-xl border border-white/15 bg-black/25 p-3 backdrop-blur-md">
+                  <p className="text-lg font-bold text-lime-300">01</p><p className="mt-1 text-[11px] text-zinc-200">Discover</p>
+                </div>
+                <div className="rounded-xl border border-white/15 bg-black/25 p-3 backdrop-blur-md">
+                  <p className="text-lg font-bold text-lime-300">02</p><p className="mt-1 text-[11px] text-zinc-200">Compare</p>
+                </div>
+                <div className="rounded-xl border border-white/15 bg-black/25 p-3 backdrop-blur-md">
+                  <p className="text-lg font-bold text-lime-300">03</p><p className="mt-1 text-[11px] text-zinc-200">Book</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-5 text-center text-xs text-zinc-600">Connecting local skills with everyday needs.</p>
+        </div>
+      </section>
+    </main>
   );
 }
 
