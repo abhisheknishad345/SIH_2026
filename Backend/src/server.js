@@ -30,8 +30,10 @@ dns.setDefaultResultOrder("ipv4first");
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const allowedOrigins = [
-  "http://localhost:5173"
-].filter(Boolean);
+  "http://localhost:5173",
+  process.env.FRONTEND_URL,
+  ...(process.env.FRONTEND_URLS || "").split(",")
+].map(origin => origin?.trim()).filter(Boolean);
 
 const corsOptions = {
   origin: (origin, callback) => {
