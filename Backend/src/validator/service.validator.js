@@ -3,9 +3,6 @@ const validateService = ({
     name,
     description,
     category,
-    price,
-    priceType,
-    estimatedDurationMinutes
 }) => {
     if (
         typeof name !== "string" ||
@@ -47,18 +44,6 @@ const validateService = ({
         );
     }
 
-    if (typeof price !== "number" || !Number.isFinite(price) || price <= 0) {
-        throw new Error("Valid price is required");
-    }
-    if (!["per_hour", "per_day", "fixed"].includes(priceType)) {
-        throw new Error("Invalid price type. Use per_hour, per_day or fixed.");
-    }
-    if (priceType === "fixed" &&
-        (!Number.isInteger(estimatedDurationMinutes) || estimatedDurationMinutes <= 0)) {
-        throw new Error("Fixed-price services require a positive estimated duration in minutes");
-    }
-
-    
 };
 
 module.exports = {

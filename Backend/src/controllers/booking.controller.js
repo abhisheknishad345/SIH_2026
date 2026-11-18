@@ -215,6 +215,24 @@ const completeBooking = async (req, res) => {
 };
 
 
+const updateNegotiatedPrice = async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+            return res.status(400).json({ message: "Invalid booking ID" });
+        }
+        const price = Number(req.body.price);
+        const result = await bookingService.updateNegotiatedPrice({
+            bookingId,
+            workerId: req.user._id,
+            price
+        });
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
 const markServiceDone = async (req, res) => {
     try {
         const { bookingId } = req.params;
@@ -256,5 +274,5 @@ module.exports = {
     createBooking, getWorkerBookings, updateBookingStatus, 
     getWorkerEarningsController,
     getWorkerDashboardController,
-    getCustomerBookings, cancelBooking, completeBooking, markServiceDone, confirmDemoPayment,
+    getCustomerBookings, cancelBooking, completeBooking, markServiceDone, confirmDemoPayment, updateNegotiatedPrice,
 };

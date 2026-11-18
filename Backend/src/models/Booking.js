@@ -42,9 +42,19 @@ const bookingSchema = new mongoose.Schema(
             required: true,
             min: 1
         },
+        scheduledEndAt: {
+            type: Date,
+            default: null
+        },
         priceType: {
             type: String,
-            enum: ["per_hour", "per_day", "fixed"]
+            enum: ["per_hour", "per_day", "fixed", "negotiable"],
+            required: true
+        },
+        pricingStatus: {
+            type: String,
+            enum: ["fixed", "pending", "agreed"],
+            default: "fixed"
         },
 
         address: {
@@ -69,7 +79,7 @@ const bookingSchema = new mongoose.Schema(
 
         price: {
             type: Number,
-            required: true,
+            default: null,
             min: 0
         },
 

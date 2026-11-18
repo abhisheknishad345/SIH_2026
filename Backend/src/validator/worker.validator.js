@@ -20,6 +20,22 @@ const validateSkill = (skill) => {
             "Skill experience must be a non-negative integer"
         );
     }
+
+    if (!["fixed", "per_hour", "per_day", "negotiable"].includes(skill.priceType)) {
+        throw new Error("Invalid skill price type");
+    }
+
+    if (skill.priceType === "negotiable") {
+        if (skill.price !== undefined && skill.price !== null && skill.price !== "") {
+            throw new Error("Negotiable skills must not have a fixed price");
+        }
+    } else if (
+        typeof skill.price !== "number" ||
+        !Number.isFinite(skill.price) ||
+        skill.price <= 0
+    ) {
+        throw new Error("A positive price is required for this price type");
+    }
 };
 
 

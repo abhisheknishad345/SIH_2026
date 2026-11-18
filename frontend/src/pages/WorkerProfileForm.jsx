@@ -40,6 +40,8 @@ const DAYS = [
 const emptySkill = {
     serviceId: "",
     experience: "",
+    priceType: "fixed",
+    price: "",
 };
 
 const getCooperativeId = (value) => {
@@ -156,6 +158,8 @@ const WorkerProfileForm = ({
                                 ? skill.serviceId?._id || ""
                                 : skill.serviceId || "",
                         experience: skill.experience ?? "",
+                        priceType: skill.priceType || "negotiable",
+                        price: skill.price ?? "",
                     }))
                     : initialData._id
                         ? [{ ...emptySkill }]
@@ -459,7 +463,10 @@ const WorkerProfileForm = ({
             (skill) =>
                 skill.serviceId &&
                 skill.experience !== "" &&
-                Number(skill.experience) >= 0
+                Number(skill.experience) >= 0 &&
+                ["fixed", "per_hour", "per_day", "negotiable"].includes(skill.priceType) &&
+                (skill.priceType === "negotiable" ||
+                    (skill.price !== "" && Number.isFinite(Number(skill.price)) && Number(skill.price) > 0))
         );
 
         if (validSkills.length === 0) {
@@ -514,6 +521,8 @@ const WorkerProfileForm = ({
             skills: validSkills.map((skill) => ({
                 serviceId: skill.serviceId,
                 experience: Number(skill.experience),
+                priceType: skill.priceType,
+                price: skill.priceType === "negotiable" ? null : Number(skill.price),
             })),
 
             certifications: formData.certifications
@@ -865,23 +874,49 @@ const WorkerProfileForm = ({
                                                 </div>
                                             </div>
 
-                                            {selectedService && (
-                                                <div className="rounded-lg border border-indigo-100 bg-indigo-50 p-3">
-                                                    <p className="text-xs font-semibold text-indigo-700">
-                                                        Admin-defined service charge
-                                                    </p>
-
-                                                    <p className="mt-1 text-sm font-bold text-slate-900">
-                                                        ₹{selectedService.price} / {
-                                                            selectedService.priceType?.replace("_", " ")
-                                                        }
-                                                    </p>
-
-                                                    <p className="mt-1 text-xs text-slate-500">
-                                                        Pricing is managed by your cooperative admin.
-                                                    </p>
+                                            <div className="grid gap-3 sm:grid-cols-2">
+                                                <div>
+                                                    <label className={labelClass}>Your Pricing Type</label>
+                                                    <select
+                                                        value={skill.priceType}
+                                                        onChange={(e) => {
+                                                            handleSkillChange(index, "priceType", e.target.value);
+                                                            if (e.target.value === "negotiable") {
+                                                                handleSkillChange(index, "price", "");
+                                                            }
+                                                        }}
+                                                        className={inputClass}
+                                                        required
+                                                    >
+                                                        <option value="fixed">Fixed Price</option>
+                                                        <option value="per_hour">Per Hour</option>
+                                                        <option value="per_day">Per Day (8 hours)</option>
+                                                        <option value="negotiable">Negotiable</option>
+                                                    </select>
                                                 </div>
-                                            )}
+                                                {skill.priceType !== "negotiable" ? (
+                                                    <div>
+                                                        <label className={labelClass}>
+                                                            {skill.priceType === "per_hour" ? "Hourly Rate (₹)" :
+                                                             skill.priceType === "per_day" ? "Daily Rate (₹)" : "Fixed Amount (₹)"}
+                                                        </label>
+                                                        <input
+                                                            type="number"
+                                                            min="0.01"
+                                                            step="0.01"
+                                                            value={skill.price}
+                                                            onChange={(e) => handleSkillChange(index, "price", e.target.value)}
+                                                            placeholder="Enter your price"
+                                                            className={inputClass}
+                                                            required
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <p className="self-end rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                                                        You and the customer will agree on the final price in booking chat.
+                                                    </p>
+                                                )}
+                                            </div>
 
                                             <div>
                                                 <label className={labelClass}>

@@ -185,6 +185,7 @@ function MyBookings() {
             per_hour: "Per Hour",
             per_day: "Per Day",
             fixed: "Fixed Price",
+            negotiable: "Negotiable",
         };
 
         return types[priceType] || "Fixed Price";
@@ -541,9 +542,9 @@ function MyBookings() {
                                                 </p>
 
                                                 <p className="mt-1 text-sm font-bold text-slate-800">
-                                                    {booking.priceType === "per_day" || booking.serviceId?.priceType === "per_day"
+                                                    {booking.priceType === "per_day"
                                                          ? `${booking.quantity} ${booking.quantity === 1 ? "Day" : "Days"}`
-                                                         : booking.priceType === "per_hour" || booking.serviceId?.priceType === "per_hour"
+                                                         : booking.priceType === "per_hour"
                                                              ? `${booking.quantity} ${booking.quantity === 1 ? "Hour" : "Hours"}`
                                                              : formatDuration(booking.duration)}
                                                 </p>
@@ -565,11 +566,11 @@ function MyBookings() {
 
                                                 <div className="flex flex-wrap items-center gap-2 mt-1">
                                                     <p className="font-bold text-gray-900 text-md">
-                                                        ₹{booking.price ?? 0}
+                                                        {booking.price != null ? `₹${Number(booking.price).toLocaleString("en-IN")}` : "Awaiting final price"}
                                                     </p>
 
                                                     <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
-                                                        {getPriceType(booking.serviceId?.priceType)}
+                                                        {getPriceType(booking.priceType)}
                                                     </span>
                                                 </div>
                                             </div>
@@ -618,6 +619,18 @@ function MyBookings() {
                                                 </p>
                                             </div>
 
+                                        </div>
+                                    )}
+
+                                    {(["accepted", "in_progress", "completed"].includes(booking.status)) && (
+                                        <div className="border-t border-indigo-100 bg-indigo-50/60 px-5 py-3 sm:px-7">
+                                            <button
+                                                type="button"
+                                                onClick={() => navigate(`/bookings/${booking._id}/chat`)}
+                                                className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                                            >
+                                                Chat with Worker
+                                            </button>
                                         </div>
                                     )}
 

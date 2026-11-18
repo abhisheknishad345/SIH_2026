@@ -76,7 +76,7 @@ Query parameters for `GET /workers/nearby`:
 - `skill` — optional skill filter.
 - `category` — optional category filter.
 
-Worker profile creation reads fields including `cooperativeId`, `category`, `skills`, `certifications`, `location`, and `workingHours`. Availability update accepts `isAvailable`. Schedule update accepts `workingHours`.
+Worker profile creation reads fields including `cooperativeId`, `category`, `skills`, `certifications`, `location`, and `workingHours`. Each skill contains `serviceId`, `experience`, `priceType` (`fixed`, `per_hour`, `per_day`, or `negotiable`), and `price` for all types except `negotiable`. Pricing belongs to the worker skill, not the service catalogue. Availability update accepts `isAvailable`. Schedule update accepts `workingHours`.
 
 ## Customers — `/customers`
 
@@ -102,6 +102,10 @@ Profile fields include `phone`, `address`, and `location`.
 | GET | `/bookings/customer` | Customer | Get customer bookings |
 | GET | `/bookings/worker/dashboard` | Worker | Get worker dashboard statistics |
 | GET | `/bookings/worker/earnings` | Worker | Get worker earnings |
+| GET | `/bookings/:bookingId/chat/booking` | Customer, Worker | Get booking pricing and status summary for its chat |
+| GET | `/bookings/:bookingId/chat/messages` | Customer, Worker | Read persisted booking chat messages |
+| POST | `/bookings/:bookingId/chat/messages` | Customer, Worker | Send a booking chat message |
+| PUT | `/bookings/:bookingId/chat/price` | Worker | Update final amount for a negotiable booking |
 
 Create booking request fields:
 ```json
@@ -116,7 +120,7 @@ Create booking request fields:
 }
 ```
 
-The exact accepted `location` structure is defined by the backend booking validator/model. The customer sends `quantity` for `per_hour` (hours) or `per_day` (calendar days); the backend calculates and stores duration in minutes. Fixed-price services use the admin-configured `estimatedDurationMinutes`.
+The exact accepted `location` structure is defined by the backend booking validator/model. The customer sends `quantity` as working hours for `fixed`, `per_hour`, and `negotiable`, or as calendar days for `per_day`. A worker can be booked for at most 8 working hours per day. For `per_day`, each selected calendar day reserves an 8-hour working interval at the selected start time. The backend calculates the price from the worker skill snapshot: fixed amount, hourly rate × hours, daily rate × days, or no initial price for negotiable bookings.
 
 Worker booking query parameters:
 - `status` — optional status filter (`pending`, `accepted` (legacy), `in_progress`, `rejected`, `cancelled`, `completed`).
@@ -129,12 +133,14 @@ Status update request body:
 { "status": "accepted" }
 ```
 
-The generic status endpoint accepts only `{ "status": "accepted" }` or `{ "status": "rejected" }`. Accepting a booking changes its status to `in_progress` and its `paymentStatus` to `awaiting`.
+The generic status endpoint accepts only `{ "status": "accepted" }` or `{ "status": "rejected" }`. Accepting a booking changes its status to `in_progress`. Payment remains `not_due` until the worker marks the service done.
 
 Worker service/payment flow:
-1. Worker calls `PUT /bookings/:bookingId/service-done` after finishing the service.
-2. Customer calls `PUT /bookings/:bookingId/pay` to confirm the demo payment. No gateway or real money transfer is involved. The server uses the booking price stored in the database; the client does not submit an amount.
-3. Worker calls `PUT /bookings/:bookingId/complete`; the server allows completion only after service completion and `paymentStatus: paid`.
+1. The booking chat is available to both customer and assigned worker for every pricing type.
+2. For `negotiable` bookings, the assigned worker updates the final amount using `PUT /bookings/:bookingId/chat/price` (or the live Socket.IO `booking-chat:update-price` event). The amount is saved on the booking; payment cannot proceed while pricing is pending.
+3. Worker calls `PUT /bookings/:bookingId/service-done` after finishing the service. The server requires a finalized positive amount and then sets `paymentStatus: awaiting`.
+4. Customer calls `PUT /bookings/:bookingId/pay` to confirm the demo payment. No gateway or real money transfer is involved. The server uses the booking price stored in the database; the client does not submit an amount.
+5. Worker calls `PUT /bookings/:bookingId/complete`; the server allows completion only after service completion and `paymentStatus: paid`.
 
 Booking payment fields: `paymentStatus` (`not_due`, `awaiting`, `paid`), `paymentMethod` (`demo` when confirmed), `serviceCompletedAt`, and `paidAt`.
 
@@ -147,7 +153,7 @@ Booking payment fields: `paymentStatus` (`not_due`, `awaiting`, `paid`), `paymen
 | GET | `/services/categories` | Worker | Get service categories |
 | GET | `/services/:serviceId/workers` | Customer | Find workers for a service |
 
-Create service fields include `name`, `description`, `category`, `price`, and `priceType` (`per_hour`, `per_day`, or `fixed`). Fixed-price services must also provide a positive `estimatedDurationMinutes`.
+Create service fields include only `name`, `description`, and `category` (plus the cooperative context supplied by the authenticated admin). Admin-managed service catalogue records no longer store pricing. Workers select active services from their category and configure pricing per skill.
 
 List active services query parameters:
 - `cooperativeId` — optional cooperative filter.

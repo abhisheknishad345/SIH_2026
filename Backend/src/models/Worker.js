@@ -43,6 +43,22 @@ category: {
                         type: Number,
                         required: true,
                         min: 0
+                    },
+
+                    priceType: {
+                        type: String,
+                        enum: ["fixed", "per_hour", "per_day", "negotiable"],
+                        required: true,
+                        default: "negotiable"
+                    },
+
+                    price: {
+                        type: Number,
+                        min: 0,
+                        default: null,
+                        required: function () {
+                            return this.priceType !== "negotiable";
+                        }
                     }
                 }
             ],

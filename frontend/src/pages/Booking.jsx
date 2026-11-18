@@ -51,6 +51,12 @@ function Booking() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
+    const selectedSkill = worker?.skills?.find(
+        (item) => String(item.serviceId?._id || item.serviceId) === String(serviceId)
+    ) || worker?.skill || worker?.skills?.[0];
+    const priceType = selectedSkill?.priceType || "negotiable";
+    const workerPrice = selectedSkill?.price ?? null;
+
     // Fetch selected service and worker
     useEffect(() => {
         const fetchData = async () => {
@@ -181,10 +187,7 @@ function Booking() {
             return;
         }
 
-        if (
-            service?.priceType !== "fixed" &&
-            (!Number.isInteger(Number(formData.quantity)) || Number(formData.quantity) < 1)
-        ) {
+        if (!Number.isInteger(Number(formData.quantity)) || Number(formData.quantity) < 1) {
             setError("Please enter a valid whole number of hours or days.");
             return;
         }
@@ -196,10 +199,7 @@ function Booking() {
                 workerId,
                 serviceId,
                 skillName: formData.skillName,
-                quantity:
-                    service?.priceType === "fixed"
-                        ? 1
-                        : Number(formData.quantity),
+                quantity: Number(formData.quantity),
                 scheduledAt: new Date(formData.scheduledAt),
                 address: formData.address.trim(),
                 location,
@@ -229,20 +229,21 @@ function Booking() {
             per_hour: "Per Hour",
             per_day: "Per Day",
             fixed: "Fixed Price",
+            negotiable: "Negotiable",
         };
 
         return types[priceType] || "Fixed Price";
     };
 
     const selectedQuantity = Number(formData.quantity) || 1;
-    const totalPrice = service?.priceType === "fixed"
-        ? Number(service?.price || 0)
-        : Number(service?.price || 0) * selectedQuantity;
+    const totalPrice = priceType === "fixed"
+        ? Number(workerPrice || 0)
+        : Number(workerPrice || 0) * selectedQuantity;
 
     const getQuantityLabel = () => {
-        if (service?.priceType === "per_hour") return "Number of Hours";
-        if (service?.priceType === "per_day") return "Number of Days";
-        return "";
+        if (priceType === "per_hour") return "Number of Hours";
+        if (priceType === "per_day") return "Number of Days";
+        return "Estimated Work Hours";
     };
 
     // Loading State
@@ -455,7 +456,7 @@ function Booking() {
                                 </div>
 
                                 {/* Quantity */}
-                                {service?.priceType !== "fixed" && (
+                                {true && (
                                     <div>
                                         <label
                                             htmlFor="quantity"
@@ -475,7 +476,7 @@ function Booking() {
                                                 type="number"
                                                 name="quantity"
                                                  min="1"
-                                                 max={service?.priceType === "per_hour" ? "24" : "30"}
+                                                 max={priceType === "per_day" ? "30" : "8"}
                                                  step="1"
                                                 value={formData.quantity}
                                                 onChange={handleChange}
@@ -486,7 +487,7 @@ function Booking() {
                                         </div>
 
                                         <p className="mt-2 text-xs text-slate-400">
-                                            Enter the required number of {service?.priceType === "per_hour" ? "hours" : service?.priceType === "per_day" ? "days" : "hours"}.
+                                            {priceType === "per_day" ? "Each selected day reserves up to 8 working hours." : "Enter the estimated number of working hours."}
                                         </p>
                                     </div>
                                 )}
@@ -494,7 +495,7 @@ function Booking() {
                                 {/* Schedule */}
                                 <div>
                                     <label className="mb-2 block text-sm font-semibold text-slate-700">
-                                        {service?.priceType === "per_day" ? "Schedule Start Date" : "Schedule Date & Time"}
+                                        Schedule Date & Time
                                     </label>
 
                                     <div className="relative">
@@ -510,7 +511,7 @@ function Booking() {
                                                     : null
                                             }
                                             onChange={(date) => {
-                                                const isPerDay = service?.priceType === "per_day";
+                                                const isPerDay = false;
                                                 const localDate = date
                                                     ? `${date.getFullYear()}-${String(
                                                         date.getMonth() + 1
@@ -530,14 +531,15 @@ function Booking() {
 
                                                 setError("");
                                             }}
-                                            showTimeSelect={service?.priceType !== "per_day"}
+                                            showTimeSelect={true}
                                             timeIntervals={30}
-                                            dateFormat={service?.priceType === "per_day" ? "dd MMM yyyy" : "dd MMM yyyy, h:mm aa"}
+                                            dateFormat="dd MMM yyyy, h:mm aa"
                                             minDate={new Date()}
                                             filterTime={(time) =>
+                                                time.toDateString() !== new Date().toDateString() ||
                                                 time.getTime() > Date.now()
                                             }
-                                            placeholderText={service?.priceType === "per_day" ? "Select start date" : "Select date and time"}
+                                            placeholderText="Select date and time"
                                             autoComplete="off"
                                             required
                                             className="w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
@@ -548,7 +550,7 @@ function Booking() {
 
                                     <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
                                         <Info size={14} />
-                                        {service?.priceType === "per_day" ? "Choose the first day of your booking. The worker will be reserved for all selected calendar days." : "Choose your preferred service date and time."}
+                                        {priceType === "per_day" ? "Choose the daily start time. Each selected day reserves up to 8 working hours." : "Choose your preferred service date and time."}
                                     </p>
                                 </div>
 
@@ -559,13 +561,9 @@ function Booking() {
                                         Booking Duration
                                     </div>
                                     <p className="mt-1 text-sm text-indigo-700">
-                                        {service?.priceType === "per_hour"
-                                            ? `${selectedQuantity} ${selectedQuantity === 1 ? "hour" : "hours"} (${selectedQuantity * 60} minutes)`
-                                            : service?.priceType === "per_day"
-                                                ? `${selectedQuantity} ${selectedQuantity === 1 ? "calendar day" : "calendar days"}`
-                                                : service?.estimatedDurationMinutes
-                                                    ? `${Math.floor(service.estimatedDurationMinutes / 60)} hour(s)${service.estimatedDurationMinutes % 60 ? ` ${service.estimatedDurationMinutes % 60} minutes` : ""} (estimated)`
-                                                    : "Estimated duration not configured"}
+                                        {priceType === "per_day"
+                                            ? `${selectedQuantity} day(s), maximum 8 working hours per day`
+                                            : `${selectedQuantity} estimated working hour(s)`}
                                     </p>
                                 </div>
 
@@ -787,22 +785,26 @@ function Booking() {
 
                                     <div className="text-right">
                                         <p className="text-xl font-bold text-slate-900">
-                                            ₹{totalPrice}
+                                            {priceType === "negotiable" ? "To be agreed in chat" : `₹${totalPrice.toLocaleString("en-IN")}`}
                                         </p>
 
                                         <p className="mt-0.5 text-xs text-slate-400">
-                                            {getPriceType(service?.priceType)}
+                                            {getPriceType(priceType)}
                                         </p>
                                     </div>
                                 </div>
 
-                                {service?.priceType !== "fixed" && (
+                                {priceType === "negotiable" ? (
+                                    <div className="rounded-xl bg-amber-50 p-3">
+                                        <p className="text-xs leading-5 text-amber-800">The worker will set the final amount in booking chat after accepting your request.</p>
+                                    </div>
+                                ) : priceType !== "fixed" ? (
                                     <div className="rounded-xl bg-slate-50 p-3">
                                         <p className="text-xs leading-5 text-slate-500">
-                                            {service?.priceType === "per_hour" ? `₹${service.price} × ${selectedQuantity} hour(s)` : `₹${service.price} × ${selectedQuantity} day(s)`}
+                                            ₹{workerPrice} × {selectedQuantity} {priceType === "per_hour" ? "hour(s)" : "day(s)"}
                                         </p>
                                     </div>
-                                )}
+                                ) : null}
 
                             </div>
                         </section>

@@ -4,7 +4,7 @@ const Worker = require("../models/Worker");
 const Service = require("../models/Service");
 const mongoose = require("mongoose");
 
-const validateWorkerWorkingHours = (worker, bookingStart, duration, priceType) => {
+const validateWorkerWorkingHours = (worker, bookingStart, duration, priceType, quantity) => {
     if (!(bookingStart instanceof Date) || Number.isNaN(bookingStart.getTime()) ||
         !Number.isFinite(Number(duration)) || Number(duration) <= 0) {
         throw new Error("Invalid booking date or duration");
@@ -17,218 +17,121 @@ const validateWorkerWorkingHours = (worker, bookingStart, duration, priceType) =
         minute: "2-digit",
         hourCycle: "h23"
     });
-    const getDateParts = (date) => Object.fromEntries(
+    const partsFor = date => Object.fromEntries(
         formatter.formatToParts(date).map(({ type, value }) => [type, value])
     );
+    const minutes = value => {
+        const [hours, mins] = value.split(":").map(Number);
+        return hours * 60 + mins;
+    };
+    const start = partsFor(bookingStart);
+    const startMinutes = Number(start.hour) * 60 + Number(start.minute);
+    const days = priceType === "per_day" ? quantity : 1;
+    const dailyMinutes = priceType === "per_day" ? 480 : duration;
 
-    // Per-day bookings reserve every selected calendar day.
-    if (priceType === "per_day") {
-        const days = Number(duration) / (24 * 60);
-        for (let index = 0; index < days; index += 1) {
-            const parts = getDateParts(new Date(bookingStart.getTime() + index * 86400000));
-            const workingDay = (worker.workingHours || []).find(item => item.day === parts.weekday);
-            if (!workingDay || !workingDay.isWorking) {
-                throw new Error(`Worker is not available on ${parts.weekday}`);
-            }
+    for (let index = 0; index < days; index += 1) {
+        const dayDate = new Date(bookingStart.getTime() + index * 86400000);
+        const day = partsFor(dayDate).weekday;
+        const workingDay = (worker.workingHours || []).find(item => item.day === day);
+        if (!workingDay || !workingDay.isWorking) {
+            throw new Error(`Worker is not available on ${day}`);
         }
-        return;
-    }
-
-    const bookingEnd = new Date(bookingStart.getTime() + Number(duration) * 60000);
-    const startParts = getDateParts(bookingStart);
-    const endParts = getDateParts(bookingEnd);
-    if (startParts.weekday !== endParts.weekday) {
-        throw new Error("Booking must be within the worker's working day");
-    }
-    const workingDay = (worker.workingHours || []).find(item => item.day === startParts.weekday);
-    if (!workingDay || !workingDay.isWorking) {
-        throw new Error(`Worker is not working on ${startParts.weekday}`);
-    }
-    const startTime = `${startParts.hour}:${startParts.minute}`;
-    const endTime = `${endParts.hour}:${endParts.minute}`;
-    if (startTime < workingDay.startTime || endTime > workingDay.endTime) {
-        throw new Error(`Worker is available on ${startParts.weekday} only between ${workingDay.startTime} and ${workingDay.endTime}`);
+        if (startMinutes < minutes(workingDay.startTime) ||
+            startMinutes + dailyMinutes > minutes(workingDay.endTime)) {
+            throw new Error(`Worker is available on ${day} only between ${workingDay.startTime} and ${workingDay.endTime}`);
+        }
     }
 };
 
 const createBooking = async ({
-    customerId,
-    workerId,
-    serviceId,
-    quantity,
-    scheduledAt,
-    address,
-    location
+    customerId, workerId, serviceId, quantity, scheduledAt, address, location
 }) => {
+    const worker = await Worker.findOne({ userId: workerId });
+    if (!worker) throw new Error("Worker not found");
+    if (!worker.isVerified) throw new Error("Worker is not verified");
+    if (!worker.isAvailable) throw new Error("Worker is currently unavailable");
 
-    // 1. Check worker exists
-    const worker = await Worker.findOne({
-        userId: workerId
-    });
-
-    if (!worker) {
-        throw new Error("Worker not found");
+    const service = await Service.findOne({ _id: serviceId, isActive: true });
+    if (!service) throw new Error("Service not found");
+    if (worker.cooperativeId.toString() !== service.cooperativeId.toString()) {
+        throw new Error("Worker does not belong to the service cooperative");
     }
 
-    // 2. Check worker is verified
-    if (!worker.isVerified) {
-        throw new Error("Worker is not verified");
+    const skill = worker.skills.find(item => item.serviceId.toString() === service._id.toString());
+    if (!skill) throw new Error("Selected service is not offered by this worker");
+
+    const priceType = skill.priceType || "negotiable";
+    const start = new Date(scheduledAt);
+    if (Number.isNaN(start.getTime())) throw new Error("Invalid booking date");
+    const indiaDate = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" });
+    if (indiaDate.format(start) < indiaDate.format(new Date())) {
+        throw new Error("Booking date must be today or in the future");
+    }
+    if (start <= new Date()) {
+        throw new Error("Booking date and time must be in the future");
     }
 
-    // 3. Check worker is available
-    if (!worker.isAvailable) {
-        throw new Error("Worker is currently unavailable");
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > (priceType === "per_day" ? 30 : 8)) {
+        throw new Error(priceType === "per_day"
+            ? "Please select between 1 and 30 days"
+            : "A worker can be booked for a maximum of 8 hours per day");
     }
 
-    // 4. Check service exists
-    const service = await Service.findOne({
-        _id: serviceId,
-        isActive: true
-    });
-
-    if (!service) {
-        throw new Error("Service not found");
+    let duration;
+    let price = null;
+    let pricingStatus = "pending";
+    if (priceType === "per_day") {
+        duration = quantity * 8 * 60;
+        price = Number(skill.price) * quantity;
+        pricingStatus = "fixed";
+    } else if (priceType === "per_hour") {
+        duration = quantity * 60;
+        price = Number(skill.price) * quantity;
+        pricingStatus = "fixed";
+    } else if (priceType === "fixed") {
+        duration = quantity * 60;
+        price = Number(skill.price);
+        pricingStatus = "fixed";
+    } else if (priceType === "negotiable") {
+        duration = quantity * 60;
+    } else {
+        throw new Error("Invalid worker pricing type");
     }
 
-    const bookingStartDate = new Date(scheduledAt);
-    const indiaDateFormatter = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "Asia/Kolkata",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit"
-    });
-    if (service.priceType === "per_day") {
-        if (indiaDateFormatter.format(bookingStartDate) < indiaDateFormatter.format(new Date())) {
-            throw new Error("Booking date must be today or in the future");
-        }
-    } else if (bookingStartDate <= new Date()) {
-        throw new Error("Booking time must be in the future");
+    if (priceType !== "negotiable" && (!Number.isFinite(price) || price <= 0)) {
+        throw new Error("Worker has not configured a valid price for this service");
     }
 
-    if (
-        worker.cooperativeId.toString() !==
-        service.cooperativeId.toString()
-    ) {
-        throw new Error(
-            "Worker does not belong to the service cooperative"
-        );
-    }
+    validateWorkerWorkingHours(worker, start, duration, priceType, quantity);
 
-    // 5. Find selected skill
-    
-const skill = worker.skills.find(
-    item =>
-        item.serviceId.toString() === service._id.toString()
-);
+    const scheduledEndAt = priceType === "per_day"
+        ? new Date(start.getTime() + (quantity - 1) * 86400000 + 8 * 60 * 60000)
+        : new Date(start.getTime() + duration * 60000);
 
-if (!skill) {
-    throw new Error(
-        "Selected service is not offered by this worker"
-    );
-}
-
-
-    // Calculate the final price and reserved duration on the server.
-    let price;
-    let bookingDuration;
-
-    switch (service.priceType) {
-        case "per_hour":
-            if (!Number.isInteger(quantity) || quantity < 1 || quantity > 24) {
-                throw new Error("Please select between 1 and 24 hours");
-            }
-            price = service.price * quantity;
-            bookingDuration = quantity * 60;
-            break;
-        case "per_day":
-            if (!Number.isInteger(quantity) || quantity < 1 || quantity > 30) {
-                throw new Error("Please select between 1 and 30 days");
-            }
-            price = service.price * quantity;
-            bookingDuration = quantity * 24 * 60;
-            break;
-        case "fixed":
-            price = service.price;
-            bookingDuration = Number(service.estimatedDurationMinutes);
-            if (!Number.isInteger(bookingDuration) || bookingDuration <= 0) {
-                throw new Error("This fixed-price service has no valid estimated duration. Please contact the cooperative admin.");
-            }
-            break;
-        default:
-            throw new Error("Invalid service price type");
-    }
-
-    const newBookingStart = new Date(scheduledAt);
-    validateWorkerWorkingHours(worker, newBookingStart, bookingDuration, service.priceType);
-    const newBookingEnd = new Date(
-        newBookingStart.getTime() + bookingDuration * 60 * 1000
-    );
-
-//     console.log("Worker ID:", workerId);
-// console.log("New Booking Start:", newBookingStart);
-// console.log("New Booking End:", newBookingEnd);
-
-
-const existingBookings = await Booking.find({
+    const candidate = {
+        scheduledAt: start,
+        scheduledEndAt,
+        duration,
+        priceType,
+        quantity
+    };
+    const existingBookings = await Booking.find({
         workerId,
-        status: {
-        $in: ["pending", "accepted", "in_progress"]
-        },
-        scheduledAt: {
-            $lt: newBookingEnd
-        }
-        
-        
-    });
-    // console.log("Existing Bookings Found:", existingBookings.length);
-
-    const hasConflict = existingBookings.some((booking) => {
-        const existingStart = new Date(booking.scheduledAt);
-
-        const existingEnd = new Date(
-            existingStart.getTime() + booking.duration * 60 * 1000
-        );
-
-        const overlap =
-        newBookingStart < existingEnd &&
-        newBookingEnd > existingStart;
-
-    //     console.log({
-    //     existingStart,
-    //     existingEnd,
-    //     existingStatus: booking.status,
-    //     overlap 
-    // });
-
-        return overlap;
-               
+        status: { $in: ["pending", "accepted", "in_progress"] },
+        scheduledAt: { $lt: scheduledEndAt }
     });
 
-    // console.log("Has Conflict:", hasConflict);
-
-    if (hasConflict) {
+    if (existingBookings.some(existing => isBookingOverlapping(candidate, existing))) {
         throw new Error("Worker is already booked during this time");
     }
 
-    // 7. Create booking
     const booking = await Booking.create({
-        customerId,
-        workerId,
-        serviceId,
-        skillName: skill.name,
-        quantity,
-        scheduledAt,
-        duration: bookingDuration,
-        priceType: service.priceType,
-        address,
-        location,
-        price
+        customerId, workerId, serviceId, skillName: skill.name, quantity,
+        scheduledAt: start, scheduledEndAt, duration, priceType, pricingStatus,
+        address, location, price
     });
 
-    return {
-        message: "Booking created successfully",
-        booking
-    };
+    return { message: "Booking created successfully", booking };
 };
 
 const getWorkerBookings = async ({
@@ -267,7 +170,7 @@ const getWorkerBookings = async ({
     const [bookings, totalBookings] = await Promise.all([
         Booking.find(filter)
             .populate("customerId", "fullName email")
-            .populate("serviceId", "name category price priceType")
+            .populate("serviceId", "name category")
             .sort({ scheduledAt: 1 })
             .skip(skip)
             .limit(limit),
@@ -288,22 +191,25 @@ const getWorkerBookings = async ({
     };
 };
 
-const getBookingEnd = (booking) => {
-    return new Date(
-        new Date(booking.scheduledAt).getTime() +
-        booking.duration * 60 * 1000
+const getBookingEnd = booking => booking.scheduledEndAt
+    ? new Date(booking.scheduledEndAt)
+    : new Date(new Date(booking.scheduledAt).getTime() + booking.duration * 60000);
+
+const getBookingIntervals = booking => {
+    const start = new Date(booking.scheduledAt);
+    if (booking.scheduledEndAt && booking.priceType === "per_day" && Number(booking.quantity) > 1) {
+        return Array.from({ length: Number(booking.quantity) }, (_, index) => ({
+            start: new Date(start.getTime() + index * 86400000),
+            end: new Date(start.getTime() + index * 86400000 + 8 * 60 * 60000)
+        }));
+    }
+    return [{ start, end: getBookingEnd(booking) }];
+};
+
+const isBookingOverlapping = (bookingA, bookingB) =>
+    getBookingIntervals(bookingA).some(a =>
+        getBookingIntervals(bookingB).some(b => a.start < b.end && a.end > b.start)
     );
-};
-
-const isBookingOverlapping = (bookingA, bookingB) => {
-    const startA = new Date(bookingA.scheduledAt);
-    const endA = getBookingEnd(bookingA);
-
-    const startB = new Date(bookingB.scheduledAt);
-    const endB = getBookingEnd(bookingB);
-
-    return startA < endB && endA > startB;
-};
 
 const updateBookingStatus = async ({
     bookingId,
@@ -423,20 +329,18 @@ const updateBookingStatus = async ({
         }
 
         // Validate the full reserved range using the saved pricing type.
-        const linkedService = currentBooking.priceType
-            ? null
-            : await Service.findById(currentBooking.serviceId);
-        const bookingPriceType = currentBooking.priceType || linkedService?.priceType;
+        const bookingPriceType = currentBooking.priceType || "negotiable";
         validateWorkerWorkingHours(
             worker,
             bookingStart,
             currentBooking.duration,
-            bookingPriceType
+            bookingPriceType,
+            currentBooking.quantity
         );
 
         // Accept selected booking
         currentBooking.status = "in_progress";
-        currentBooking.paymentStatus = "awaiting";
+        currentBooking.paymentStatus = "not_due";
 
         await currentBooking.save();
 
@@ -510,7 +414,7 @@ const getCustomerBookings = async (customerId) => {
         customerId
     })
         .populate("workerId", "fullName email")
-        .populate("serviceId", "name category priceType")
+        .populate("serviceId", "name category")
         .sort({ createdAt: -1 });
 
     return {
@@ -601,6 +505,28 @@ const completeBooking = async ({
 };
 
 
+const updateNegotiatedPrice = async ({ bookingId, workerId, price }) => {
+    if (!Number.isFinite(price) || price <= 0) {
+        throw new Error("Enter a valid amount greater than zero");
+    }
+    const booking = await Booking.findOne({ _id: bookingId, workerId });
+    if (!booking) throw new Error("Booking not found or access denied");
+    if (booking.priceType !== "negotiable") {
+        throw new Error("Price updates are available only for negotiable bookings");
+    }
+    if (!["in_progress", "accepted"].includes(booking.status)) {
+        throw new Error("Price can be updated only after the booking is accepted");
+    }
+    if (booking.paymentStatus === "paid" || booking.serviceCompletedAt) {
+        throw new Error("Price cannot be changed after service completion or payment");
+    }
+    booking.price = Math.round(price * 100) / 100;
+    booking.pricingStatus = "agreed";
+    booking.paymentStatus = "not_due";
+    await booking.save();
+    return { message: "Negotiated price saved successfully", booking };
+};
+
 const markServiceDone = async ({ bookingId, workerId }) => {
     const booking = await Booking.findOne({ _id: bookingId, workerId });
 
@@ -612,7 +538,11 @@ const markServiceDone = async ({ bookingId, workerId }) => {
         return { message: "Service was already marked as done", booking };
     }
 
+    if (booking.price == null || booking.price <= 0 || booking.pricingStatus === "pending") {
+        throw new Error("Final booking price must be set before completing the service");
+    }
     booking.serviceCompletedAt = new Date();
+    booking.paymentStatus = "awaiting";
     await booking.save();
 
     return { message: "Service marked as done. Waiting for customer payment.", booking };
@@ -628,6 +558,9 @@ const confirmDemoPayment = async ({ bookingId, customerId }) => {
     if (!existingBooking.serviceCompletedAt) {
         throw new Error("The worker must mark the service as done first");
     }
+    if (existingBooking.price == null || existingBooking.price <= 0 || existingBooking.pricingStatus === "pending") {
+        throw new Error("Payment is unavailable until the final price is agreed");
+    }
     if (existingBooking.paymentStatus === "paid") {
         return { message: "Demo payment was already confirmed", booking: existingBooking };
     }
@@ -642,6 +575,8 @@ const confirmDemoPayment = async ({ bookingId, customerId }) => {
             customerId,
             status: "in_progress",
             serviceCompletedAt: { $ne: null },
+            price: { $gt: 0 },
+            pricingStatus: { $ne: "pending" },
             paymentStatus: "awaiting"
         },
         {
@@ -861,5 +796,5 @@ const getWorkerEarnings = async (workerId) => {
 
 module.exports = {
     createBooking, getWorkerBookings, updateBookingStatus, getCustomerBookings, cancelBooking
-    , completeBooking, markServiceDone, confirmDemoPayment, getWorkerDashboard, getWorkerEarnings
+    , completeBooking, markServiceDone, confirmDemoPayment, updateNegotiatedPrice, getWorkerDashboard, getWorkerEarnings
 };

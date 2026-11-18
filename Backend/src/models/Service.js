@@ -32,26 +32,6 @@ const serviceSchema = new mongoose.Schema(
             trim: true,
             maxlength: 100
         },
-        price: {
-            type: Number,
-            required: true,
-            min: 0
-        },
-
-        priceType: {
-            type: String,
-            enum: ["per_hour", "per_day", "fixed"],
-            required: true
-        },
-
-        estimatedDurationMinutes: {
-            type: Number,
-            min: 1,
-            required: function () {
-                return this.priceType === "fixed";
-            }
-        },
-
         isActive: {
             type: Boolean,
             default: true

@@ -123,6 +123,7 @@ const updateBookingStatus = async (bookingId, status) => {
             per_hour: "Per Hour",
             per_day: "Per Day",
             fixed: "Fixed Price",
+            negotiable: "Negotiable",
         };
 
         return types[priceType] || "Fixed Price";
@@ -345,6 +346,18 @@ const updateBookingStatus = async (bookingId, status) => {
                     </span>
                   </div>
 
+                  {(["accepted", "in_progress", "completed"].includes(booking.status)) && (
+                    <div className="mt-4">
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/bookings/${booking._id}/chat`)}
+                        className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100"
+                      >
+                        Chat with Customer
+                      </button>
+                    </div>
+                  )}
+
                   {/* Booking details */}
                   <div className="grid grid-cols-1 sm:grid-cols-2
                                   lg:grid-cols-2 gap-4 mt-5 text-sm">
@@ -385,9 +398,9 @@ const updateBookingStatus = async (bookingId, status) => {
                       </p>
 
                       <p className="font-semibold text-gray-800 mt-1">
-                        {booking.priceType === "per_day" || booking.serviceId?.priceType === "per_day"
+                        {booking.priceType === "per_day"
                           ? `${booking.quantity} ${booking.quantity === 1 ? "Day" : "Days"}`
-                          : booking.priceType === "per_hour" || booking.serviceId?.priceType === "per_hour"
+                          : booking.priceType === "per_hour"
                             ? `${booking.quantity} ${booking.quantity === 1 ? "Hour" : "Hours"}`
                             : formatDuration(booking.duration)}
                       </p>
@@ -400,11 +413,11 @@ const updateBookingStatus = async (bookingId, status) => {
 
   <div className="flex flex-wrap items-center gap-2 mt-1">
     <p className="font-bold text-gray-900 text-lg">
-      ₹{booking.price ?? 0}
+      {booking.price != null ? `₹${Number(booking.price).toLocaleString("en-IN")}` : "Awaiting final price"}
     </p>
 
     <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
-      {getPriceType(booking.serviceId?.priceType)}
+      {getPriceType(booking.priceType)}
     </span>
   </div>
 </div>
@@ -478,7 +491,7 @@ const updateBookingStatus = async (bookingId, status) => {
                     </span>
                   </div>
 
-                  {booking.status === "in_progress" && !booking.serviceCompletedAt && (
+                  {booking.status === "in_progress" && !booking.serviceCompletedAt && booking.pricingStatus !== "pending" && (
                     <button
                       disabled={isUpdating}
                       onClick={() => markServiceDone(booking._id)}
@@ -486,6 +499,12 @@ const updateBookingStatus = async (bookingId, status) => {
                     >
                       {isUpdating ? "Updating..." : "Mark Service Done"}
                     </button>
+                  )}
+
+                  {booking.status === "in_progress" && !booking.serviceCompletedAt && booking.pricingStatus === "pending" && (
+                    <p className="mt-5 rounded-xl bg-amber-50 p-3 text-sm font-medium text-amber-700">
+                      Set the final negotiated amount in booking chat before marking the service done.
+                    </p>
                   )}
 
                   {booking.status === "in_progress" && booking.serviceCompletedAt && booking.paymentStatus !== "paid" && (
