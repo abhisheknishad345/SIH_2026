@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
-import {ArrowLeft, RefreshCw} from 'lucide-react'
+import {ArrowLeft, RefreshCw, MapPin} from 'lucide-react'
 
 const filters = [
   { label: "All", value: "all" },
@@ -355,6 +355,15 @@ const updateBookingStatus = async (bookingId, status) => {
                       >
                         Chat with Customer
                       </button>
+                      {booking.status === "in_progress" && (
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/bookings/${booking._id}/live-map`)}
+                          className="ml-2 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                        >
+                          <MapPin size={16} /> Live Location
+                        </button>
+                      )}
                     </div>
                   )}
 
