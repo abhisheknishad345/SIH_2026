@@ -170,7 +170,7 @@ const getWorkerBookings = async ({
     const [bookings, totalBookings] = await Promise.all([
         Booking.find(filter)
             .populate("customerId", "fullName email")
-            .populate("serviceId", "name category price priceType")
+            .populate("serviceId", "name category")
             .sort({ scheduledAt: 1 })
             .skip(skip)
             .limit(limit),
@@ -329,10 +329,7 @@ const updateBookingStatus = async ({
         }
 
         // Validate the full reserved range using the saved pricing type.
-        const linkedService = currentBooking.priceType
-            ? null
-            : await Service.findById(currentBooking.serviceId);
-        const bookingPriceType = currentBooking.priceType || linkedService?.priceType;
+        const bookingPriceType = currentBooking.priceType || "negotiable";
         validateWorkerWorkingHours(
             worker,
             bookingStart,
@@ -419,7 +416,7 @@ const getCustomerBookings = async (customerId) => {
         customerId
     })
         .populate("workerId", "fullName email")
-        .populate("serviceId", "name category priceType")
+        .populate("serviceId", "name category")
         .sort({ createdAt: -1 });
 
     return {
