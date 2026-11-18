@@ -211,6 +211,7 @@ const getServiceWorkers = async ({ serviceId }) => {
             skill: matchedSkill,
             skills: worker.skills,
             certifications: worker.certifications || [],
+            workingHours: worker.workingHours || [],
             isVerified: worker.isVerified,
             isAvailable: worker.isAvailable,
             averageRating: rating?.averageRating || 0,
