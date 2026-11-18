@@ -176,7 +176,7 @@ export default function BookingChat() {
                     : "Price is based on the worker's selected rate."}
                 </p>
               </div>
-              {booking.priceType === "negotiable" && user?.role === "worker" && (
+              {booking.priceType === "negotiable" && user?.role === "worker" && !booking.serviceCompletedAt && booking.status !== "completed" && (
                 <form onSubmit={handlePriceUpdate} className="flex w-full gap-2 sm:w-auto">
                   <div className="relative min-w-0 flex-1 sm:w-44">
                     <IndianRupee size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
