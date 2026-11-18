@@ -621,6 +621,18 @@ function MyBookings() {
                                         </div>
                                     )}
 
+                                    {(booking.status === "in_progress" || booking.status === "completed") && (
+                                        <div className="border-t border-indigo-100 bg-indigo-50/60 px-5 py-3 sm:px-7">
+                                            <button
+                                                type="button"
+                                                onClick={() => navigate(`/bookings/${booking._id}/chat`)}
+                                                className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                                            >
+                                                Chat with Worker
+                                            </button>
+                                        </div>
+                                    )}
+
                                     {/* Card Footer */}
                                     {booking.status === "pending" && (
                                         <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
