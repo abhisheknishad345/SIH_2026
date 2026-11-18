@@ -219,9 +219,13 @@ function ServiceWorkers() {
                         />
                       </h3>
 
-                      {worker.basePrice != null && (
+                      {worker.skill?.priceType && (
                         <span className="shrink-0 rounded-lg border border-indigo-100 bg-indigo-50 px-2 py-1 text-[11px] font-semibold text-indigo-700">
-                          ₹{worker.basePrice} base
+                          {worker.skill.priceType === "negotiable"
+                            ? "Negotiable"
+                            : worker.skill.priceType === "fixed"
+                              ? `₹${worker.skill.price} fixed`
+                              : `₹${worker.skill.price} / ${worker.skill.priceType === "per_hour" ? "hour" : "day"}`}
                         </span>
                       )}
                     </div>
