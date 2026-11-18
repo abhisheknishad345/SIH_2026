@@ -255,10 +255,9 @@ const WorkerProfile = () => {
             key: "rating",
             icon: <Star size={16} className="fill-amber-400 text-amber-400" />,
             value: ratingSummary.totalRatings > 0
-    ? ratingSummary.averageRating.toFixed(1)
-    : "New",
-
-label: `${ratingSummary.totalRatings} ratings`,
+                ? ratingSummary.averageRating.toFixed(1)
+                : "New",
+            label: `${ratingSummary.totalRatings} ratings`,
         },
         {
             key: "experience",
