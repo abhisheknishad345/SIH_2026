@@ -19,7 +19,7 @@ const getAccessibleBooking = async (user, bookingId) => {
     throw new Error("You are not allowed to access this booking chat");
   }
 
-  if (!["in_progress", "completed"].includes(booking.status)) {
+  if (!["accepted", "in_progress", "completed"].includes(booking.status)) {
     throw new Error("Chat becomes available after the worker accepts the booking");
   }
 
