@@ -7,27 +7,17 @@ const createService = async (req, res) => {
 
         validateService(req.body);
 
-        const {
-            name,
-            description,
-            category,
-            price,
-            priceType,
-            estimatedDurationMinutes
-        } = req.body;
+        const { name, description, category } = req.body;
 
         const service = await serviceService.createService({
             adminId: req.user._id,
             name,
             description,
-            category,
-            price,
-            priceType,
-            estimatedDurationMinutes
+            category
         });
 
         res.status(201).json({
-            message: "Paid Service created successfully",
+            message: "Service created successfully",
             service
         });
 
