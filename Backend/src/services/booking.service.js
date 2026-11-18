@@ -71,10 +71,10 @@ const createBooking = async ({
         throw new Error("Booking date and time must be in the future");
     }
 
-    if (!Number.isInteger(quantity) || quantity < 1 || quantity > (priceType === "per_day" ? 30 : 12)) {
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > (priceType === "per_day" ? 30 : 8)) {
         throw new Error(priceType === "per_day"
             ? "Please select between 1 and 30 days"
-            : "Please select between 1 and 12 hours");
+            : "A worker can be booked for a maximum of 8 hours per day");
     }
 
     let duration;
