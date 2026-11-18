@@ -9,7 +9,6 @@ const User = require("./models/User");
 const ChatMessage = require("./models/ChatMessage");
 const chatService = require("./services/chat.service");
 const bookingChatService = require("./services/bookingChat.service");
-const BookingChatMessage = require("./models/BookingChatMessage");
 const app = express();
 
 require("dotenv").config();
