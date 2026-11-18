@@ -156,7 +156,7 @@ export default function BookingChat() {
           </div>
           <div className="min-w-0">
             <h1 className="font-bold text-slate-900">Booking Chat</h1>
-            <p className="truncate text-xs text-slate-500">Discuss service details and negotiate the final amount</p>
+            <p className="truncate text-xs text-slate-500">Discuss service details and coordinate your booking</p>
           </div>
         </header>
 
