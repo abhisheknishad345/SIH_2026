@@ -6,6 +6,7 @@ const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const User = require("./models/User");
+const Worker = require("./models/Worker");
 const ChatMessage = require("./models/ChatMessage");
 const chatService = require("./services/chat.service");
 const bookingChatService = require("./services/bookingChat.service");
@@ -145,8 +146,23 @@ io.on("connection", socket => {
       socket.activeMapBookingId = booking._id.toString();
 
       const saved = bookingMapLocations.get(socket.activeMapBookingId) || {};
-      const peerRole = socket.user.role === "customer" ? "worker" : "customer";
-      acknowledge({ success: true, peerLocation: saved[peerRole] || null });
+      const workerProfile = await Worker.findOne({ userId: booking.workerId }).select("location");
+      const coordinates = booking.location?.coordinates || [];
+      const customerLocation = coordinates.length === 2
+        ? { longitude: Number(coordinates[0]), latitude: Number(coordinates[1]) }
+        : null;
+      const workerCoordinates = workerProfile?.location?.coordinates || [];
+      const workerInitialLocation = workerCoordinates.length === 2
+        ? { longitude: Number(workerCoordinates[0]), latitude: Number(workerCoordinates[1]) }
+        : null;
+
+      acknowledge({
+        success: true,
+        role: socket.user.role,
+        customerLocation,
+        workerInitialLocation,
+        workerLiveLocation: saved.worker || workerInitialLocation
+      });
     } catch (error) {
       acknowledge({ success: false, message: error.message });
     }
@@ -157,6 +173,9 @@ io.on("connection", socket => {
       const bookingId = String(payload.bookingId || "");
       if (!socket.activeMapBookingId || socket.activeMapBookingId !== bookingId) {
         return acknowledge({ success: false, message: "Join this booking map before sharing location" });
+      }
+      if (socket.user.role !== "worker") {
+        return acknowledge({ success: false, message: "Only the assigned worker shares live GPS location" });
       }
       const booking = await bookingChatService.getAccessibleBooking(socket.user, bookingId);
       if (booking.status !== "in_progress") {
@@ -171,10 +190,10 @@ io.on("connection", socket => {
       }
 
       const locations = bookingMapLocations.get(bookingId) || {};
-      const location = { latitude, longitude, updatedAt: Date.now(), role: socket.user.role };
-      locations[socket.user.role] = location;
+      const location = { latitude, longitude, updatedAt: Date.now(), role: "worker" };
+      locations.worker = location;
       bookingMapLocations.set(bookingId, locations);
-      socket.to(getBookingMapRoom(bookingId)).emit("booking-map:peer-location", location);
+      socket.to(getBookingMapRoom(bookingId)).emit("booking-map:worker-location", location);
       acknowledge({ success: true });
     } catch (error) {
       acknowledge({ success: false, message: error.message });
