@@ -197,7 +197,7 @@ const getBookingEnd = booking => booking.scheduledEndAt
 
 const getBookingIntervals = booking => {
     const start = new Date(booking.scheduledAt);
-    if (booking.priceType === "per_day" && Number(booking.quantity) > 1) {
+    if (booking.scheduledEndAt && booking.priceType === "per_day" && Number(booking.quantity) > 1) {
         return Array.from({ length: Number(booking.quantity) }, (_, index) => ({
             start: new Date(start.getTime() + index * 86400000),
             end: new Date(start.getTime() + index * 86400000 + 8 * 60 * 60000)
