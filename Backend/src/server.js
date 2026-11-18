@@ -8,6 +8,8 @@ const cors = require("cors");
 const User = require("./models/User");
 const ChatMessage = require("./models/ChatMessage");
 const chatService = require("./services/chat.service");
+const bookingChatService = require("./services/bookingChat.service");
+const BookingChatMessage = require("./models/BookingChatMessage");
 const app = express();
 
 require("dotenv").config();
@@ -104,7 +106,7 @@ io.use(async (socket, next) => {
       return next(new Error("Invalid or unverified account"));
     }
 
-    if (!["worker", "cooperative_admin"].includes(user.role)) {
+    if (!["worker", "cooperative_admin", "customer"].includes(user.role)) {
       return next(new Error("Chat access is not allowed for this account"));
     }
 
@@ -118,6 +120,44 @@ io.use(async (socket, next) => {
 io.on("connection", socket => {
   socket.activeChatRoom = null;
   socket.activeWorkerId = null;
+  socket.activeBookingRoom = null;
+  socket.activeBookingId = null;
+
+  socket.on("booking-chat:join", async (payload = {}, acknowledge = () => {}) => {
+    try {
+      const bookingId = String(payload.bookingId || "");
+      const booking = await bookingChatService.getAccessibleBooking(socket.user, bookingId);
+      const room = `booking-chat:${booking._id}`;
+
+      if (socket.activeBookingRoom) socket.leave(socket.activeBookingRoom);
+      await socket.join(room);
+      socket.activeBookingRoom = room;
+      socket.activeBookingId = booking._id.toString();
+      acknowledge({ success: true });
+    } catch (error) {
+      acknowledge({ success: false, message: error.message });
+    }
+  });
+
+  socket.on("booking-chat:send", async (payload = {}, acknowledge = () => {}) => {
+    try {
+      const bookingId = String(payload.bookingId || "");
+      if (!socket.activeBookingId || socket.activeBookingId !== bookingId) {
+        return acknowledge({ success: false, message: "Join this booking chat before sending a message" });
+      }
+
+      const savedMessage = await bookingChatService.sendMessage(
+        socket.user,
+        bookingId,
+        payload.content
+      );
+
+      io.to(socket.activeBookingRoom).emit("booking-chat:message", savedMessage);
+      acknowledge({ success: true, message: savedMessage });
+    } catch (error) {
+      acknowledge({ success: false, message: error.message });
+    }
+  });
 
   socket.on("chat:join", async (payload = {}, acknowledge = () => {}) => {
     try {
@@ -163,6 +203,8 @@ io.on("connection", socket => {
   socket.on("disconnect", () => {
     socket.activeChatRoom = null;
     socket.activeWorkerId = null;
+    socket.activeBookingRoom = null;
+    socket.activeBookingId = null;
   });
 });
 
