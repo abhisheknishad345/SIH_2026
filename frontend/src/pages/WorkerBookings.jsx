@@ -345,7 +345,7 @@ const updateBookingStatus = async (bookingId, status) => {
                     </span>
                   </div>
 
-                  {(booking.status === "in_progress" || booking.status === "completed") && (
+                  {(["accepted", "in_progress", "completed"].includes(booking.status)) && (
                     <div className="mt-4">
                       <button
                         type="button"
