@@ -31,6 +31,7 @@ import ApprovedWorkers from "./pages/ApprovedWorkers";
 import RejectedWorkers from "./pages/RejectedWorkers";
 import CooperativeChat from "./pages/CooperativeChat";
 import BookingChat from "./pages/BookingChat";
+import BookingLiveMap from "./pages/BookingLiveMap";
 import Body from "./components/Body";
 
 function App() {
@@ -65,6 +66,7 @@ function App() {
           <Route path="/worker/edit-profile" element={<Body allowedRoles={["worker"]}><WorkerProfileEdit /></Body>} />
           <Route path="/worker/chat" element={<Body allowedRoles={["worker"]}><CooperativeChat /></Body>} />
           <Route path="/bookings/:bookingId/chat" element={<Body allowedRoles={["customer", "worker"]}><BookingChat /></Body>} />
+          <Route path="/bookings/:bookingId/live-map" element={<Body allowedRoles={["customer", "worker"]}><BookingLiveMap /></Body>} />
 
           {/* Cooperative admin routes */}
           <Route path="/cooperative-admin" element={<Body allowedRoles={["cooperative_admin"]}><AdminDashboard /></Body>} />
