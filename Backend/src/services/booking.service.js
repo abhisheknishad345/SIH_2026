@@ -340,9 +340,7 @@ const updateBookingStatus = async ({
 
         // Accept selected booking
         currentBooking.status = "in_progress";
-        currentBooking.paymentStatus = currentBooking.price != null && currentBooking.price > 0
-            ? "awaiting"
-            : "not_due";
+        currentBooking.paymentStatus = "not_due";
 
         await currentBooking.save();
 
