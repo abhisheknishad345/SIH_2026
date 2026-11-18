@@ -491,7 +491,7 @@ const updateBookingStatus = async (bookingId, status) => {
                     </span>
                   </div>
 
-                  {booking.status === "in_progress" && !booking.serviceCompletedAt && (
+                  {booking.status === "in_progress" && !booking.serviceCompletedAt && booking.pricingStatus !== "pending" && (
                     <button
                       disabled={isUpdating}
                       onClick={() => markServiceDone(booking._id)}
@@ -499,6 +499,12 @@ const updateBookingStatus = async (bookingId, status) => {
                     >
                       {isUpdating ? "Updating..." : "Mark Service Done"}
                     </button>
+                  )}
+
+                  {booking.status === "in_progress" && !booking.serviceCompletedAt && booking.pricingStatus === "pending" && (
+                    <p className="mt-5 rounded-xl bg-amber-50 p-3 text-sm font-medium text-amber-700">
+                      Set the final negotiated amount in booking chat before marking the service done.
+                    </p>
                   )}
 
                   {booking.status === "in_progress" && booking.serviceCompletedAt && booking.paymentStatus !== "paid" && (
