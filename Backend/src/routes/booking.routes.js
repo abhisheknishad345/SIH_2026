@@ -84,4 +84,22 @@ router.get(
 
 
 
+
+const bookingChatController = require("../controllers/bookingChat.controller");
+const bookingChatRoles = roleMiddleware(["customer", "worker"]);
+
+router.get(
+    "/:bookingId/chat/messages",
+    authMiddleware,
+    bookingChatRoles,
+    bookingChatController.getMessages
+);
+
+router.post(
+    "/:bookingId/chat/messages",
+    authMiddleware,
+    bookingChatRoles,
+    bookingChatController.sendMessage
+);
+
 module.exports = router;
