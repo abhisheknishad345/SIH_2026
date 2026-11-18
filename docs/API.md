@@ -76,7 +76,7 @@ Query parameters for `GET /workers/nearby`:
 - `skill` — optional skill filter.
 - `category` — optional category filter.
 
-Worker profile creation reads fields including `cooperativeId`, `category`, `skills`, `certifications`, `location`, and `workingHours`. Each skill contains `serviceId`, `experience`, `priceType` (`fixed`, `per_hour`, `per_day`, or `negotiable`), and `price` for all types except `negotiable`. Pricing belongs to the worker skill, not the service catalogue. Availability update accepts `isAvailable`. Schedule update accepts `workingHours`.
+Worker profile creation reads fields including `cooperativeId`, `category`, `skills`, `certifications`, `location`, and `workingHours`. Each skill contains `serviceId`, `experience`, `priceType` (`fixed`, `per_hour`, `per_day`, or `negotiable`), and `price` for all types except `negotiable`. Optional `shopName` (maximum 100 characters) and `shopAddress` (maximum 300 characters) can also be supplied; both can be changed or cleared through `PUT /workers/editprofile`. Pricing belongs to the worker skill, not the service catalogue. Availability update accepts `isAvailable`. Schedule update accepts `workingHours`.
 
 ## Customers — `/customers`
 
