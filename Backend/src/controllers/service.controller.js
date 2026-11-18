@@ -109,9 +109,9 @@ const getServiceWorkers = async (req, res) => {
         if (radiusKm !== undefined) {
             parsedRadius = Number(radiusKm);
 
-            if (![1, 2, 4, 6, 8, 10, 50, 100].includes(parsedRadius)) {
+            if (![1, 2, 4, 6, 8, 10, 50].includes(parsedRadius)) {
                 return res.status(400).json({
-                    message: "Radius must between 1 or 100 KM"
+                    message: "Radius must between 1 or 50 KM"
                 });
             }
 

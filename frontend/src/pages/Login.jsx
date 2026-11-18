@@ -359,7 +359,7 @@ function Login() {
 
           <div className="group relative h-[430px] overflow-hidden rounded-3xl border border-white/10 bg-[#151d18] shadow-2xl shadow-black/40 xl:h-[520px]">
             <img
-              src="https://images.unsplash.com/photo-1676210134188-4c05dd172f89?w=1200&auto=format&fit=crop&q=85"
+              src="https://images.unsplash.com/photo-1758101755915-462eddc23f57?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D"
               alt="A skilled technician working on a home repair"
               className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
             />

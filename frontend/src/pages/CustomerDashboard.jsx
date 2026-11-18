@@ -192,7 +192,7 @@ function CustomerDashboard() {
                             WELCOME TO TECHCONNECT
                         </div>
 
-                        <h2 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl lg:text-5xl">
+                        <h2 className="text-2xl font-bold leading-tight tracking-tight sm:text-2xl lg:text-3xl">
                             What service do you need today?
                         </h2>
 

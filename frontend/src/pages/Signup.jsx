@@ -233,7 +233,7 @@ function Signup() {
           </div>
 
           <div className="group relative h-[330px] overflow-hidden rounded-3xl border border-white/10 bg-[#151d18] shadow-2xl shadow-black/40 sm:h-[430px] lg:h-[500px]">
-            <img src="https://images.unsplash.com/photo-1676210134188-4c05dd172f89?w=1200&auto=format&fit=crop&q=85" alt="A skilled technician working on a home repair" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+            <img src="https://images.unsplash.com/photo-1705760058049-b58119c416a9?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D" alt="A skilled technician working on a home repair" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#080b0a] via-black/25 to-black/5" />
             <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full border border-white/15 bg-black/30 px-3 py-2 text-[11px] font-medium text-white backdrop-blur-md"><span className="h-2 w-2 rounded-full bg-lime-300" /> Connecting local skills</div>
             <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
