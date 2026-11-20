@@ -118,6 +118,28 @@ const createCooperativeAdmin = async ({
     };
 };
 
+const getAdminServices = async (adminId) => {
+    const admin = await CooperativeAdmin.findOne({ userId: adminId, isActive: true });
+    if (!admin) throw new Error("Cooperative admin not found");
+
+    return Service.find({ cooperativeId: admin.cooperativeId })
+        .sort({ createdAt: -1 })
+        .lean();
+};
+
+const getAdminBookings = async (adminId) => {
+    const admin = await CooperativeAdmin.findOne({ userId: adminId, isActive: true });
+    if (!admin) throw new Error("Cooperative admin not found");
+
+    const serviceIds = await Service.find({ cooperativeId: admin.cooperativeId }).distinct("_id");
+    return Booking.find({ serviceId: { $in: serviceIds } })
+        .populate("customerId", "fullName email")
+        .populate("workerId", "fullName email")
+        .populate("serviceId", "name category")
+        .sort({ createdAt: -1 })
+        .lean();
+};
+
 const getDashboardStats = async (adminId) => {
     const admin = await CooperativeAdmin.findOne({
         userId: adminId,
@@ -167,24 +189,24 @@ const getDashboardStats = async (adminId) => {
         cooperativeId
     }).distinct("_id");
 
+    const bookingScope = { serviceId: { $in: serviceIds } };
+
     const [
         totalBookings,
         pendingBookings,
+        acceptedBookings,
+        inProgressBookings,
+        rejectedBookings,
+        cancelledBookings,
         completedBookings
     ] = await Promise.all([
-        Booking.countDocuments({
-            serviceId: { $in: serviceIds }
-        }),
-
-        Booking.countDocuments({
-            serviceId: { $in: serviceIds },
-            status: "pending"
-        }),
-
-        Booking.countDocuments({
-            serviceId: { $in: serviceIds },
-            status: "completed"
-        })
+        Booking.countDocuments(bookingScope),
+        Booking.countDocuments({ ...bookingScope, status: "pending" }),
+        Booking.countDocuments({ ...bookingScope, status: "accepted" }),
+        Booking.countDocuments({ ...bookingScope, status: "in_progress" }),
+        Booking.countDocuments({ ...bookingScope, status: "rejected" }),
+        Booking.countDocuments({ ...bookingScope, status: "cancelled" }),
+        Booking.countDocuments({ ...bookingScope, status: "completed" })
     ]);
 
     return {
@@ -203,6 +225,10 @@ const getDashboardStats = async (adminId) => {
         bookings: {
             total: totalBookings,
             pending: pendingBookings,
+            accepted: acceptedBookings,
+            inProgress: inProgressBookings,
+            rejected: rejectedBookings,
+            cancelled: cancelledBookings,
             completed: completedBookings
         }
     };
@@ -210,5 +236,7 @@ const getDashboardStats = async (adminId) => {
 
 module.exports = {
     createCooperativeAdmin,
-    getDashboardStats
+    getDashboardStats,
+    getAdminServices,
+    getAdminBookings
 };

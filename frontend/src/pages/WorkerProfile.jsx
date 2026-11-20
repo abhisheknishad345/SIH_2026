@@ -123,6 +123,8 @@ const WorkerProfile = () => {
     const [worker, setWorker] = useState(null);
     const [loading, setLoading] = useState(true);
     const [updatingAvailability, setUpdatingAvailability] = useState(false);
+    const [ratings, setRatings] = useState([]);
+    const [ratingSummary, setRatingSummary] = useState({ averageRating: 0, totalRatings: 0 });
 
     const toggleAvailability = async () => {
         try {
@@ -150,7 +152,22 @@ const WorkerProfile = () => {
         const fetchProfile = async () => {
             try {
                 const response = await api.get("/workers/profile");
-                setWorker(response.data.worker);
+                const currentWorker = response.data.worker;
+                setWorker(currentWorker);
+
+                const workerUserId = currentWorker?.userId?._id;
+                if (workerUserId) {
+                    try {
+                        const ratingResponse = await api.get(`/ratings/worker/${workerUserId}`);
+                        setRatings(ratingResponse.data.ratings || []);
+                        setRatingSummary({
+                            averageRating: ratingResponse.data.averageRating || 0,
+                            totalRatings: ratingResponse.data.totalRatings || 0
+                        });
+                    } catch (ratingError) {
+                        console.error("Worker ratings fetch failed:", ratingError);
+                    }
+                }
             } catch (error) {
                 console.error(error);
             } finally {
@@ -237,8 +254,10 @@ const WorkerProfile = () => {
         {
             key: "rating",
             icon: <Star size={16} className="fill-amber-400 text-amber-400" />,
-            value: worker.averageRating?.toFixed(1) || "New",
-            label: `${worker.totalRatings || 0} ratings`,
+            value: ratingSummary.totalRatings > 0
+                ? ratingSummary.averageRating.toFixed(1)
+                : "New",
+            label: `${ratingSummary.totalRatings} ratings`,
         },
         {
             key: "experience",
@@ -783,6 +802,45 @@ const WorkerProfile = () => {
                             </div>
                         )}
                     </div>
+                </Card>
+
+                {/* Customer ratings and reviews */}
+                <Card>
+                    <CardHeader
+                        icon={Star}
+                        title="Customer Ratings & Reviews"
+                        subtitle="Feedback received from customers after completed jobs."
+                        badge={<span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">{ratingSummary.averageRating ? ratingSummary.averageRating.toFixed(1) : "New"} · {ratingSummary.totalRatings} reviews</span>}
+                    />
+                    {ratings.length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center">
+                            <Star size={25} className="mx-auto text-slate-300" />
+                            <p className="mt-2 text-sm font-semibold text-slate-700">No customer reviews yet</p>
+                            <p className="mt-1 text-xs text-slate-500">Reviews will appear here when customers rate your completed jobs.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {ratings.map((item) => (
+                                <article key={item._id} className="rounded-xl border border-slate-200 p-4">
+                                    <div className="flex flex-wrap items-start justify-between gap-2">
+                                        <div>
+                                            <p className="text-sm font-bold text-slate-900">{item.customerId?.fullName || "Customer"}</p>
+                                            <div className="mt-1 flex items-center gap-1 text-amber-500">
+                                                {Array.from({ length: 5 }, (_, index) => (
+                                                    <Star key={index} size={14} className={index < item.rating ? "fill-amber-400 text-amber-400" : "text-slate-300"} />
+                                                ))}
+                                                <span className="ml-1 text-xs font-bold text-slate-700">{item.rating}/5</span>
+                                            </div>
+                                        </div>
+                                        <time className="text-xs text-slate-500">
+                                            {item.createdAt ? new Date(item.createdAt).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true, timeZone: "Asia/Kolkata" }) : ""}
+                                        </time>
+                                    </div>
+                                    {item.review && <p className="mt-3 text-sm leading-6 text-slate-600">{item.review}</p>}
+                                </article>
+                            ))}
+                        </div>
+                    )}
                 </Card>
 
                 {/* Verification banner */}

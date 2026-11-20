@@ -19,6 +19,8 @@ import {
     ClipboardList,
     CalendarCheck,
     CalendarClock,
+    Star,
+    Send,
 } from "lucide-react";
 
 import api from "../services/api";
@@ -32,6 +34,10 @@ function MyBookings() {
     const [cancellingId, setCancellingId] = useState(null);
     const [payingId, setPayingId] = useState(null);
     const [error, setError] = useState("");
+    const [ratingBooking, setRatingBooking] = useState(null);
+    const [ratingValue, setRatingValue] = useState(5);
+    const [reviewText, setReviewText] = useState("");
+    const [submittingRating, setSubmittingRating] = useState(false);
 
     // Fetch customer bookings
     const fetchBookings = async (isRefresh = false) => {
@@ -63,6 +69,29 @@ function MyBookings() {
     useEffect(() => {
         fetchBookings();
     }, []);
+
+    const submitRating = async (event) => {
+        event.preventDefault();
+        if (!ratingBooking || ratingBooking.status !== "completed") return;
+
+        try {
+            setSubmittingRating(true);
+            setError("");
+            await api.post("/ratings", {
+                bookingId: ratingBooking._id,
+                rating: ratingValue,
+                review: reviewText.trim()
+            });
+            setRatingBooking(null);
+            setRatingValue(5);
+            setReviewText("");
+            await fetchBookings(true);
+        } catch (err) {
+            setError(err.response?.data?.message || "Unable to submit your rating.");
+        } finally {
+            setSubmittingRating(false);
+        }
+    };
 
     // Cancel booking
     const cancelBooking = async (bookingId) => {
@@ -579,6 +608,7 @@ function MyBookings() {
 
                                     </div>
 
+
                                     {/* Payment status */}
                                     {booking.status !== "pending" && booking.status !== "rejected" && booking.status !== "cancelled" && (
                                         <div className="mx-5 mb-5 flex flex-wrap items-center gap-2 rounded-2xl bg-slate-50 p-4 sm:mx-7">
@@ -622,7 +652,46 @@ function MyBookings() {
                                         </div>
                                     )}
 
-                                    {(["accepted", "in_progress", "completed"].includes(booking.status)) && (
+                                     {/* Rating: available only after the booking is completed */}
+                                    {booking.status === "completed" && (
+                                        <div className="mx-5 mb-5 rounded-2xl border border-amber-200 bg-amber-50/60 p-4 sm:mx-7">
+                                            {booking.rating ? (
+                                                <div>
+                                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                                        <div className="flex items-center gap-1 text-amber-500">
+                                                            {Array.from({ length: 5 }, (_, index) => (
+                                                                <Star key={index} size={17} className={index < booking.rating.rating ? "fill-amber-400 text-amber-400" : "text-slate-300"} />
+                                                            ))}
+                                                            <span className="ml-1 text-sm font-bold text-slate-800">{booking.rating.rating}/5</span>
+                                                        </div>
+                                                        <span className="text-xs text-slate-500">
+                                                            Rated on {formatDate(booking.rating.createdAt)}
+                                                        </span>
+                                                    </div>
+                                                    {booking.rating.review && (
+                                                        <p className="mt-2 text-sm leading-6 text-slate-700">{booking.rating.review}</p>
+                                                    )}
+                                                    <p className="mt-2 text-xs font-semibold text-slate-500">Your review for {booking.workerId?.fullName || "the worker"}</p>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                                    <div>
+                                                        <p className="font-bold text-slate-800">How was your experience?</p>
+                                                        <p className="mt-1 text-xs text-slate-500">This booking is completed. Share your rating for the worker.</p>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { setRatingBooking(booking); setRatingValue(5); setReviewText(""); }}
+                                                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-amber-600 cursor-pointer"
+                                                    >
+                                                        <Star size={16} className="fill-white" /> Rate service
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {(["accepted", "in_progress"].includes(booking.status)) && (
                                         <div className="border-t border-indigo-100 bg-indigo-50/60 px-5 py-3 sm:px-7">
                                             <button
                                                 type="button"
@@ -631,6 +700,15 @@ function MyBookings() {
                                             >
                                                 Chat with Worker
                                             </button>
+                                            {booking.status === "in_progress" && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => navigate(`/bookings/${booking._id}/live-map`)}
+                                                    className="ml-2 inline-flex cursor-pointer items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                                                >
+                                                    <MapPin size={16} /> Live Location
+                                                </button>
+                                            )}
                                         </div>
                                     )}
 
@@ -745,6 +823,40 @@ function MyBookings() {
                         Connecting local skills with local needs through technology.
                     </p>
                 </footer>
+
+                {ratingBooking && (
+                    <div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+                        <form onSubmit={submitRating} className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+                            <div className="flex items-start justify-between gap-3">
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-wider text-amber-600">Share your experience</p>
+                                    <h2 className="mt-1 text-xl font-extrabold text-slate-900">Rate {ratingBooking.workerId?.fullName || "your worker"}</h2>
+                                    <p className="mt-1 text-xs text-slate-500">{ratingBooking.serviceId?.name || "Completed service"}</p>
+                                </div>
+                                <button type="button" onClick={() => setRatingBooking(null)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 cursor-pointer" aria-label="Close rating form"><XCircle size={20} /></button>
+                            </div>
+                            <div className="mt-6">
+                                <p className="mb-3 text-sm font-semibold text-slate-700">Your rating</p>
+                                <div className="flex items-center gap-2">
+                                    {[1, 2, 3, 4, 5].map(value => (
+                                        <button key={value} type="button" onClick={() => setRatingValue(value)} aria-label={`Rate ${value} stars`} className="rounded-lg p-1 transition hover:scale-110">
+                                            <Star size={32} className={value <= ratingValue ? "fill-amber-400 text-amber-400" : "text-slate-300"} />
+                                        </button>
+                                    ))}
+                                    <span className="ml-2 text-sm font-bold text-slate-700">{ratingValue}/5</span>
+                                </div>
+                            </div>
+                            <div className="mt-5">
+                                <label htmlFor="rating-review" className="mb-2 block text-sm font-semibold text-slate-700">Write a review <span className="font-normal text-slate-400">(optional)</span></label>
+                                <textarea id="rating-review" value={reviewText} onChange={event => setReviewText(event.target.value)} maxLength={500} rows={4} placeholder="Tell others about your experience..." className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-100" />
+                                <p className="mt-1 text-right text-xs text-slate-400">{reviewText.length}/500</p>
+                            </div>
+                            <button type="submit" disabled={submittingRating} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 text-sm font-bold text-white transition hover:bg-amber-600 disabled:opacity-60 cursor-pointer">
+                                <Send size={16} /> {submittingRating ? "Submitting..." : "Submit"}
+                            </button>
+                        </form>
+                    </div>
+                )}
 
             </main>
         </div>

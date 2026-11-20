@@ -6,6 +6,7 @@ const connectDB = require("./config/db");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const User = require("./models/User");
+const Worker = require("./models/Worker");
 const ChatMessage = require("./models/ChatMessage");
 const chatService = require("./services/chat.service");
 const bookingChatService = require("./services/bookingChat.service");
@@ -30,8 +31,10 @@ dns.setDefaultResultOrder("ipv4first");
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const allowedOrigins = [
-  "http://localhost:5173"
-].filter(Boolean);
+  "http://localhost:5173",
+  process.env.FRONTEND_URL,
+  ...(process.env.FRONTEND_URLS || "").split(",")
+].map(origin => origin?.trim()).filter(Boolean);
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -71,6 +74,10 @@ const io = new Server(server, {
     methods: ["GET", "POST"]
   }
 });
+
+// Temporary live locations: kept in memory only, never persisted to MongoDB.
+const bookingMapLocations = new Map();
+const getBookingMapRoom = bookingId => "booking-map:" + bookingId;
 
 const getCookieToken = (cookieHeader = "") => {
   const tokenCookie = cookieHeader
@@ -117,10 +124,87 @@ io.use(async (socket, next) => {
 });
 
 io.on("connection", socket => {
+  socket.activeMapRoom = null;
+  socket.activeMapBookingId = null;
   socket.activeChatRoom = null;
   socket.activeWorkerId = null;
   socket.activeBookingRoom = null;
   socket.activeBookingId = null;
+
+  socket.on("booking-map:join", async (payload = {}, acknowledge = () => {}) => {
+    try {
+      const bookingId = String(payload.bookingId || "");
+      const booking = await bookingChatService.getAccessibleBooking(socket.user, bookingId);
+      if (booking.status !== "in_progress") {
+        return acknowledge({ success: false, message: "Live location is available only while the booking is in progress" });
+      }
+
+      if (socket.activeMapRoom) socket.leave(socket.activeMapRoom);
+      const room = getBookingMapRoom(booking._id.toString());
+      await socket.join(room);
+      socket.activeMapRoom = room;
+      socket.activeMapBookingId = booking._id.toString();
+
+      const saved = bookingMapLocations.get(socket.activeMapBookingId) || {};
+      const workerProfile = await Worker.findOne({ userId: booking.workerId }).select("location");
+      const coordinates = booking.location?.coordinates || [];
+      const customerLocation = coordinates.length === 2
+        ? { longitude: Number(coordinates[0]), latitude: Number(coordinates[1]) }
+        : null;
+      const workerCoordinates = workerProfile?.location?.coordinates || [];
+      const workerInitialLocation = workerCoordinates.length === 2
+        ? { longitude: Number(workerCoordinates[0]), latitude: Number(workerCoordinates[1]) }
+        : null;
+
+      acknowledge({
+        success: true,
+        role: socket.user.role,
+        customerLocation,
+        workerInitialLocation,
+        workerLiveLocation: saved.worker || workerInitialLocation
+      });
+    } catch (error) {
+      acknowledge({ success: false, message: error.message });
+    }
+  });
+
+  socket.on("booking-map:location", async (payload = {}, acknowledge = () => {}) => {
+    try {
+      const bookingId = String(payload.bookingId || "");
+      if (!socket.activeMapBookingId || socket.activeMapBookingId !== bookingId) {
+        return acknowledge({ success: false, message: "Join this booking map before sharing location" });
+      }
+      if (socket.user.role !== "worker") {
+        return acknowledge({ success: false, message: "Only the assigned worker shares live GPS location" });
+      }
+      const booking = await bookingChatService.getAccessibleBooking(socket.user, bookingId);
+      if (booking.status !== "in_progress") {
+        return acknowledge({ success: false, message: "Live location sharing has ended for this booking" });
+      }
+
+      const latitude = Number(payload.latitude);
+      const longitude = Number(payload.longitude);
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude) ||
+          latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+        return acknowledge({ success: false, message: "Invalid location coordinates" });
+      }
+
+      const locations = bookingMapLocations.get(bookingId) || {};
+      const location = { latitude, longitude, updatedAt: Date.now(), role: "worker" };
+      locations.worker = location;
+      bookingMapLocations.set(bookingId, locations);
+      socket.to(getBookingMapRoom(bookingId)).emit("booking-map:worker-location", location);
+      acknowledge({ success: true });
+    } catch (error) {
+      acknowledge({ success: false, message: error.message });
+    }
+  });
+
+  socket.on("booking-map:leave", () => {
+    if (socket.activeMapRoom) socket.leave(socket.activeMapRoom);
+    socket.activeMapRoom = null;
+    socket.activeMapBookingId = null;
+  });
 
   socket.on("booking-chat:join", async (payload = {}, acknowledge = () => {}) => {
     try {
@@ -222,6 +306,9 @@ io.on("connection", socket => {
   });
 
   socket.on("disconnect", () => {
+    if (socket.activeMapRoom) socket.leave(socket.activeMapRoom);
+    socket.activeMapRoom = null;
+    socket.activeMapBookingId = null;
     socket.activeChatRoom = null;
     socket.activeWorkerId = null;
     socket.activeBookingRoom = null;

@@ -1,5 +1,6 @@
 
 const Booking = require("../models/Booking");
+const Rating = require("../models/Rating");
 const Worker = require("../models/Worker");
 const Service = require("../models/Service");
 const mongoose = require("mongoose");
@@ -410,16 +411,23 @@ const updateBookingStatus = async ({
 };
 
 const getCustomerBookings = async (customerId) => {
-    const bookings = await Booking.find({
-        customerId
-    })
+    const bookings = await Booking.find({ customerId })
         .populate("workerId", "fullName email")
         .populate("serviceId", "name category")
         .sort({ createdAt: -1 });
 
-    return {
-        bookings
-    };
+    const bookingIds = bookings.map(booking => booking._id);
+    const ratings = await Rating.find({ bookingId: { $in: bookingIds } }).lean();
+    const ratingsByBooking = new Map(
+        ratings.map(rating => [rating.bookingId.toString(), rating])
+    );
+
+    const bookingsWithRating = bookings.map(booking => ({
+        ...booking.toObject(),
+        rating: ratingsByBooking.get(booking._id.toString()) || null
+    }));
+
+    return { bookings: bookingsWithRating };
 };
 
 const cancelBooking = async ({

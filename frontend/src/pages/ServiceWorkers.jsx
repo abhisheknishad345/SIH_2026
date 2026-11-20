@@ -60,6 +60,47 @@ function ServiceWorkers() {
   const [error, setError] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
+  const [customerLocation, setCustomerLocation] = useState(null);
+  const [locationLoading, setLocationLoading] = useState(true);
+  const [locationError, setLocationError] = useState("");
+  const [radiusKm, setRadiusKm] = useState("all");
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationError("Your browser does not support GPS location.");
+      setLocationLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCustomerLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        });
+
+        setLocationError("");
+        setLocationLoading(false);
+      },
+      (error) => {
+        console.error("Location error:", error);
+
+        setLocationError(
+          error.code === 1
+            ? "Location permission denied. Allow location access to find nearby workers."
+            : "Unable to get your location. Please try again."
+        );
+
+        setLocationLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 60000
+      }
+    );
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -68,13 +109,32 @@ function ServiceWorkers() {
       setError("");
 
       try {
-        const response = await api.get("/services/" + serviceId + "/workers");
-        if (isMounted) setWorkers(response.data.workers || []);
+        const params = {};
+
+        if (customerLocation) {
+          params.latitude = customerLocation.latitude;
+          params.longitude = customerLocation.longitude;
+
+          if (radiusKm !== "all") {
+            params.radiusKm = radiusKm;
+          }
+        }
+
+        const response = await api.get(
+          "/services/" + serviceId + "/workers",
+          { params }
+        );
+
+        if (isMounted) {
+          setWorkers(response.data.workers || []);
+        }
       } catch (err) {
         console.error("Unable to load service workers:", err);
+
         if (isMounted) {
           setError(
-            err.response?.data?.message || "Unable to load workers. Please try again."
+            err.response?.data?.message ||
+            "Unable to load workers. Please try again."
           );
         }
       } finally {
@@ -83,10 +143,11 @@ function ServiceWorkers() {
     };
 
     fetchWorkers();
+
     return () => {
       isMounted = false;
     };
-  }, [serviceId]);
+  }, [serviceId, customerLocation, radiusKm]);
 
   const categories = useMemo(() => {
     const unique = [...new Set(workers.map((worker) => worker.category).filter(Boolean))];
@@ -164,6 +225,61 @@ function ServiceWorkers() {
             })}
           </div>
         )}
+
+        {/* Nearby Worker Filter */}
+        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+              <h3 className="flex items-center gap-2 font-bold text-slate-800">
+                <MapPin size={18} className="text-indigo-600" />
+                Find Nearby Workers
+              </h3>
+
+              <p className="mt-1 text-xs text-slate-500">
+                {locationLoading
+                  ? "Getting your current location..."
+                  : customerLocation
+                    ? "Distance calculated from your current location."
+                    : locationError}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {[
+  { label: "All", value: "all" },
+  { label: "Up to 1 KM", value: "1" },
+  { label: "Up to 2 KM", value: "2" },
+  { label: "Up to 4 KM", value: "4" },
+  { label: "Up to 6 KM", value: "6" },
+  { label: "Up to 8 KM", value: "8" },
+  { label: "Up to 10 KM", value: "10" },
+  { label: "Up to 50 KM", value: "50" }
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  disabled={!customerLocation || locationLoading}
+                  onClick={() => setRadiusKm(option.value)}
+                  className={
+                    "rounded-xl border px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 " +
+                    (radiusKm === option.value
+                      ? "border-indigo-600 bg-indigo-600 text-white"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-indigo-300")
+                  }
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {locationError && (
+            <p className="mt-3 rounded-lg bg-amber-50 p-3 text-xs text-amber-700">
+              {locationError} You can still browse all workers without distance filtering.
+            </p>
+          )}
+        </div>
 
         {loading && (
           <div className="flex min-h-56 items-center justify-center gap-3 text-sm font-medium text-slate-500">
@@ -255,6 +371,16 @@ function ServiceWorkers() {
                           <BriefcaseBusiness size={15} />
                           {worker.category || "Service professional"}
                         </p>
+
+                        {worker.distanceKm !== null &&
+                          worker.distanceKm !== undefined && (
+                            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+                              <MapPin size={14} />
+                              {worker.distanceKm < 1
+                                ? `${Math.round(worker.distanceKm * 1000)} m away`
+                                : `${worker.distanceKm.toFixed(2)} km away`}
+                            </div>
+                          )}
 
                         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
                           <span className="inline-flex items-center gap-1.5 font-bold text-slate-800">
