@@ -4,12 +4,15 @@ import { useNavigate } from "react-router-dom";
 import {
     Search,
     UserRound,
+    Zap,
     CalendarDays,
     LogOut,
     ArrowRight,
+    ShieldCheck,
     Wrench,
     RefreshCw,
     BriefcaseBusiness,
+    Tag,
 } from "lucide-react";
 
 import api from "../services/api";
@@ -111,7 +114,7 @@ function CustomerDashboard() {
         <div className="min-h-screen bg-slate-50 text-slate-900">
 
             {/* Navbar */}
-            <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-md">
+            <nav className="sticky top-0 z-50 border-b-2  border-slate-500 bg-white/95 backdrop-blur-md">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
                     <div className="flex h-18 items-center justify-between">
@@ -207,7 +210,7 @@ function CustomerDashboard() {
                                 document.getElementById("services-section")
                                     ?.scrollIntoView({ behavior: "smooth" });
                             }}
-                            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-indigo-700 shadow-sm transition hover:bg-indigo-50 cursor-pointer"
+                            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-indigo-700 shadow-sm transition hover:bg-indigo-50 cursor-pointer"
                         >
                             Explore Services
                             <ArrowRight size={17} />
@@ -441,56 +444,53 @@ function CustomerDashboard() {
 
                                     <div
                                         key={service._id}
-                                        className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-100/60"
+                                        className="group flex flex-col rounded-2xl border border-slate-300 bg-white/50 p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-100/60"
                                     >
 
                                         {/* Card Header */}
                                         <div className="flex items-start justify-between gap-3">
 
                                             <div className="min-w-0">
-
-                                                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition group-hover:bg-indigo-100">
-                                                    <Wrench size={21} />
+                                                <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-xl bg-green-50 text-green-600 transition group-hover:bg-green-100">
+                                                    <Tag size={22} />
                                                 </div>
 
                                                 <h4 className="truncate text-lg font-bold text-slate-900">
                                                     {service.name}
                                                 </h4>
 
-                                                <span className="mt-2 inline-flex rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+                                                <span className="mt-2 inline-flex font-sans font-bold rounded-lg bg-indigo-50 px-2.5 py-1 text-sm  text-indigo-700">
                                                     {service.category}
                                                 </span>
 
                                             </div>
-
-                                            {/* Price */}
                                             
 
                                         </div>
 
                                         {/* Description */}
-                                        <div className="my-5 h-px bg-slate-100" />
+                                        <div className="my-2 h-px bg-slate-100" />
 
-                                        <p className="min-h-12 text-sm leading-6 text-slate-500 line-clamp-2">
+                                        <p className="min-h-12 text-md leading-6 text-slate-700 line-clamp-2">
                                             {service.description ||
                                                 "Professional service for your everyday needs."}
                                         </p>
 
                                         {/* Cooperative */}
                                         {service.cooperativeId && (
-                                            <div className="mt-5 flex items-start gap-2 rounded-xl bg-slate-50 p-3">
+                                            <div className="mt-5 flex items-start gap-2 rounded-2xl bg-emerald-100/50 p-3">
 
-                                                <BriefcaseBusiness
-                                                    size={16}
-                                                    className="mt-0.5 shrink-0 text-slate-400"
+                                                <ShieldCheck
+                                                    size={20}
+                                                    className="mt-0.5 shrink-0 text-green-500"
                                                 />
 
                                                 <div className="min-w-0">
-                                                    <p className="text-[11px] font-medium text-slate-400">
-                                                        PROVIDED BY
+                                                    <p className="text-xs font-medium text-gray-700">
+                                                        Provided By
                                                     </p>
 
-                                                    <p className="truncate text-xs font-semibold text-slate-700">
+                                                    <p className="truncate text-sm font-sans font-semibold text-slate-700">
                                                         {service.cooperativeId.name}
                                                     </p>
                                                 </div>
@@ -527,12 +527,12 @@ function CustomerDashboard() {
                 {/* Footer */}
                 <footer className="mt-16 border-t border-slate-200 py-7 text-center">
 
-                    <p className="text-sm font-semibold text-slate-600">
+                    <p className="text-sm font-semibold font-sans text-slate-600">
                         TechConnect
                     </p>
 
-                    <p className="mt-1 text-xs text-slate-400">
-                        Connecting local skills with local needs through technology.
+                    <p className="mt-1 text-sm font-serif capitalize text-slate-400">
+                        Connecting local skills with local needs through technology
                     </p>
 
                 </footer>

@@ -183,9 +183,9 @@ function ServiceWorkers() {
       <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-9">
         <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700">
-              <Sparkles size={14} />
-              Verified service professionals
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1 text-sm font-bold text-indigo-700">
+              <ShieldCheck size={20} />
+              Verified Service Professionals
             </div>
             <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
               Choose your worker

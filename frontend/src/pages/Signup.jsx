@@ -197,14 +197,14 @@ function Signup() {
               <span>I agree to the <Link to="/terms" className="font-semibold text-lime-300 hover:underline">Terms of Service</Link> and <Link to="/privacy" className="font-semibold text-lime-300 hover:underline">Privacy Policy</Link>.</span>
             </label>
 
-            <button type="submit" disabled={loading} className="flex w-full items-center justify-center gap-2 rounded-xl bg-lime-300 py-3.5 text-sm font-bold text-black shadow-lg shadow-lime-300/10 transition hover:bg-lime-200 disabled:cursor-not-allowed disabled:opacity-60">
+            <button type="submit" disabled={loading} className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-lime-300 py-3.5 text-sm font-bold text-black shadow-lg shadow-lime-300/10 transition hover:bg-lime-200 disabled:cursor-not-allowed disabled:opacity-60">
               {loading ? "Creating account..." : <>Create account <ArrowRight size={18} /></>}
             </button>
           </form>
 
           <div className="my-5 flex items-center gap-4">
             <div className="h-px flex-1 bg-white/10" />
-            <span className="text-[10px] font-semibold uppercase tracking-[.18em] text-zinc-600">Or sign up with</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[.18em] text-lime-500">Or sign up with</span>
             <div className="h-px flex-1 bg-white/10" />
           </div>
 
@@ -213,13 +213,14 @@ function Signup() {
             <button type="button" className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-medium text-zinc-200 transition hover:bg-white/10"><GoogleIcon /> Google</button>
           </div>
 
-          <p className="mt-6 text-center text-sm text-zinc-500">Already have an account? <Link to="/login" className="font-semibold text-lime-300 transition hover:text-lime-200">Log in</Link></p>
-          <div className="mt-5 flex items-center justify-center gap-2 text-xs text-zinc-600"><ShieldCheck size={14} className="text-lime-300" /> Secure registration · Cooperative Network</div>
+          <p className="mt-6 text-center text-md text-zinc-200">Already have an account? <Link to="/login" className="font-semibold text-lime-300 transition hover:text-lime-200">Log in</Link></p>
+          <div className="mt-5 flex items-center justify-center gap-2 text-sm text-zinc-300">
+            <ShieldCheck size={14} className="text-lime-300" /> Secure Registration · Cooperative Network</div>
         </div>
       </section>
 
       {/* Landing-page style image panel: below form on mobile, beside it on desktop */}
-      <section className="relative order-2 flex min-h-[430px] items-center justify-center overflow-hidden border-t border-white/10 bg-[#0d120f] p-5 sm:p-8 lg:min-h-screen lg:border-l lg:border-t-0 lg:p-8">
+      <section className="relative order-2 flex min-h-107 items-center justify-center overflow-hidden border-t border-white/10 bg-[#0d120f] p-5 sm:p-8 lg:min-h-screen lg:border-l lg:border-t-0 lg:p-8">
         <div className="pointer-events-none absolute -right-24 top-10 h-96 w-96 rounded-full bg-lime-300/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-28 -left-20 h-96 w-96 rounded-full bg-emerald-500/10 blur-3xl" />
         <div className="relative w-full max-w-2xl">
@@ -227,15 +228,16 @@ function Signup() {
             <div>
               <p className="text-xs font-bold uppercase tracking-[.22em] text-lime-300">LOCAL PROFESSIONALS</p>
               <h2 className="mt-2 text-xl font-bold text-white sm:text-2xl">Good help, right around the corner.</h2>
-              <p className="mt-1.5 text-xs text-zinc-400 sm:text-sm">A preview of what you can discover.</p>
             </div>
             <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-lime-300/20 bg-lime-300/10 px-3 py-2 text-xs font-semibold text-lime-200"><span className="h-2 w-2 rounded-full bg-lime-300" /> Discover</span>
           </div>
 
-          <div className="group relative h-[330px] overflow-hidden rounded-3xl border border-white/10 bg-[#151d18] shadow-2xl shadow-black/40 sm:h-[430px] lg:h-[500px]">
+          <div className="group relative h-82 overflow-hidden rounded-3xl border border-white/10 bg-[#151d18] shadow-2xl shadow-black/40 sm:h-[430px] lg:h-[500px]">
             <img src="https://images.unsplash.com/photo-1705760058049-b58119c416a9?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D" alt="A skilled technician working on a home repair" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#080b0a] via-black/25 to-black/5" />
-            <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full border border-white/15 bg-black/30 px-3 py-2 text-[11px] font-medium text-white backdrop-blur-md"><span className="h-2 w-2 rounded-full bg-lime-300" /> Connecting local skills</div>
+            <div className="absolute inset-0 bg-linear-to-t from-[#080b0a] via-black/25 to-black/5" />
+            <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full border border-white/15 bg-black/30 px-3 py-2 text-[11px] font-medium text-white backdrop-blur-md">
+            <span className="h-2 w-2 rounded-full bg-lime-300" />
+            Connecting Local Skills</div>
             <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
               <p className="text-xs font-bold uppercase tracking-[.22em] text-lime-300">HELP AROUND THE CORNER</p>
               <h3 className="mt-3 max-w-lg text-2xl font-bold leading-tight text-white sm:text-4xl">Skilled hands. Peace of mind.</h3>
@@ -247,7 +249,7 @@ function Signup() {
               </div>
             </div>
           </div>
-          <p className="mt-4 text-center text-xs text-zinc-600">Connecting local skills with everyday needs.</p>
+          <p className="mt-4 text-center text-sm capitalize text-zinc-300">Connecting local skills with everyday needs</p>
         </div>
       </section>
     </main>

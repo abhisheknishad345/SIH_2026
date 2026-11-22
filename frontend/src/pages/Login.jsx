@@ -307,7 +307,7 @@ function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-lime-300 py-3.5 text-sm font-bold text-black shadow-lg shadow-lime-300/10 transition hover:bg-lime-200 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-lime-300 py-3.5 text-sm font-bold text-black shadow-lg shadow-lime-300/10 transition hover:bg-lime-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? "Signing in..." : <>Sign in <ArrowRightIcon /></>}
             </button>
@@ -315,7 +315,7 @@ function Login() {
 
           <div className="my-7 flex items-center gap-4">
             <div className="h-px flex-1 bg-white/10" />
-            <span className="text-[10px] font-semibold uppercase tracking-[.18em] text-zinc-600">Or continue with</span>
+            <span className="text-[10px] font-semibold uppercase tracking-[.18em] text-lime-500">Or continue with</span>
             <div className="h-px flex-1 bg-white/10" />
           </div>
 
@@ -328,20 +328,19 @@ function Login() {
             </button>
           </div>
 
-          <p className="mt-8 text-center text-sm text-zinc-500">
+          <p className="mt-8 text-center text-md text-zinc-300">
             Don't have an account?{" "}
             <Link to="/signup" className="font-semibold text-lime-300 transition hover:text-lime-200">Create account</Link>
           </p>
-          <div className="mt-6 flex items-center justify-center gap-2 text-xs text-zinc-600">
+          <div className="mt-6 flex items-center justify-center gap-2 text-sm text-zinc-300">
             <span className="text-lime-300"><ShieldIcon /></span>
-            Secure access · Cooperative Network
+            Secure Access · Cooperative Network
           </div>
-          <Link to="/" className="mt-6 block text-center text-xs text-zinc-600 transition hover:text-lime-300">← Back to home</Link>
         </div>
       </section>
 
       {/* Right: landing-page style visual panel */}
-      <section className="relative hidden min-h-screen overflow-hidden border-l border-white/10 bg-[#0d120f] p-5 lg:flex lg:items-center lg:justify-center xl:p-8">
+      <section className="relative min-h-screen overflow-hidden border-l border-white/10 bg-[#0d120f] p-5 lg:flex lg:items-center lg:justify-center xl:p-8">
         <div className="pointer-events-none absolute -right-24 top-10 h-96 w-96 rounded-full bg-lime-300/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-28 -left-20 h-96 w-96 rounded-full bg-emerald-500/10 blur-3xl" />
 
@@ -352,20 +351,20 @@ function Login() {
               <h2 className="mt-2 text-2xl font-bold text-white xl:text-3xl">Good help, right around the corner.</h2>
               <p className="mt-2 text-sm text-zinc-400">Discover skilled people in your community.</p>
             </div>
-            <Link to="/signup" className="inline-flex shrink-0 items-center gap-2 rounded-full border border-lime-300/20 bg-lime-300/10 px-4 py-2.5 text-xs font-semibold text-lime-200 transition hover:bg-lime-300/20">
-              Get started <ArrowRightIcon />
+            <Link to="/signup" className="inline-flex shrink-0 items-center gap-2 rounded-full border border-lime-300/20 bg-lime-300/10 px-4 py-2.5 text-xs text-lime-300  transition hover:bg-lime-300/20">
+              Get Started <ArrowRightIcon />
             </Link>
           </div>
 
-          <div className="group relative h-[430px] overflow-hidden rounded-3xl border border-white/10 bg-[#151d18] shadow-2xl shadow-black/40 xl:h-[520px]">
+          <div className="group relative h-107 overflow-hidden rounded-3xl border border-white/10 bg-[#151d18] shadow-2xl shadow-black/40 xl:h-130">
             <img
               src="https://images.unsplash.com/photo-1758101755915-462eddc23f57?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=NHwxMjA3fDA%3D"
               alt="A skilled technician working on a home repair"
               className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#080b0a] via-black/25 to-black/5" />
+            <div className="absolute inset-0 bg-linear-to-t from-[#080b0a] via-black/25 to-black/5" />
             <div className="absolute left-6 top-6 flex items-center gap-2 rounded-full border border-white/15 bg-black/30 px-3 py-2 text-xs font-medium text-white backdrop-blur-md">
-              <span className="h-2 w-2 rounded-full bg-lime-300" /> Connecting local skills
+              <span className="h-2 w-2 rounded-full bg-lime-300" /> Connecting Local Skills
             </div>
             <div className="absolute inset-x-0 bottom-0 p-7 xl:p-9">
               <p className="text-xs font-bold uppercase tracking-[.22em] text-lime-300">HELP AROUND THE CORNER</p>
@@ -387,7 +386,7 @@ function Login() {
             </div>
           </div>
 
-          <p className="mt-5 text-center text-xs text-zinc-600">Connecting local skills with everyday needs.</p>
+          <p className="mt-5 text-center text-sm text-zinc-200 capitalize">Connecting local skills with everyday needs</p>
         </div>
       </section>
     </main>
