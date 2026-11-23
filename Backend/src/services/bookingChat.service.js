@@ -33,6 +33,8 @@ const getBookingSummary = async (user, bookingId) => {
     price: booking.price,
     priceType: booking.priceType,
     pricingStatus: booking.pricingStatus,
+    counterOfferCount: booking.counterOfferCount || 0,
+    negotiation: booking.negotiation || { currentOffer: null, history: [] },
     quantity: booking.quantity,
     status: booking.status,
     paymentStatus: booking.paymentStatus,
