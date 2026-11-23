@@ -218,20 +218,59 @@ const completeBooking = async (req, res) => {
 const updateNegotiatedPrice = async (req, res) => {
     try {
         const { bookingId } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(bookingId)) {
-            return res.status(400).json({ message: "Invalid booking ID" });
+        if (!mongoose.Types.ObjectId.isValid(bookingId)) return res.status(400).json({ message: "Invalid booking ID" });
+        if (typeof req.body.amount !== "number" && typeof req.body.price !== "number") {
+            return res.status(400).json({ message: "Amount must be a valid number" });
         }
-        const price = Number(req.body.price);
-        const result = await bookingService.updateNegotiatedPrice({
-            bookingId,
-            workerId: req.user._id,
-            price
+        const result = await bookingService.proposeNegotiatedPrice({
+            bookingId, workerId: req.user._id, amount: req.body.amount ?? req.body.price
         });
         return res.status(200).json(result);
     } catch (error) {
         return res.status(400).json({ message: error.message });
     }
 };
+
+const counterNegotiatedPrice = async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(bookingId)) return res.status(400).json({ message: "Invalid booking ID" });
+        if (typeof req.body.amount !== "number") return res.status(400).json({ message: "Amount must be a valid number" });
+        const result = await bookingService.counterNegotiatedPrice({
+            bookingId, actorId: req.user._id, actorRole: req.user.role, amount: req.body.amount
+        });
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+const acceptNegotiatedPrice = async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(bookingId)) return res.status(400).json({ message: "Invalid booking ID" });
+        const result = await bookingService.acceptNegotiatedPrice({
+            bookingId, actorId: req.user._id, actorRole: req.user.role
+        });
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
+const rejectNegotiatedPrice = async (req, res) => {
+    try {
+        const { bookingId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(bookingId)) return res.status(400).json({ message: "Invalid booking ID" });
+        const result = await bookingService.rejectNegotiatedPrice({
+            bookingId, actorId: req.user._id, actorRole: req.user.role
+        });
+        return res.status(200).json(result);
+    } catch (error) {
+        return res.status(400).json({ message: error.message });
+    }
+};
+
 
 const markServiceDone = async (req, res) => {
     try {
@@ -274,5 +313,5 @@ module.exports = {
     createBooking, getWorkerBookings, updateBookingStatus, 
     getWorkerEarningsController,
     getWorkerDashboardController,
-    getCustomerBookings, cancelBooking, completeBooking, markServiceDone, confirmDemoPayment, updateNegotiatedPrice,
+    getCustomerBookings, cancelBooking, completeBooking, markServiceDone, confirmDemoPayment, updateNegotiatedPrice,\n    counterNegotiatedPrice, acceptNegotiatedPrice, rejectNegotiatedPrice,
 };
