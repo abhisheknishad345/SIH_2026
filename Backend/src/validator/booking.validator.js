@@ -115,7 +115,14 @@ const validateBookingStatus = ({ status }) => {
     }
 };
 
+const validateNegotiationAmount = ({ amount }) => {
+    if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
+        throw new Error("Amount must be a number greater than zero");
+    }
+};
+
 module.exports = {
     validateBooking,
-    validateBookingStatus
+    validateBookingStatus,
+    validateNegotiationAmount
 };
