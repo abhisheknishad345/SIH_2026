@@ -311,5 +311,6 @@ module.exports = {
     createBooking, getWorkerBookings, updateBookingStatus, 
     getWorkerEarningsController,
     getWorkerDashboardController,
-    getCustomerBookings, cancelBooking, completeBooking, markServiceDone, confirmDemoPayment, updateNegotiatedPrice,\n    counterNegotiatedPrice, acceptNegotiatedPrice, rejectNegotiatedPrice,
+    getCustomerBookings, cancelBooking, completeBooking, markServiceDone, confirmDemoPayment, updateNegotiatedPrice,
+    counterNegotiatedPrice, acceptNegotiatedPrice, rejectNegotiatedPrice,
 };
