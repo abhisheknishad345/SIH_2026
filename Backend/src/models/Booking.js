@@ -53,8 +53,33 @@ const bookingSchema = new mongoose.Schema(
         },
         pricingStatus: {
             type: String,
-            enum: ["fixed", "pending", "agreed"],
+            enum: ["fixed", "pending", "proposed", "countered", "agreed", "rejected"],
             default: "fixed"
+        },
+
+        counterOfferCount: {
+            type: Number,
+            default: 0,
+            min: 0,
+            max: 10
+        },
+
+        negotiation: {
+            currentOffer: {
+                amount: { type: Number, min: 0 },
+                proposedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+                proposedAt: { type: Date }
+            },
+            history: [{
+                amount: { type: Number, required: true, min: 0 },
+                proposedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+                action: {
+                    type: String,
+                    enum: ["proposed", "countered", "accepted", "rejected"],
+                    required: true
+                },
+                createdAt: { type: Date, default: Date.now }
+            }]
         },
 
         address: {
