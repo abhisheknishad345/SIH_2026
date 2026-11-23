@@ -339,9 +339,16 @@ const updateBookingStatus = async ({
             currentBooking.quantity
         );
 
-        // Accept selected booking
-        currentBooking.status = "in_progress";
-        currentBooking.paymentStatus = "not_due";
+        // Fixed-price bookings can start immediately. Negotiable bookings reserve
+        // the slot while both parties agree on a final price.
+        if (currentBooking.priceType === "negotiable") {
+            currentBooking.status = "accepted";
+            currentBooking.pricingStatus = "pending";
+            currentBooking.paymentStatus = "not_due";
+        } else {
+            currentBooking.status = "in_progress";
+            currentBooking.paymentStatus = "not_due";
+        }
 
         await currentBooking.save();
 
@@ -430,42 +437,190 @@ const getCustomerBookings = async (customerId) => {
     return { bookings: bookingsWithRating };
 };
 
-const cancelBooking = async ({
-    bookingId,
-    customerId
-}) => {
+const cancelBooking = async ({ bookingId, customerId }) => {
     const booking = await Booking.findById(bookingId);
-
-    if (!booking) {
-        throw new Error("Booking not found");
+    if (!booking) throw new Error("Booking not found");
+    if (booking.customerId.toString() !== customerId.toString()) {
+        throw new Error("You are not allowed to cancel this booking");
     }
 
-    // Check: kya booking isi customer ki hai?
-    if (
-        booking.customerId.toString() !==
-        customerId.toString()
-    ) {
-        throw new Error(
-            "You are not allowed to cancel this booking"
-        );
-    }
+    const canCancelPending = booking.status === "pending";
+    const canCancelNegotiation =
+        booking.status === "accepted" &&
+        booking.priceType === "negotiable" &&
+        ["pending", "proposed", "countered"].includes(booking.pricingStatus);
 
-    // Sirf pending booking cancel hogi
-    if (booking.status !== "pending") {
-        throw new Error(
-            "Only pending bookings can be cancelled"
-        );
+    if (!canCancelPending && !canCancelNegotiation) {
+        throw new Error("Only pending bookings or active price negotiations can be cancelled");
     }
 
     booking.status = "cancelled";
-
+    if (booking.priceType === "negotiable") booking.pricingStatus = "rejected";
     await booking.save();
 
-    return {
-        message: "Booking cancelled successfully",
-        booking
-    };
+    return { message: "Booking cancelled successfully", booking };
 };
+
+const normalizeNegotiationAmount = amount => {
+    if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
+        throw new Error("Enter a valid amount greater than zero");
+    }
+    return Math.round(amount * 100) / 100;
+};
+
+const proposeNegotiatedPrice = async ({ bookingId, workerId, amount }) => {
+    const proposedAmount = normalizeNegotiationAmount(amount);
+    const booking = await Booking.findOne({
+        _id: bookingId,
+        workerId,
+        priceType: "negotiable",
+        status: "accepted",
+        pricingStatus: "pending"
+    });
+    if (!booking) throw new Error("Only the assigned worker can submit the initial price for an accepted negotiable booking");
+
+    const now = new Date();
+    const updated = await Booking.findOneAndUpdate(
+        { _id: booking._id, status: "accepted", pricingStatus: "pending", priceType: "negotiable" },
+        {
+            $set: {
+                "negotiation.currentOffer": { amount: proposedAmount, proposedBy: workerId, proposedAt: now },
+                pricingStatus: "proposed"
+            },
+            $push: {
+                "negotiation.history": { amount: proposedAmount, proposedBy: workerId, action: "proposed", createdAt: now }
+            }
+        },
+        { new: true, runValidators: true }
+    );
+    if (!updated) throw new Error("Negotiation changed. Refresh the booking and try again");
+    return { message: "Price proposal sent successfully", booking: updated };
+};
+
+const counterNegotiatedPrice = async ({ bookingId, actorId, actorRole, amount }) => {
+    const proposedAmount = normalizeNegotiationAmount(amount);
+    const booking = await Booking.findById(bookingId);
+    if (!booking) throw new Error("Booking not found");
+    const isCustomer = actorRole === "customer" && booking.customerId.toString() === actorId.toString();
+    const isWorker = actorRole === "worker" && booking.workerId.toString() === actorId.toString();
+    if (!isCustomer && !isWorker) throw new Error("You are not allowed to negotiate this booking");
+    if (booking.priceType !== "negotiable" || booking.status !== "accepted" ||
+        !["proposed", "countered"].includes(booking.pricingStatus) || !booking.negotiation?.currentOffer) {
+        throw new Error("There is no active price offer to counter");
+    }
+    if (booking.negotiation.currentOffer.proposedBy.toString() === actorId.toString()) {
+        throw new Error("You cannot counter your own offer. Wait for the other party to respond");
+    }
+    if ((booking.counterOfferCount || 0) >= 10) {
+        throw new Error("Maximum of 10 counteroffers reached. Accept or reject the current offer");
+    }
+
+    const now = new Date();
+    const previousOffer = booking.negotiation.currentOffer;
+    const updated = await Booking.findOneAndUpdate(
+        {
+            _id: booking._id,
+            status: "accepted",
+            pricingStatus: { $in: ["proposed", "countered"] },
+            counterOfferCount: booking.counterOfferCount || 0,
+            "negotiation.currentOffer.proposedBy": previousOffer.proposedBy,
+            "negotiation.currentOffer.amount": previousOffer.amount
+        },
+        {
+            $set: {
+                "negotiation.currentOffer": { amount: proposedAmount, proposedBy: actorId, proposedAt: now },
+                pricingStatus: "countered"
+            },
+            $inc: { counterOfferCount: 1 },
+            $push: {
+                "negotiation.history": { amount: proposedAmount, proposedBy: actorId, action: "countered", createdAt: now }
+            }
+        },
+        { new: true, runValidators: true }
+    );
+    if (!updated) throw new Error("The offer has changed. Refresh the booking before sending another counteroffer");
+    return { message: "Counteroffer sent successfully", booking: updated };
+};
+
+const acceptNegotiatedPrice = async ({ bookingId, actorId, actorRole }) => {
+    const booking = await Booking.findById(bookingId);
+    if (!booking) throw new Error("Booking not found");
+    const isCustomer = actorRole === "customer" && booking.customerId.toString() === actorId.toString();
+    const isWorker = actorRole === "worker" && booking.workerId.toString() === actorId.toString();
+    if (!isCustomer && !isWorker) throw new Error("You are not allowed to accept this offer");
+    if (booking.priceType !== "negotiable" || booking.status !== "accepted" ||
+        !["proposed", "countered"].includes(booking.pricingStatus) || !booking.negotiation?.currentOffer) {
+        throw new Error("There is no active price offer to accept");
+    }
+    if (booking.negotiation.currentOffer.proposedBy.toString() === actorId.toString()) {
+        throw new Error("You cannot accept your own offer");
+    }
+
+    const offer = booking.negotiation.currentOffer;
+    const now = new Date();
+    const updated = await Booking.findOneAndUpdate(
+        {
+            _id: booking._id,
+            status: "accepted",
+            pricingStatus: { $in: ["proposed", "countered"] },
+            "negotiation.currentOffer.proposedBy": offer.proposedBy,
+            "negotiation.currentOffer.amount": offer.amount
+        },
+        {
+            $set: {
+                price: offer.amount,
+                pricingStatus: "agreed",
+                status: "in_progress",
+                paymentStatus: "not_due"
+            },
+            $push: {
+                "negotiation.history": { amount: offer.amount, proposedBy: actorId, action: "accepted", createdAt: now }
+            }
+        },
+        { new: true, runValidators: true }
+    );
+    if (!updated) throw new Error("The offer changed before it could be accepted. Refresh and try again");
+    return { message: "Negotiated price accepted. Booking is now in progress", booking: updated };
+};
+
+const rejectNegotiatedPrice = async ({ bookingId, actorId, actorRole }) => {
+    const booking = await Booking.findById(bookingId);
+    if (!booking) throw new Error("Booking not found");
+    const isCustomer = actorRole === "customer" && booking.customerId.toString() === actorId.toString();
+    const isWorker = actorRole === "worker" && booking.workerId.toString() === actorId.toString();
+    if (!isCustomer && !isWorker) throw new Error("You are not allowed to reject this offer");
+    if (booking.priceType !== "negotiable" || booking.status !== "accepted" ||
+        !["proposed", "countered"].includes(booking.pricingStatus) || !booking.negotiation?.currentOffer) {
+        throw new Error("There is no active price offer to reject");
+    }
+    if (booking.negotiation.currentOffer.proposedBy.toString() === actorId.toString()) {
+        throw new Error("You can only reject an offer made by the other party");
+    }
+
+    const offer = booking.negotiation.currentOffer;
+    const now = new Date();
+    const updated = await Booking.findOneAndUpdate(
+        {
+            _id: booking._id,
+            status: "accepted",
+            pricingStatus: { $in: ["proposed", "countered"] },
+            "negotiation.currentOffer.proposedBy": offer.proposedBy,
+            "negotiation.currentOffer.amount": offer.amount
+        },
+        {
+            $set: { status: "rejected", pricingStatus: "rejected" },
+            $push: {
+                "negotiation.history": { amount: offer.amount, proposedBy: actorId, action: "rejected", createdAt: now }
+            }
+        },
+        { new: true, runValidators: true }
+    );
+    if (!updated) throw new Error("The offer changed before it could be rejected. Refresh and try again");
+    return { message: "Price offer rejected and booking closed", booking: updated };
+};
+
+const updateNegotiatedPrice = async ({ bookingId, workerId, price }) =>
+    proposeNegotiatedPrice({ bookingId, workerId, amount: price });
 
 const completeBooking = async ({
     bookingId,
@@ -546,7 +701,7 @@ const markServiceDone = async ({ bookingId, workerId }) => {
         return { message: "Service was already marked as done", booking };
     }
 
-    if (booking.price == null || booking.price <= 0 || booking.pricingStatus === "pending") {
+    if (booking.price == null || booking.price <= 0 || booking.pricingStatus !== "agreed") {
         throw new Error("Final booking price must be set before completing the service");
     }
     booking.serviceCompletedAt = new Date();
@@ -566,7 +721,7 @@ const confirmDemoPayment = async ({ bookingId, customerId }) => {
     if (!existingBooking.serviceCompletedAt) {
         throw new Error("The worker must mark the service as done first");
     }
-    if (existingBooking.price == null || existingBooking.price <= 0 || existingBooking.pricingStatus === "pending") {
+    if (existingBooking.price == null || existingBooking.price <= 0 || existingBooking.pricingStatus !== "agreed") {
         throw new Error("Payment is unavailable until the final price is agreed");
     }
     if (existingBooking.paymentStatus === "paid") {
@@ -803,6 +958,8 @@ const getWorkerEarnings = async (workerId) => {
 
 
 module.exports = {
-    createBooking, getWorkerBookings, updateBookingStatus, getCustomerBookings, cancelBooking
-    , completeBooking, markServiceDone, confirmDemoPayment, updateNegotiatedPrice, getWorkerDashboard, getWorkerEarnings
+    createBooking, getWorkerBookings, updateBookingStatus, getCustomerBookings, cancelBooking,
+    completeBooking, markServiceDone, confirmDemoPayment, updateNegotiatedPrice,
+    proposeNegotiatedPrice, counterNegotiatedPrice, acceptNegotiatedPrice, rejectNegotiatedPrice,
+    getWorkerDashboard, getWorkerEarnings
 };
