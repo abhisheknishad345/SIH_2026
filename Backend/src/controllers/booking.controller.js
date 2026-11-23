@@ -1,6 +1,6 @@
 const bookingService = require("../services/booking.service");
 const mongoose = require("mongoose");
-const {validateBooking, validateBookingStatus
+const {validateBooking, validateBookingStatus, validateNegotiationAmount
 } = require("../validator/booking.validator");
 
 
@@ -219,9 +219,7 @@ const updateNegotiatedPrice = async (req, res) => {
     try {
         const { bookingId } = req.params;
         if (!mongoose.Types.ObjectId.isValid(bookingId)) return res.status(400).json({ message: "Invalid booking ID" });
-        if (typeof req.body.amount !== "number" && typeof req.body.price !== "number") {
-            return res.status(400).json({ message: "Amount must be a valid number" });
-        }
+        validateNegotiationAmount({ amount: req.body.amount ?? req.body.price });
         const result = await bookingService.proposeNegotiatedPrice({
             bookingId, workerId: req.user._id, amount: req.body.amount ?? req.body.price
         });
@@ -235,7 +233,7 @@ const counterNegotiatedPrice = async (req, res) => {
     try {
         const { bookingId } = req.params;
         if (!mongoose.Types.ObjectId.isValid(bookingId)) return res.status(400).json({ message: "Invalid booking ID" });
-        if (typeof req.body.amount !== "number") return res.status(400).json({ message: "Amount must be a valid number" });
+        validateNegotiationAmount({ amount: req.body.amount });
         const result = await bookingService.counterNegotiatedPrice({
             bookingId, actorId: req.user._id, actorRole: req.user.role, amount: req.body.amount
         });
