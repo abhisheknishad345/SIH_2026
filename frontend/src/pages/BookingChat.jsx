@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { io } from "socket.io-client";
-import { ArrowLeft, Send, MessageCircle, LoaderCircle, IndianRupee } from "lucide-react";
+import { ArrowLeft, Send, MessageCircle, LoaderCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import NegotiationPanel from "../components/NegotiationPanel";
@@ -14,8 +14,6 @@ export default function BookingChat() {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [booking, setBooking] = useState(null);
-  const [priceDraft, setPriceDraft] = useState("");
-  const [priceSaving, setPriceSaving] = useState(false);
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
@@ -31,7 +29,6 @@ export default function BookingChat() {
       ]);
       setMessages(response.data.messages || []);
       setBooking(bookingResponse.data.booking);
-      setPriceDraft(bookingResponse.data.booking?.price ?? "");
       setError("");
     } catch (err) {
       setError(err.response?.data?.message || "Unable to load this booking chat.");
@@ -63,16 +60,6 @@ export default function BookingChat() {
 
     socket.on("connect", joinRoom);
     socket.on("connect_error", err => setError(err.message || "Chat connection failed."));
-    socket.on("booking-chat:price", update => {
-      if (String(update.bookingId) !== String(bookingId)) return;
-      setBooking(current => current ? {
-        ...current,
-        price: update.price,
-        pricingStatus: update.pricingStatus
-      } : current);
-      setPriceDraft(String(update.price));
-    });
-
     socket.on("booking-chat:message", message => {
       const incomingBookingId = String(message.bookingId?._id || message.bookingId);
       if (incomingBookingId !== String(bookingId)) return;
@@ -85,7 +72,6 @@ export default function BookingChat() {
 
     return () => {
       socket.off("connect", joinRoom);
-      socket.off("booking-chat:price");
       socket.disconnect();
       socketRef.current = null;
     };
@@ -94,34 +80,6 @@ export default function BookingChat() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  const handlePriceUpdate = event => {
-    event.preventDefault();
-    const price = Number(priceDraft);
-    const socket = socketRef.current;
-    if (!Number.isFinite(price) || price <= 0) {
-      setError("Enter a valid amount greater than zero.");
-      return;
-    }
-    if (!socket?.connected) {
-      setError("Chat server se connection nahi hai. Please try again.");
-      return;
-    }
-    setPriceSaving(true);
-    setError("");
-    socket.emit("booking-chat:update-price", { bookingId, price }, response => {
-      setPriceSaving(false);
-      if (!response?.success) {
-        setError(response?.message || "Price could not be updated.");
-        return;
-      }
-      setBooking(current => current ? {
-        ...current,
-        price: response.booking.price,
-        pricingStatus: response.booking.pricingStatus
-      } : current);
-    });
-  };
 
   const handleSend = event => {
     event.preventDefault();
