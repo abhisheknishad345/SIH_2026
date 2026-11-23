@@ -28,8 +28,9 @@ export default function NegotiationPanel({ booking, user, onRefresh }) {
 
   const currentOffer = booking?.negotiation?.currentOffer;
   const history = booking?.negotiation?.history || [];
-  const isWorker = user?.role === "worker";
-  const isCustomer = user?.role === "customer";
+  const userRole = String(user?.role || "").toLowerCase();
+  const isWorker = userRole === "worker";
+  const isCustomer = userRole === "customer";
   const isNegotiable = booking?.priceType === "negotiable";
   const pricingStatus = booking?.pricingStatus;
   const counterCount = Number(booking?.counterOfferCount || 0);
