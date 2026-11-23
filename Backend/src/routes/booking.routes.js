@@ -3,6 +3,7 @@ const express = require("express");
 const {createBooking, getWorkerBookings, updateBookingStatus,
     getCustomerBookings, cancelBooking, completeBooking, getWorkerDashboardController,
     getWorkerEarningsController, markServiceDone, confirmDemoPayment, updateNegotiatedPrice,
+    counterNegotiatedPrice, acceptNegotiatedPrice, rejectNegotiatedPrice,
  } = require("../controllers/booking.controller");
 
 const authMiddleware = require("../middlewares/auth.middleware");
@@ -93,6 +94,36 @@ router.put(
     authMiddleware,
     roleMiddleware(["worker"]),
     updateNegotiatedPrice
+);
+
+// Negotiation actions: worker makes the initial offer; either party can counter,
+// accept or reject an offer made by the other party.
+router.post(
+    "/:bookingId/negotiation/offer",
+    authMiddleware,
+    roleMiddleware(["worker"]),
+    updateNegotiatedPrice
+);
+
+router.post(
+    "/:bookingId/negotiation/counter",
+    authMiddleware,
+    bookingChatRoles,
+    counterNegotiatedPrice
+);
+
+router.post(
+    "/:bookingId/negotiation/accept",
+    authMiddleware,
+    bookingChatRoles,
+    acceptNegotiatedPrice
+);
+
+router.post(
+    "/:bookingId/negotiation/reject",
+    authMiddleware,
+    bookingChatRoles,
+    rejectNegotiatedPrice
 );
 
 router.get(
