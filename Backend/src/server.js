@@ -228,15 +228,17 @@ io.on("connection", socket => {
       if (!socket.activeBookingId || socket.activeBookingId !== bookingId || socket.user.role !== "worker") {
         return acknowledge({ success: false, message: "Only the assigned worker can update this booking price" });
       }
-      const result = await bookingService.updateNegotiatedPrice({
+      const result = await bookingService.proposeNegotiatedPrice({
         bookingId,
         workerId: socket.user._id,
-        price: Number(payload.price)
+        amount: Number(payload.price)
       });
-      io.to(socket.activeBookingRoom).emit("booking-chat:price", {
+      io.to(socket.activeBookingRoom).emit("booking-chat:negotiation", {
         bookingId,
         price: result.booking.price,
-        pricingStatus: result.booking.pricingStatus
+        pricingStatus: result.booking.pricingStatus,
+        negotiation: result.booking.negotiation,
+        counterOfferCount: result.booking.counterOfferCount || 0
       });
       acknowledge({ success: true, booking: result.booking });
     } catch (error) {
