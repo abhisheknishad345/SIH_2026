@@ -1,16 +1,13 @@
 import { useMemo, useState } from "react";
 import {
-  BadgeCheck,
   Check,
   CheckCircle2,
   Clock3,
   Handshake,
   IndianRupee,
   LoaderCircle,
-  MessageSquareText,
   RotateCcw,
   Send,
-  ShieldCheck,
   X,
   XCircle,
 } from "lucide-react";
